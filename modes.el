@@ -206,8 +206,7 @@ functions from one source file."
 (autoload 'haml-mode "haml-mode" "Haml editing mode." t)
 
 ;; rails 
-(require 'ruby-mode)
-(require 'ruby-electric)
+;;(require 'ruby-electric)
 
 (defun my-ruby-setup ()
   (setq indent-tabs-mode nil)
@@ -223,8 +222,6 @@ functions from one source file."
 ;; javascript
 (autoload 'js2-mode "js2-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-
-(require 'haml-mode)
 
 ;;(require 'sass-mode)
 ;;(add-to-list 'auto-mode-alist '("\\.scss\\'" . sass-mode))
