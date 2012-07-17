@@ -1,0 +1,81 @@
+<UserSettings>
+	<ApplicationIdentity version="9.0"/>
+	<ToolsOptions>
+		<ToolsOptionsCategory name="Environment" RegisteredName="Environment"/>
+	</ToolsOptions>
+	<Category name="Environment_Group" RegisteredName="Environment_Group">
+		<Category name="Environment_KeyBindings" Category="{F09035F1-80D2-4312-8EC4-4D354A4BCB4C}" Package="{DA9FB551-C724-11d0-AE1F-00A0C90FFFC3}" RegisteredName="Environment_KeyBindings" PackageName="Visual Studio Environment Package">
+			<Version>9.0.0.0</Version>
+			<KeyboardShortcuts>
+                <ShortcutsScheme>Emacs</ShortcutsScheme>                
+				<UserShortcuts>                
+					<RemoveShortcut Command="Edit.ToggleWordWrap" Scope="Text Editor">Ctrl+E, Ctrl+W</RemoveShortcut>
+					<RemoveShortcut Command="Edit.SelectCurrentWord" Scope="Text Editor">Ctrl+W</RemoveShortcut>
+					<RemoveShortcut Command="View.NavigateForward" Scope="Global">Ctrl+Shift+-</RemoveShortcut>
+					<RemoveShortcut Command="Edit.Cut" Scope="Global">Ctrl+X</RemoveShortcut>
+					<RemoveShortcut Command="Edit.ClearBookmarks" Scope="Text Editor">Ctrl+K, Ctrl+L</RemoveShortcut>
+					<RemoveShortcut Command="Edit.CommentSelection" Scope="Text Editor">Ctrl+K, Ctrl+C</RemoveShortcut>
+					<RemoveShortcut Command="Edit.DeleteHorizontalWhiteSpace" Scope="Text Editor">Ctrl+K, Ctrl+\</RemoveShortcut>
+					<RemoveShortcut Command="Edit.FormatDocument" Scope="Text Editor">Ctrl+K, Ctrl+D</RemoveShortcut>
+					<RemoveShortcut Command="Edit.FormatSelection" Scope="Text Editor">Ctrl+K, Ctrl+F</RemoveShortcut>
+					<RemoveShortcut Command="Edit.GenerateMethodStub" Scope="Text Editor">Ctrl+K, Ctrl+M</RemoveShortcut>
+					<RemoveShortcut Command="Edit.InsertSnippet" Scope="Global">Ctrl+K, Ctrl+X</RemoveShortcut>
+					<RemoveShortcut Command="Edit.NextBookmark" Scope="Global">Ctrl+K, Ctrl+N</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.PreviousBookmark" Scope="Global">Ctrl+K, Ctrl+P</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.QuickInfo" Scope="Text Editor">Ctrl+K, Ctrl+I</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.SurroundWith" Scope="Text Editor">Ctrl+K, Ctrl+S</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.SwapAnchor" Scope="Text Editor">Ctrl+K, Ctrl+A</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.ToggleBookmark" Scope="Text Editor">Ctrl+K, Ctrl+K</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.ToggleTaskListShortcut" Scope="Text Editor">Ctrl+K, Ctrl+H</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.UncommentSelection" Scope="Text Editor">Ctrl+K, Ctrl+U</RemoveShortcut>
+                    <RemoveShortcut Command="Tools.CodeSnippetsManager" Scope="Global">Ctrl+K, Ctrl+B</RemoveShortcut>
+                    <RemoveShortcut Command="View.BookmarkWindow" Scope="Global">Ctrl+K, Ctrl+W</RemoveShortcut>
+                    <RemoveShortcut Command="View.ClassViewGoToSearchCombo" Scope="Global">Ctrl+K, Ctrl+V</RemoveShortcut>
+                    <RemoveShortcut Command="View.ObjectBrowserGoToSearchCombo" Scope="Global">Ctrl+K, Ctrl+R</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.CompleteWord" Scope="Text Editor">Ctrl+Space</RemoveShortcut>                    
+					<RemoveShortcut Command="Edit.EmacsBreakLine" Scope="Text Editor">Enter</RemoveShortcut>
+					<RemoveShortcut Command="Edit.Cut" Scope="Text Editor">Ctrl+X</RemoveShortcut>
+					<RemoveShortcut Command="Edit.Cut" Scope="Text Editor">Ctrl+W</RemoveShortcut>                    
+					<RemoveShortcut Command="Edit.EmacsLineDown" Scope="Text Editor">Ctrl+N</RemoveShortcut>
+					<RemoveShortcut Command="Edit.DeleteBlankLines" Scope="Text Editor">Ctrl+X, Ctrl+O</RemoveShortcut>
+					<RemoveShortcut Command="Edit.EmacsOtherWindow" Scope="Text Editor">Ctrl+X, O</RemoveShortcut>                    
+					<RemoveShortcut Command="Edit.IncreaseFilterLevel" Scope="Text Editor">Alt+.</RemoveShortcut>
+					<RemoveShortcut Command="Edit.ViewWhiteSpace" Scope="Global">Ctrl+Shift+8</RemoveShortcut>                                        
+					<RemoveShortcut Command="Edit.NextKeyTyped" Scope="VC Accelerator Editor">Ctrl+W</RemoveShortcut>
+					<RemoveShortcut Command="Edit.EmacsDocumentEnd" Scope="Text Editor">End</RemoveShortcut>
+					<RemoveShortcut Command="Edit.EmacsDocumentStart" Scope="Text Editor">Home</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.EmacsLineUp" Scope="Text Editor">Ctrl+P</RemoveShortcut>
+                    <RemoveShortcut Command="Edit.EmacsLineDown" Scope="Text Editor">Ctrl+N</RemoveShortcut>
+
+                    <Shortcut Command="Edit.IncreaseLineIndent" Scope="Global">Ctrl+Alt+\</Shortcut>
+                    <Shortcut Command="Edit.DecreaseLineIndent" Scope="Global">Ctrl+Alt+/</Shortcut>                                        
+                    <Shortcut Command="Edit.LineStart" Scope="Global">Home</Shortcut>
+                    <Shortcut Command="Edit.LineEnd" Scope="Global">End</Shortcut>                    
+                    <Shortcut Command="Edit.LineStart" Scope="Global">Ctrl+A</Shortcut>
+					<Shortcut Command="Edit.LineEnd" Scope="Global">Ctrl+E</Shortcut>
+					<Shortcut Command="Edit.LineEnd" Scope="Global">End</Shortcut>                     
+					<Shortcut Command="Edit.LineUp" Scope="Global">Ctrl+P</Shortcut>
+					<Shortcut Command="Edit.LineDown" Scope="Global">Ctrl+N</Shortcut>
+					<Shortcut Command="Edit.Paste" Scope="Global">Ctrl+Y</Shortcut>
+					<Shortcut Command="Edit.Delete" Scope="Global">Ctrl+D</Shortcut>
+					<Shortcut Command="Edit.Delete" Scope="Global">Del</Shortcut>                    
+					<Shortcut Command="Edit.SelectionCancel" Scope="Global">Ctrl+G</Shortcut>
+					<Shortcut Command="Edit.EmacsWordDeleteToStart" Scope="Global">Ctrl+W</Shortcut>
+					<Shortcut Command="File.SaveSelectedItems" Scope="Global">Ctrl+X, Ctrl+S</Shortcut>
+					<Shortcut Command="Edit.Undo" Scope="Global">Ctrl+Shift+-</Shortcut>
+					<Shortcut Command="Edit.LineCut" Scope="Global">Ctrl+K</Shortcut>
+					<Shortcut Command="Edit.Cut" Scope="Global">Ctrl+X, Ctrl+K</Shortcut>
+					<Shortcut Command="Edit.EmacsSetMark" Scope="Global">Ctrl+Space</Shortcut>
+					<Shortcut Command="Edit.EmacsWordNext" Scope="Global">Alt+F</Shortcut>
+					<Shortcut Command="Edit.BreakLine" Scope="Text Editor">Enter</Shortcut>
+					<Shortcut Command="Window.NextDocumentWindow" Scope="Global">Ctrl+X, Ctrl+O</Shortcut>
+					<Shortcut Command="Window.NextDocumentWindow" Scope="Global">Ctrl+X, O</Shortcut>
+					<Shortcut Command="Edit.GotoDefinition" Scope="Global">Alt+.</Shortcut>
+   					<Shortcut Command="View.PopBrowseContext" Scope="Global">Shift+Alt+8</Shortcut>
+			    </UserShortcuts>
+                <DefaultShortcuts>
+                </DefaultShortcuts>
+            </KeyboardShortcuts>
+		</Category>
+	</Category>
+</UserSettings>
