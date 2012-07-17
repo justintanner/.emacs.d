@@ -1,5 +1,5 @@
 ;; justin tanner's emacs config file
-(defvar JWTELISP (format "%s/elisp" (getenv "HOME")))
+(defvar JWTELISP (format "%s/emacs" (getenv "HOME")))
 (load (format "%s/start" JWTELISP))
 
 ;; workaround for windows bug  
