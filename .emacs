@@ -24,10 +24,6 @@
 ;; so you can see what area you have selected
 (transient-mark-mode t)
 
-;; tab complete everything
-(require 'complete)
-(partial-completion-mode t)
-
 ;; make spell checker skip html
 (setq
  ispell-extra-args '("--mode=sgml")
@@ -49,29 +45,6 @@
  sort-fold-case t
  sql-oracle-program "sqlplus"
  tags-add-tables t)
-
-;; special key bindings
-(defalias 'qrr 'query-replace-regexp)
-(global-set-key [f5]  'call-last-kbd-macro)
-(global-set-key [f7]  'abtags-find-file)
-(global-set-key [f8]  'grep)
-(global-set-key [f12] 'next-error)
-(global-set-key "\C-xb" 'switch-to-buffer-nocreate)
-(global-set-key "\C-\M-q" 'backward-up-list-indent)
-(global-set-key "\M-," 'tags-search-tags-table)
-(global-set-key "\C-x\C-m" 'execute-extended-command)
-(global-set-key "\C-c\C-m" 'execute-extended-command)
-(global-set-key "\C-xm" 'execute-extended-command)
-(global-set-key "\C-w" 'backward-kill-word)
-(global-set-key "\C-x\C-k" 'kill-region)
-(global-set-key "\C-c\C-k" 'copy-region-as-kill)
-(global-set-key "\C-i" 'indent-region)
-(global-set-key "\C-s" 'isearch-forward-regexp)
-(global-set-key "\C-r" 'isearch-backward-regexp)
-(global-set-key "\C-cs" 'secret-commit)
-(global-set-key "\C-c\C-s" 'secret-commit)
-(global-set-key "\C-c\C-f" 'doxymacs-insert-file-comment)
-(global-set-key "\C-c\C-g" 'doxymacs-insert-function-comment)
 
 ;; use TAB key for completion everywhere ( dont need these? )
 (global-set-key-override0 "\t" 'clever-hippie-tab)
