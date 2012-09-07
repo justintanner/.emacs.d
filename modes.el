@@ -230,3 +230,16 @@ functions from one source file."
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
 
 (require 'coffee-mode)
+
+
+;; yaml
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+
+(add-hook 'yaml-mode-hook
+  '(lambda ()
+  (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
+
+;; require
+(require 'less-css-mode)
+(add-to-list 'auto-mode-alist '("\\.less$" . less-css-mode))
