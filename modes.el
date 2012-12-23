@@ -189,7 +189,7 @@ functions from one source file."
 (add-hook 'python-mode-hook 'my-python-mode-hook)
 
 (auto-fill-mode 0)
-(setq ispell-program-name "/opt/local/bin/aspell")
+(setq ispell-program-name "/usr/local/bin/aspell")
 
 ;; haml mode
 (eval-when-compile (require 'haml-mode))

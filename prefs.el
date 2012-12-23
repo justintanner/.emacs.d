@@ -265,3 +265,5 @@
      (is-win32      (color-theme-amd-win32))
      (window-system (color-theme-amd-linux))
      (t             (color-theme-amd-linux-nw)))))
+
+
