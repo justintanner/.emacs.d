@@ -38,9 +38,11 @@ list is used to fill in the magic values for the font name."
 (defun set-frame-size-according-to-resolution ()
   (interactive)
   (if window-system
-    (if (> (x-display-pixel-width) 1900)
-           (arrange-frame 135 65 950 22)
-           (arrange-frame 100 50 10 22))))
+    (cond
+      ((equal (x-display-pixel-width) 1920) (arrange-frame 135 65 950 22))
+      ((equal (x-display-pixel-width) 1440) (arrange-frame 150 50 365 22))
+      (t (arrange-frame 100 50 10 22)))))
+
 (set-frame-size-according-to-resolution)
 
 
