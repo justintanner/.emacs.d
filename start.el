@@ -7,6 +7,8 @@
 ;; setup the paths so emacs can find all files in the elisp directory
 (setq load-path (cons JWTELISP load-path))
 
+(setq default-directory "~/")
+
 ;; update the default-directory to start in the elisp directory
 (let ((old-dir default-directory))
   (unwind-protect
@@ -36,3 +38,5 @@
 
 (when (not is-win32)
   (load "linux"))
+
+'(load-path)
