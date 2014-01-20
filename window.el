@@ -41,7 +41,7 @@ list is used to fill in the magic values for the font name."
     (cond
       ((equal (x-display-pixel-width) 1920) (arrange-frame 139 68 920 22))
       ((equal (x-display-pixel-width) 1440) (arrange-frame 150 53 365 22))
-      ((equal (x-display-pixel-width) 1366) (arrange-frame 20 20 20 22))      
+      ((equal (x-display-pixel-width) 1366) (arrange-frame 150 47 290 22))      
       (t (arrange-frame 100 50 10 22)))))
 
 (set-frame-size-according-to-resolution)
