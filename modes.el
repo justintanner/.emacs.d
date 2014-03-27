@@ -7,16 +7,16 @@
 (defun autoloads (file &rest funcs)
   "A helper function written by jp that lets you autoload many
 functions from one source file."
-  (let ((result))  
-    (while (not (null funcs))  
-      (let ((func-string (format "%s" (car funcs))))  
-        (setq result (cons `(autoload (quote ,(car funcs))  
+  (let ((result))
+    (while (not (null funcs))
+      (let ((func-string (format "%s" (car funcs))))
+        (setq result (cons `(autoload (quote ,(car funcs))
                               ,file
-                              ,func-string  
-                              (quote ,(car funcs)))  
-                           result)))  
-      (setq funcs (cdr funcs)))  
-    (eval `(progn ,@result))))  
+                              ,func-string
+                              (quote ,(car funcs)))
+                           result)))
+      (setq funcs (cdr funcs)))
+    (eval `(progn ,@result))))
 
 ;; amd's etags setup
 (setq tags-revert-without-query t)
@@ -26,7 +26,7 @@ functions from one source file."
   '(add-hook 'tags-table-format-hooks 'my-etags-setup))
 
 ;; ansi-color
-(autoloads "ansi-color"  
+(autoloads "ansi-color"
            'ansi-color-for-comint-mode-on
            'ansi-color-apply-on-region)
 
@@ -128,7 +128,7 @@ functions from one source file."
 
 ;; apache
 (add-to-list 'auto-mode-alist '("\\my.cnf$" . apache-mode))
-             
+
 ;; ediff
 (eval-after-load "ediff"
   '(setq ediff-split-window-function 'split-window-horizontally))
@@ -140,7 +140,7 @@ functions from one source file."
 ;; diff
 (eval-when-compile (require 'diff-mode))
 (defun my-diff-setup ()
-  (copy-face 'font-lock-string-face 'diff-removed-face)  
+  (copy-face 'font-lock-string-face 'diff-removed-face)
   (copy-face 'font-lock-builtin-face 'diff-added-face)
   (copy-face 'font-lock-comment-face 'diff-hunk-header-face))
 (add-hook 'diff-mode-hook 'my-diff-setup)
@@ -201,16 +201,16 @@ functions from one source file."
 (defun my-haml-setup ()
   (make-local-variable 'standard-indent)
   (setq standard-indent 2)
-  (define-key haml-mode-map [C-left] 'my-decrease)  
+  (define-key haml-mode-map [C-left] 'my-decrease)
   (define-key haml-mode-map [C-right] 'my-increase)
   (setq haml-backspace-backdents-nesting nil)
-  (modify-syntax-entry ?_ "." haml-mode-syntax-table))  
+  (modify-syntax-entry ?_ "." haml-mode-syntax-table))
 (add-hook 'haml-mode-hook 'my-haml-setup)
 
 (setq auto-mode-alist (cons '("\\.haml$" . haml-mode) auto-mode-alist))
 (autoload 'haml-mode "haml-mode" "Haml editing mode." t)
 
-;; rails 
+;; rails
 ;;(require 'ruby-electric)
 
 (defun my-ruby-setup ()
@@ -244,6 +244,7 @@ functions from one source file."
 (set-face-attribute 'web-mode-html-attr-name-face nil :foreground "black")
 (set-face-attribute 'web-mode-html-attr-value-face nil :foreground "tomato")
 (set-face-attribute 'web-mode-html-attr-value-face nil :background "white")
+(set-face-attribute 'web-mode-symbol-face nil :foreground "teal")
 
 (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
