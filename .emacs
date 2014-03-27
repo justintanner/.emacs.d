@@ -2,7 +2,7 @@
 (defvar JWTELISP (format "%s/.emacs.d" (getenv "HOME")))
 (load (format "%s/start" JWTELISP))
 
-;; workaround for windows bug  
+;; workaround for windows bug
 (require 'server)
 (server-start)
 
@@ -23,13 +23,6 @@
 
 ;; so you can see what area you have selected
 (transient-mark-mode t)
-
-;; make spell checker skip html
-(setq
- ispell-extra-args '("--mode=sgml")
- ispell-program-name "aspell"
- ispell-silently-savep t)
-(set-default 'ispell-skip-html t)
 
 ;; highlight paranthesis automatically
 (show-paren-mode t)
@@ -55,5 +48,3 @@
   (define-key minibuffer-local-must-match-filename-map "\t" 'minibuffer-complete)
   (define-key minibuffer-local-filename-completion-map "\t" 'minibuffer-complete)
   (setq read-file-name-completion-ignore-case t))
-
-(setq ispell-program-name "/usr/local/bin/aspell")
