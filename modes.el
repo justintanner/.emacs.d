@@ -1,5 +1,8 @@
 ;; hooks and other setup variables for many different modes
 
+;; delete trailing whitespace before saving any file
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
 ;; what does this function do?
 (defun autoloads (file &rest funcs)
   "A helper function written by jp that lets you autoload many
@@ -189,7 +192,9 @@ functions from one source file."
 (add-hook 'python-mode-hook 'my-python-mode-hook)
 
 (auto-fill-mode 0)
-(setq ispell-program-name "/usr/local/bin/aspell")
+
+;; moved this to .emacs, not sure why this doesn't work here
+;;(setq ispell-program-name "/usr/local/bin/aspell")
 
 ;; haml mode
 (eval-when-compile (require 'haml-mode))
