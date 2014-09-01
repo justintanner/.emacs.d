@@ -1,5 +1,4 @@
 ;; personal preferences
-
 (setq PC-word-delimiters "-_.=")
 (setq auto-revert-interval 2)
 (setq auto-save-list-file-prefix nil)
@@ -21,6 +20,13 @@
 (setq track-eol nil)
 (setq truncate-partial-width-windows nil)
 (setq w32-use-full-screen-buffer nil)
+
+;; make spell checker skip html
+(setq
+ ispell-extra-args '("--mode=sgml")
+ ispell-program-name "/usr/local/bin/aspell"
+ ispell-silently-savep t)
+(set-default 'ispell-skip-html t)
 
 ;; cleanup make output
 (setenv "TERM" "emacs")
@@ -66,7 +72,7 @@
   (keyboard-translate ?\C-h ?\C-?))
 
 (global-set-key "\C-\\"         'advertised-undo)
-(global-set-key "\C-c\C-c"      'comment-region)  
+(global-set-key "\C-c\C-c"      'comment-region)
 (global-set-key "\C-c\C-u"      'uncomment-region)
 (global-set-key "\C-m"          'newline-and-indent)
 (global-set-key "\C-x."         'find-tag)
@@ -82,7 +88,7 @@
 
 ;; mini-buffer
 (define-key minibuffer-local-map "\t" 'hippie-expand)
-   
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; movement
 
@@ -98,11 +104,11 @@
 (global-set-key [C-kp-up]       'previous-line)
 (global-set-key [C-kp-down]     'next-line)
 (global-set-key [C-kp-left]     'backward-word)
- 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; mistakes
 
-(global-set-key "\C-xf"     'find-file) 
+(global-set-key "\C-xf"     'find-file)
 (global-set-key "\C-x\C-f"  'find-file)
 (global-set-key "\C-xs"     'save-buffer)
 (global-set-key "\C-x\C-s"  'save-buffer)
@@ -196,6 +202,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; amd's color theme - turned off by default
 
+(setq ansi-color-names-vector
+      ["black" "tomato" "PaleGreen2" "gold1"
+       "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
+
+(setq ansi-color-map (ansi-color-make-color-map))
+
 (defun color-theme-amd ()
   (color-theme-install
    '(color-theme-amd
@@ -203,13 +215,13 @@
       (foreground-color . "white")
       (cursor-color     . "yellow")
       (background-mode  . dark))
-     
+
      (default      ((t (nil))))
      (fringe       ((t (                    :background "grey20"))))
      (modeline     ((t (:foreground "white" :background "darkslateblue"))))
      (region       ((t (                    :background "midnight blue"))))
      (highlight    ((t (                    :background "#13385b"))))
-     
+
      (font-lock-builtin-face       ((t (:foreground "cornflower blue"))))
      (font-lock-comment-face       ((t (:foreground "green"))))
      (font-lock-doc-face           ((t (:foreground "green"))))
@@ -225,7 +237,7 @@
 
 (defun color-theme-amd-win32 ()
   (color-theme-amd)
-  (let ((color-theme-is-cumulative t))  
+  (let ((color-theme-is-cumulative t))
     (color-theme-install
      '(color-theme-amd-win32
        nil
@@ -237,7 +249,7 @@
 
 (defun color-theme-amd-linux ()
   (color-theme-amd)
-  (let ((color-theme-is-cumulative t))  
+  (let ((color-theme-is-cumulative t))
     (color-theme-install
      '(color-theme-amd-win32
        ((background-color . "black"))
@@ -247,7 +259,7 @@
 
 (defun color-theme-amd-linux-nw ()
   (color-theme-amd)
-  (let ((color-theme-is-cumulative t))  
+  (let ((color-theme-is-cumulative t))
     (color-theme-install
      '(color-theme-amd-win32
        nil
@@ -265,5 +277,3 @@
      (is-win32      (color-theme-amd-win32))
      (window-system (color-theme-amd-linux))
      (t             (color-theme-amd-linux-nw)))))
-
-
