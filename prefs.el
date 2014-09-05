@@ -202,12 +202,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; amd's color theme - turned off by default
 
-(setq ansi-color-names-vector
-      ["black" "tomato" "PaleGreen2" "gold1"
-       "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
-
-(setq ansi-color-map (ansi-color-make-color-map))
-
 (defun color-theme-amd ()
   (color-theme-install
    '(color-theme-amd

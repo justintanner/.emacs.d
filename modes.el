@@ -194,7 +194,7 @@ functions from one source file."
 (auto-fill-mode 0)
 
 ;; moved this to .emacs, not sure why this doesn't work here
-;;(setq ispell-program-name "/usr/local/bin/aspell")
+(setq ispell-program-name "/usr/local/bin/aspell")
 
 ;; haml mode
 (eval-when-compile (require 'haml-mode))
