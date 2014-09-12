@@ -32,7 +32,7 @@ functions from one source file."
 
 ;; grep defaults
 (setq grep-command "grep -n -s -i -r --exclude=\*{TAGS,.svn-base,.map,.mcs,.mcp,Makefile,*.o} \"")
-                                        ;
+
 ;; ansi colors for grep - makes --color=auto work
 (eval-after-load "compile"
   '(defun grep-process-setup ()
@@ -179,22 +179,12 @@ functions from one source file."
 ;; css
 (autoload 'css-mode "css-mode" "css-mode" t)
 
-;; php
-(defun my-php-mode-hook ()
-  (c-set-style "K&R")
-  (setq tab-width 4)
-  (setq c-basic-offset 4))
-(add-hook 'php-mode-hook 'my-php-mode-hook)
-
 ;; python
 (defun my-python-mode-hook ()
   (global-set-key "\C-c\C-k" 'copy-region-as-kill))
 (add-hook 'python-mode-hook 'my-python-mode-hook)
 
 (auto-fill-mode 0)
-
-;; moved this to .emacs, not sure why this doesn't work here
-(setq ispell-program-name "/usr/local/bin/aspell")
 
 ;; haml mode
 (eval-when-compile (require 'haml-mode))

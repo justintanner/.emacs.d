@@ -1,5 +1,6 @@
 ;; justin tanner's emacs config file
 (defvar JWTELISP (format "%s/.emacs.d" (getenv "HOME")))
+
 (load (format "%s/start" JWTELISP))
 
 ;; workaround for windows bug
@@ -48,3 +49,10 @@
   (define-key minibuffer-local-must-match-filename-map "\t" 'minibuffer-complete)
   (define-key minibuffer-local-filename-completion-map "\t" 'minibuffer-complete)
   (setq read-file-name-completion-ignore-case t))
+
+;; shell colors
+(setq ansi-color-names-vector
+      ["black" "tomato" "PaleGreen2" "gold1"
+       "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
+
+(setq ansi-color-map (ansi-color-make-color-map))
