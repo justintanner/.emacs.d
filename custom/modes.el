@@ -56,6 +56,17 @@ functions from one source file."
       (setq indent-line-function 'indent-relative-maybe)))
 (add-hook 'text-mode-hook 'my-text-setup)
 
+;; c
+(defun my-c-mode-hook ()
+  (setq c-basic-offset 2))
+(add-hook 'c-mode-hook 'my-c-mode-hook)
+(setq c-default-style '((c-mode . "k&r")))
+
+(defun my-turn-on-auto-newline ()
+  (c-toggle-auto-newline 1))
+(add-hook 'c-mode-common-hook 'my-turn-on-auto-newline)
+
+
 ;; perl
 (eval-when-compile (require 'perl-mode))
 (defun my-perl-setup ()
@@ -129,22 +140,9 @@ functions from one source file."
 ;; apache
 (add-to-list 'auto-mode-alist '("\\my.cnf$" . apache-mode))
 
-;; ediff
-(eval-after-load "ediff"
-  '(setq ediff-split-window-function 'split-window-horizontally))
-
 ;; zip support
 (setq archive-zip-use-pkzip nil)
 (add-to-list 'auto-mode-alist '("\\.war$" . archive-mode))
-
-;; diff
-(eval-when-compile (require 'diff-mode))
-(defun my-diff-setup ()
-  (copy-face 'font-lock-string-face 'diff-removed-face)
-  (copy-face 'font-lock-builtin-face 'diff-added-face)
-  (copy-face 'font-lock-comment-face 'diff-hunk-header-face))
-(add-hook 'diff-mode-hook 'my-diff-setup)
-(add-to-list 'auto-mode-alist '("[.-]patch$" . diff-mode))
 
 ;; shell-script-mode
 (add-to-list
@@ -201,8 +199,6 @@ functions from one source file."
 (autoload 'haml-mode "haml-mode" "Haml editing mode." t)
 
 ;; rails
-;;(require 'ruby-electric)
-
 (defun my-ruby-setup ()
   (setq indent-tabs-mode nil)
   (define-key ruby-mode-map "\C-m" 'newline-and-indent))
@@ -214,15 +210,9 @@ functions from one source file."
 (add-to-list 'auto-mode-alist '("\\.rake\\'$" . ruby-mode))
 (add-to-list 'interpreter-mode-alist '("ruby" . ruby-mode))
 
-(require 'rvm)
-(rvm-use-default)
-
 ;; javascript
 (autoload 'js2-mode "js2-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-
-;;(require 'sass-mode)
-;;(add-to-list 'auto-mode-alist '("\\.scss\\'" . sass-mode))
 
 (require 'scss-mode)
 (add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))

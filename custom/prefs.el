@@ -175,10 +175,10 @@
                   system-name)
                 " - %f")))
 
-(when (or window-system (not is-win32))
-  (setq font-lock-verbose 2048)
-  (setq font-lock-maximum-decoration t)
-  (global-font-lock-mode t))
+;; (when (or window-system (not is-win32))
+;;   (setq font-lock-verbose 2048)
+;;   (setq font-lock-maximum-decoration t)
+;;   (global-font-lock-mode t))
 
 ;; settings from customzie-group
 (custom-set-variables
@@ -186,6 +186,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(c-basic-offset 2)
  '(coffee-tab-width 2)
  '(css-indent-offset 2)
  '(js2-basic-offset 2)
@@ -199,75 +200,16 @@
  ;; If there is more than one, they won't work right.
  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; amd's color theme - turned off by default
+;; colors and themes
+(require 'color-theme)
 
-(defun color-theme-amd ()
-  (color-theme-install
-   '(color-theme-amd
-     ((background-color . "black")
-      (foreground-color . "white")
-      (cursor-color     . "yellow")
-      (background-mode  . dark))
+;; shell colors
+(setq ansi-color-names-vector
+      ["black" "tomato" "PaleGreen2" "gold1"
+       "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
 
-     (default      ((t (nil))))
-     (fringe       ((t (                    :background "grey20"))))
-     (modeline     ((t (:foreground "white" :background "darkslateblue"))))
-     (region       ((t (                    :background "midnight blue"))))
-     (highlight    ((t (                    :background "#13385b"))))
+(setq ansi-color-map (ansi-color-make-color-map))
 
-     (font-lock-builtin-face       ((t (:foreground "cornflower blue"))))
-     (font-lock-comment-face       ((t (:foreground "green"))))
-     (font-lock-doc-face           ((t (:foreground "green"))))
-     (font-lock-constant-face      ((t (:foreground "gold"))))
-     (font-lock-function-name-face ((t (:foreground "goldenrod" :bold t))))
-     (font-lock-keyword-face       ((t (:foreground "DeepSkyBlue1"))))
-     (font-lock-string-face        ((t (:foreground "red"))))
-     (font-lock-type-face          ((t (:foreground "CadetBlue1" :bold t))))
-     (font-lock-variable-name-face ((t (:foreground "SeaGreen2"))))
-     (font-lock-warning-face       ((t (:foreground "Pink"))))
-
-     )))
-
-(defun color-theme-amd-win32 ()
-  (color-theme-amd)
-  (let ((color-theme-is-cumulative t))
-    (color-theme-install
-     '(color-theme-amd-win32
-       nil
-       nil
-       (font-lock-keyword-face       ((t (:foreground "cornflower blue"))))
-       (font-lock-string-face        ((t (:foreground "tomato"))))
-       (font-lock-warning-face       ((t (:foreground "cornflower blue"))))
-       ))))
-
-(defun color-theme-amd-linux ()
-  (color-theme-amd)
-  (let ((color-theme-is-cumulative t))
-    (color-theme-install
-     '(color-theme-amd-win32
-       ((background-color . "black"))
-       nil
-       (font-lock-string-face        ((t (:foreground "tomato"))))
-       ))))
-
-(defun color-theme-amd-linux-nw ()
-  (color-theme-amd)
-  (let ((color-theme-is-cumulative t))
-    (color-theme-install
-     '(color-theme-amd-win32
-       nil
-       nil
-       (font-lock-function-name-face ((t (:bold nil))))
-       (font-lock-type-face          ((t (:foreground "cyan" :bold nil))))
-       ))))
-
-(defun turn-on-color-theme-amd ()
-  "Turn on amd's colors."
-  (interactive)
-  (when (or window-system (not is-win32))
-    (require 'color-theme)
-    (cond
-     (is-win32      (color-theme-amd-win32))
-     (window-system (color-theme-amd-linux))
-     (t             (color-theme-amd-linux-nw)))))
+(add-to-list 'custom-theme-load-path "~/.emacs.d/custom/themes")
+(require 'color-theme-sanityinc-tomorrow)
+(load-theme 'sanityinc-tomorrow-day t)

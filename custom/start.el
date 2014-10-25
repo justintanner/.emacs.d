@@ -27,8 +27,6 @@
 (load "modes")
 (when window-system
   (load "window"))
-(when (file-exists-p "company.el")
-  (load "company"))
 (load "prefs")
 (load (format "%s/lisp/loaddefs" JWTELISP))
 
