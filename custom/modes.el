@@ -57,15 +57,7 @@ functions from one source file."
 (add-hook 'text-mode-hook 'my-text-setup)
 
 ;; c
-(defun my-c-mode-hook ()
-  (setq c-basic-offset 2))
-(add-hook 'c-mode-hook 'my-c-mode-hook)
 (setq c-default-style '((c-mode . "k&r")))
-
-(defun my-turn-on-auto-newline ()
-  (c-toggle-auto-newline 1))
-(add-hook 'c-mode-common-hook 'my-turn-on-auto-newline)
-
 
 ;; perl
 (eval-when-compile (require 'perl-mode))
@@ -249,7 +241,12 @@ functions from one source file."
 
 ;; markdown
 (autoload 'markdown-mode "markdown-mode"
-   "Major mode for editing Markdown files" t)
+  "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+(add-hook 'markdown-mode-hook 'turn-on-auto-fill)
+(add-hook 'markdown-mode-hook
+          (lambda ()
+            (set-fill-column 100)))
