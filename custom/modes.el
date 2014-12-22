@@ -50,6 +50,10 @@ functions from one source file."
                        (cons msg code)))
               (cons msg code))))))
 
+;; smart shift
+(require 'smart-shift)
+(global-smart-shift-mode 1)
+
 ;; text
 (defun my-text-setup ()
   (if (eq indent-line-function 'indent-to-left-margin)
@@ -212,6 +216,10 @@ functions from one source file."
 (require 'coffee-mode)
 
 (require 'web-mode)
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+
 (set-face-attribute 'web-mode-html-tag-face nil :foreground "black")
 (set-face-attribute 'web-mode-html-attr-name-face nil :foreground "black")
 (set-face-attribute 'web-mode-html-attr-value-face nil :foreground "tomato")
