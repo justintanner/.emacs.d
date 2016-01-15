@@ -31,7 +31,7 @@ functions from one source file."
            'ansi-color-apply-on-region)
 
 ;; grep defaults
-(setq grep-command "grep -n -s -i -r --exclude=\*{TAGS,.svn-base,.map,.mcs,.mcp,Makefile,*.o} \"")
+(setq grep-command "grep -n -s -i -r --exclude=\*{TAGS,.svg,.log,.png,.jpg,*.o} \"")
 
 ;; ansi colors for grep - makes --color=auto work
 (eval-after-load "compile"
