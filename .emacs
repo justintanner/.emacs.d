@@ -7,19 +7,7 @@
 (require 'server)
 (server-start)
 
-(require 'color-theme)
-
-(if window-system
-    (color-theme-vim-colors)
-  (turn-on-color-theme-amd))
-
-(when window-system
-  (when is-win32
-    (setq my-font (window-build-font "Fixedsys" 9)))
-  (mouse-wheel-mode t)
-  (blink-cursor-mode 1))
-
-;; menubars suck
+;; turn off the menubar
 (menu-bar-mode 0)
 
 ;; so you can see what area you have selected
@@ -49,10 +37,3 @@
   (define-key minibuffer-local-must-match-filename-map "\t" 'minibuffer-complete)
   (define-key minibuffer-local-filename-completion-map "\t" 'minibuffer-complete)
   (setq read-file-name-completion-ignore-case t))
-
-;; shell colors
-(setq ansi-color-names-vector
-      ["black" "tomato" "PaleGreen2" "gold1"
-       "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
-
-(setq ansi-color-map (ansi-color-make-color-map))
