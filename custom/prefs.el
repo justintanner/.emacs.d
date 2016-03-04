@@ -209,27 +209,6 @@
 
 (defvar my-font nil)
 
-(when window-system
-  (blink-cursor-mode 0)
-  (set-scroll-bar-mode nil)
-  (setq visible-bell t)
-  (tool-bar-mode 0)
-  (transient-mark-mode 0)
-
-  (if is-win32 (setq my-font (window-build-font "Courier New" 9)))
-
-  (window-set-frame-default 'auto-raise nil)
-  (window-set-frame-default 'cursor-type 'box)
-  (window-set-frame-default 'scroll-bar-width 12)
-
-  ;; frame title
-  (setq frame-title-format
-        (concat "Emacs@"
-                (if (string-match "^\\([^.]+\\)\..+" system-name)
-                    (match-string 1 system-name)
-                  system-name)
-                " - %f")))
-
 ;; (when (or window-system (not is-win32))
 ;;   (setq font-lock-verbose 2048)
 ;;   (setq font-lock-maximum-decoration t)
