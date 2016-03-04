@@ -480,61 +480,6 @@ reverting a buffer that is modified."
 
 ;;(defalias 'print 'ps-print-buffer-with-faces)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; setting global key bindings
-
-(defvar mode-list
-  '(emacs-lisp-mode java-mode lisp-interaction-mode lisp-mode makefile-mode
-                    perl-mode python-mode sgml-mode shell-mode shell-script-mode tetris-mode
-                    c-mode-common text-mode fundamental-mode sql-mode sql-interactive-mode
-                    generic-mode gud-mode bat-generic-mode properties-generic-mode p4-buffer-mode
-                    nxml-mode)
-  "List of all the modes that these key bindings should apply to.")
-
-(defvar the-cc-modes '(c-mode c++-mode objc-mode csharp-mode java-mode idl-mode pike-mode)
-  "List of the modes which are 'subclasses' of cc-mode")
-
-(defun global-set-key-override (keys func &optional mode)
-  (if (null mode)
-      (global-set-key keys func))
-  (if (null mode)
-      (global-set-key keys func))
-  (global-set-key-override0 keys func mode))
-
-(defun global-set-key-override0 (keys func &optional mode)
-  (let* ((the-mode (if (null mode) 'global-mode mode))
-         (bindings (get 'global-key-overrides the-mode))
-         (binding (assoc keys bindings)))
-    (if (or (null bindings) (null binding))
-        (setq bindings (cons (cons keys func) bindings))
-      (setcdr binding func))
-    (put 'global-key-overrides the-mode bindings))
-  t)
-
-(defun global-bindings-override-hook ()
-  "Function that's called for the various major modes to override bindings."
-  (message (format "Applying bindings for %s" major-mode))
-
-  ;; first map global bindings
-  (mapc (lambda (binding) (local-set-key (car binding) (cdr binding)))
-        (get 'global-key-overrides 'global-mode))
-  (mapc (lambda (binding) (local-set-key (car binding) (cdr binding)))
-        (get 'global-key-overrides major-mode))
-
-  ;; check to see if the major-mode is a subclass of the cc-modes, and
-  ;; if so, invoke the binding overrides defined for c-mode-common
-  (when (memq major-mode the-cc-modes)
-    ;;(message "Applying common bindings for %s" major-mode)
-    (mapc (lambda (binding) (local-set-key (car binding) (cdr binding)))
-          (get 'global-key-overrides 'c-common-mode))))
-
-;; Add our hook to all the defined hooks in 'mode-list'.
-(mapc (lambda (mode)
-        (add-hook (intern (concat (symbol-name mode) "-hook"))
-                  'global-bindings-override-hook))
-      mode-list)
-(add-hook 'find-file-hooks 'global-bindings-override-hook)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; cpp
 
