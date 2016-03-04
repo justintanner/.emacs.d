@@ -243,7 +243,3 @@
        "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
 
 (setq ansi-color-map (ansi-color-make-color-map))
-
-(add-to-list 'custom-theme-load-path "~/.emacs.d/custom/themes")
-(require 'color-theme-sanityinc-tomorrow)
-(load-theme 'sanityinc-tomorrow-day t)

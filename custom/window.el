@@ -66,3 +66,9 @@ list is used to fill in the magic values for the font name."
                     (match-string 1 system-name)
                   system-name)
                 " - %f")))
+
+(when window-system
+  (when is-win32
+    (setq my-font (window-build-font "Fixedsys" 9)))
+  (mouse-wheel-mode t)
+  (blink-cursor-mode 1))
