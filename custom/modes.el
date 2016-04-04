@@ -258,3 +258,8 @@ functions from one source file."
 (add-hook 'markdown-mode-hook
           (lambda ()
             (set-fill-column 100)))
+
+;; cucumber
+(add-to-list 'load-path (format "%s/emacslib/feature-mode" JWTELISP) t)
+(require 'feature-mode)
+(add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
