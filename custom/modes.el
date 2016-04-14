@@ -180,21 +180,9 @@ functions from one source file."
 
 (auto-fill-mode 0)
 
-;; haml mode
-(eval-when-compile (require 'haml-mode))
-(defun my-haml-setup ()
-  (make-local-variable 'standard-indent)
-  (setq standard-indent 2)
-  (define-key haml-mode-map [C-left] 'my-decrease)
-  (define-key haml-mode-map [C-right] 'my-increase)
-  (setq haml-backspace-backdents-nesting nil)
-  (modify-syntax-entry ?_ "." haml-mode-syntax-table))
-(add-hook 'haml-mode-hook 'my-haml-setup)
-
-(setq auto-mode-alist (cons '("\\.haml$" . haml-mode) auto-mode-alist))
-(autoload 'haml-mode "haml-mode" "Haml editing mode." t)
-
 ;; rails
+(require 'ruby-mode)
+
 (defun my-ruby-setup ()
   (setq indent-tabs-mode nil)
   (define-key ruby-mode-map "\C-m" 'newline-and-indent))
@@ -234,6 +222,61 @@ functions from one source file."
 (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+;; haml mode
+
+;; haml is complaining about this not being defined
+(cond
+ ((featurep 'font-lock)
+  (or (boundp 'font-lock-variable-name-face)
+      (setq font-lock-variable-name-face font-lock-type-face))
+
+  (setq ruby-font-lock-syntactic-keywords
+	'(
+	  ;; #{ }, #$hoge, #@foo are not comments
+	  ("\\(#\\)[{$@]" 1 (1 . nil))
+	  ;; the last $' in the string ,'...$' is not variable
+	  ;; the last ?' in the string ,'...?' is not ascii code
+	  ("\\(^\\|[[\\s <+(,=]\\)\\('\\)[^'\n\\\\]*\\(\\\\.[^'\n\\\\]*\\)*[?$]\\('\\)"
+	   (2 (7 . nil))
+	   (4 (7 . nil)))
+	  ;; the last $` in the string ,`...$` is not variable
+	  ;; the last ?` in the string ,`...?` is not ascii code
+	  ("\\(^\\|[[\\s <+(,=]\\)\\(`\\)[^`\n\\\\]*\\(\\\\.[^`\n\\\\]*\\)*[?$]\\(`\\)"
+	   (2 (7 . nil))
+	   (4 (7 . nil)))
+	  ;; the last $" in the string ,"...$" is not variable
+	  ;; the last ?" in the string ,"...?" is not ascii code
+	  ("\\(^\\|[[\\s <+(,=]\\)\\(\"\\)[^\"\n\\\\]*\\(\\\\.[^\"\n\\\\]*\\)*[?$]\\(\"\\)"
+	   (2 (7 . nil))
+	   (4 (7 . nil)))
+	  ;; $' $" $` .... are variables
+	  ;; ?' ?" ?` are ascii codes
+	  ("[?$][#\"'`]" 0 (1 . nil))
+	  ;; regexps
+	  ("\\(^\\|[=(,~?:;]\\|\\(^\\|\\s \\)\\(if\\|elsif\\|unless\\|while\\|until\\|when\\|and\\|or\\|&&\\|||\\)\\|g?sub!?\\|scan\\|split!?\\)\\s *\\(/\\)[^/\n\\\\]*\\(\\\\.[^/\n\\\\]*\\)*\\(/\\)"
+	   (4 (7 . ?/))
+	   (6 (7 . ?/)))
+	  ;; %Q!...!
+	  ("\\(^\\|[[\\s <+(,=]\\)%[xrqQ]?\\([^a-zA-Z0-9 \n]\\)[^\n\\\\]*\\(\\\\.[^\n\\\\]*\\)*\\(\\2\\)"
+	   (2 (7 . nil))
+	   (4 (7 . nil)))
+	  ("^\\(=\\)begin\\(\\s \\|$\\)" 1 (7 . nil))
+	  ("^\\(=\\)end\\(\\s \\|$\\)" 1 (7 . nil))))
+
+(require 'haml-mode)
+;; (eval-when-compile (require 'haml-mode))
+;; (defun my-haml-setup ()
+;;   (make-local-variable 'standard-indent)
+;;   (setq standard-indent 2)
+;;   (define-key haml-mode-map [C-left] 'my-decrease)
+;;   (define-key haml-mode-map [C-right] 'my-increase)
+;;   (setq haml-backspace-backdents-nesting nil)
+;;   (modify-syntax-entry ?_ "." haml-mode-syntax-table))
+;; (add-hook 'haml-mode-hook 'my-haml-setup)
+
+;; (setq auto-mode-alist (cons '("\\.haml$" . haml-mode) auto-mode-alist))
+;; (autoload 'haml-mode "haml-mode" "Haml editing mode." t)
 
 ;; yaml
 (require 'yaml-mode)
