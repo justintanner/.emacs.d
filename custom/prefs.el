@@ -197,6 +197,8 @@
 (global-set-key-override "\t" 'comint-dynamic-complete 'shell-mode)
 (global-set-key-override "\C-c\C-c" 'comint-interrupt-subjob 'shell-mode)
 
+(global-set-key-override "\C-x\C-g" 'grep)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; imenu
 (when window-system
