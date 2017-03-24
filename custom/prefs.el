@@ -243,9 +243,4 @@
       ["black" "tomato" "PaleGreen2" "gold1"
        "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
 
-(defun run-bash ()
-      (interactive)
-      (let ((shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe"))
-    (shell "*bash*")))
-
 (setq ansi-color-map (ansi-color-make-color-map))

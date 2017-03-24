@@ -33,7 +33,7 @@ list is used to fill in the magic values for the font name."
   (set-scroll-bar-mode nil)
   (setq visible-bell t)
   (tool-bar-mode 0)
-  (transient-mark-mode 0)
+  (transient-mark-mode t)
   (mouse-wheel-mode t)
 
   (if is-win32 (setq my-font (window-build-font "Courier New" 9)))
