@@ -60,7 +60,6 @@
 (setq backup-by-copying t)
 (setq tab-width 2)
 (setq display-time-format nil)
-(setq file-name-buffer-file-type-alist '(("\\.cgi$" . t)))
 (setq fill-column 60)
 (setq gc-cons-threshold 200000)
 (setq inhibit-startup-message t)
@@ -243,5 +242,10 @@
 (setq ansi-color-names-vector
       ["black" "tomato" "PaleGreen2" "gold1"
        "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
+
+(defun run-bash ()
+      (interactive)
+      (let ((shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe"))
+    (shell "*bash*")))
 
 (setq ansi-color-map (ansi-color-make-color-map))

@@ -3,7 +3,6 @@
 
 (load (format "%s/start" JWTELISP))
 
-;; workaround for windows bug
 (require 'server)
 (server-start)
 

@@ -1,8 +1,8 @@
-Windows Registry Editor Version 5.00
-[HKEY_CLASSES_ROOT\*\shell\Emacs]
-@="Edit With &Emacs"
-[HKEY_CLASSES_ROOT\*\shell\Emacs\command]
-@="Wscript.exe C:\\emacs\\emacs-23.1\\bin\\launch-emacs-client.vbs \"%1\""
+REGEDIT4
+[HKEY_CLASSES_ROOT\*\shell]
 
+[HKEY_CLASSES_ROOT\*\shell\openwemacs]
+@="&Edit with Emacs"
 
-
+[HKEY_CLASSES_ROOT\*\shell\openwemacs\command]
+@="C:\\emacs\\bin\\emacsclientw --alternate-editor=\"C:\\emacs\\bin\\runemacs\" \"%1\""

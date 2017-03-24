@@ -1,1 +1,22 @@
 ls
+ls
+cd ..
+ls
+cd ..
+ls
+ls -all
+ls
+cd /mnt
+ls
+ls -all
+npm install -g hyper-papercolor
+npm --help
+ls
+cd ~
+ls
+ls -al
+ls .hyper*
+ls
+bash
+ls
+pwd

@@ -28,30 +28,13 @@ list is used to fill in the magic values for the font name."
   (if is-win32 (set-frame-font my-font))
   (if display-time-format (display-time)))
 
-(defun arrange-frame (w h x y)
-  "Set the width, height, and x/y position of the current frame"
-  (let ((frame (selected-frame)))
-    (delete-other-windows)
-    (set-frame-position frame x y)
-    (set-frame-size frame w h)))
-
-(defun set-frame-size-according-to-resolution ()
-  (interactive)
-  (if window-system
-    (cond
-      ((equal (x-display-pixel-width) 1920) (arrange-frame 139 68 920 22))
-      ((equal (x-display-pixel-width) 1440) (arrange-frame 150 60 365 22))
-      ((equal (x-display-pixel-width) 1366) (arrange-frame 150 51 290 22))
-      (t (arrange-frame 100 50 10 22)))))
-
-(set-frame-size-according-to-resolution)
-
 (when window-system
   (blink-cursor-mode 0)
   (set-scroll-bar-mode nil)
   (setq visible-bell t)
   (tool-bar-mode 0)
   (transient-mark-mode 0)
+  (mouse-wheel-mode t)
 
   (if is-win32 (setq my-font (window-build-font "Courier New" 9)))
 
@@ -59,16 +42,9 @@ list is used to fill in the magic values for the font name."
   (window-set-frame-default 'cursor-type 'box)
   (window-set-frame-default 'scroll-bar-width 12)
 
-  ;; frame title
   (setq frame-title-format
-        (concat "Emacs@"
-                (if (string-match "^\\([^.]+\\)\..+" system-name)
-                    (match-string 1 system-name)
-                  system-name)
-                " - %f")))
-
-(when window-system
-  (when is-win32
-    (setq my-font (window-build-font "Fixedsys" 9)))
-  (mouse-wheel-mode t)
-  (blink-cursor-mode 1))
+    (concat "Emacs@"
+      (if (string-match "^\\([^.]+\\)\..+" (system-name))
+        (match-string 1 (system-name))
+          (system-name))
+            " - %f")))
