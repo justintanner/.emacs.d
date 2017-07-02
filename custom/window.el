@@ -36,7 +36,7 @@ list is used to fill in the magic values for the font name."
   (transient-mark-mode t)
   (mouse-wheel-mode t)
 
-  (if is-win32 (setq my-font (window-build-font "Courier New" 9)))
+  (if is-win32 (setq my-font (window-build-font "SF Mono" 12)))
 
   (window-set-frame-default 'auto-raise nil)
   (window-set-frame-default 'cursor-type 'box)

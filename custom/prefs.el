@@ -1,4 +1,4 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; setting global key bindings
 
 (defvar mode-list
@@ -102,6 +102,9 @@
 (put 'downcase-region 'disabled nil)
 
 (defalias 'qrr 'query-replace-regexp)
+(global-set-key-override "\C-x\C-p" 'query-replace-regexp)
+(global-set-key-override "\C-xp" 'query-replace-regexp)
+
 (global-set-key [f5]  'call-last-kbd-macro)
 (global-set-key [f7]  'abtags-find-file)
 (global-set-key [f8]  'grep)
@@ -177,20 +180,6 @@
 (global-set-key [M-down]    'next-error)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; java/cpp
-
-(global-set-key-override "\C-cr"    'repackage  'java-mode)
-(global-set-key-override "\C-c\C-r" 'repackage  'java-mode)
-(global-set-key-override "\C-cj"    'jdok-generate-javadoc-template 'java-mode)
-(global-set-key-override "\C-c\C-j" 'jdok-generate-javadoc-template 'java-mode)
-(global-set-key-override "\C-ct"    'java-trace-method 'java-mode)
-(global-set-key-override "\C-c\C-t" 'java-trace-method 'java-mode)
-(global-set-key-override "\C-cp"    'java-trace-ctor 'java-mode)
-(global-set-key-override "\C-c\C-p" 'java-trace-ctor 'java-mode)
-(global-set-key-override "\C-ct"    'cpp-trace-method 'c++-mode)
-(global-set-key-override "\C-c\C-t" 'cpp-trace-method 'c++-mode)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; shell
 
 (global-set-key-override "\t" 'comint-dynamic-complete 'shell-mode)
@@ -244,3 +233,12 @@
        "DeepSkyBlue1" "MediumOrchid1" "cyan" "white"])
 
 (setq ansi-color-map (ansi-color-make-color-map))
+
+;; Copy and Paste compatibility with windows
+(cua-mode t)
+;; Don't tabify after rectangle
+(setq cua-auto-tabify-rectangles nil)
+;; No region when it is not highlighted
+(transient-mark-mode 1)
+;; Standard Windows behaviour
+(setq cua-keep-region-after-copy t)
