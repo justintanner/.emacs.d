@@ -53,6 +53,11 @@
       mode-list)
 (add-hook 'find-file-hooks 'global-bindings-override-hook)
 
+(defun create-empty-buffer ()
+  "Open a new frame with a buffer named Untitled. The buffer is not associated with a file."
+  (interactive)
+  (switch-to-buffer (generate-new-buffer "Untitled")))
+
 ;; personal preferences
 (setq PC-word-delimiters "-_.=")
 (setq auto-revert-interval 2)
@@ -120,7 +125,6 @@
 (global-set-key "\C-c\C-k" 'copy-region-as-kill)
 (global-set-key "\C-i" 'indent-region)
 (global-set-key "\C-s" 'isearch-forward-regexp)
-(global-set-key "\C-r" 'isearch-backward-regexp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; editing
@@ -129,14 +133,14 @@
   (keyboard-translate ?\C-h ?\C-?))
 
 (global-set-key "\C-\\"         'advertised-undo)
-(global-set-key "\C-c\C-c"      'comment-region)
 (global-set-key "\C-c\C-u"      'uncomment-region)
-(global-set-key "\C-m"          'newline-and-indent)
-(global-set-key "\C-x."         'find-tag)
+(global-set-key "\C-x\C-x"      'kill-region)
 (global-set-key "\C-x\C-b"      'electric-buffer-list)
 (global-set-key "\M-."          'find-tag-non-interactive)
 (global-set-key "\M-;"          'tags-return)
 (global-set-key "\M-g"          'goto-line)
+(global-set-key "\M-r"          'comment-region)
+(global-set-key "\M-n"          'create-empty-buffer)
 (global-set-key [C-backspace]   'backward-kill-word)
 (global-set-key [C-kp-right]    'indent-for-tab-command)
 (global-set-key [C-right]       'indent-for-tab-command)
@@ -148,7 +152,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; movement
-
 (global-set-key "\M-z"          'pager-row-up)
 (global-set-key "\C-z"          'pager-row-down)
 (global-set-key [home]          'beginning-of-line)
@@ -169,6 +172,7 @@
 (global-set-key "\C-x\C-f"  'find-file)
 (global-set-key "\C-xs"     'save-buffer)
 (global-set-key "\C-x\C-s"  'save-buffer)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; compilation
@@ -242,3 +246,6 @@
 (transient-mark-mode 1)
 ;; Standard Windows behaviour
 (setq cua-keep-region-after-copy t)
+
+(global-set-key-override "\C-j" 'scroll-up-command)
+(global-set-key-override "\M-j" 'scroll-down-command)
