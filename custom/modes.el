@@ -303,3 +303,6 @@ functions from one source file."
 (add-to-list 'load-path (format "%s/emacslib/feature-mode" JWTELISP) t)
 (require 'feature-mode)
 (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+
+;; autohotkey
+(require 'ahk-mode)
