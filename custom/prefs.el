@@ -156,6 +156,7 @@
 (global-set-key "\C-xs"     'save-buffer)
 (global-set-key "\C-x\C-s"  'save-buffer)
 (global-set-key "\C-h\C-k"  'describe-key)
+(global-set-key "\C-xi"  'indent-region)
 
 (global-set-key-override "\t" 'comint-dynamic-complete 'shell-mode)
 (global-set-key-override "\C-x\C-g" 'grep)
