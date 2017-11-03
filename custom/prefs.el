@@ -107,33 +107,25 @@
 (put 'downcase-region 'disabled nil)
 
 (defalias 'qrr 'query-replace-regexp)
+(global-set-key "\C-c\C-k" 'kill-ring-save)
+(global-set-key "\C-ck" 'kill-ring-save)
+
+(global-set-key "\C-c\C-c" 'comment-region)
+(global-set-key "\C-cc" 'comment-region)
+
 (global-set-key-override "\C-x\C-p" 'query-replace-regexp)
 (global-set-key-override "\C-xp" 'query-replace-regexp)
-
-(global-set-key [f5]  'call-last-kbd-macro)
-(global-set-key [f7]  'abtags-find-file)
-(global-set-key [f8]  'grep)
-(global-set-key [f12] 'next-error)
 (global-set-key "\C-xb" 'switch-to-buffer-nocreate)
 (global-set-key "\C-\M-q" 'backward-up-list-indent)
 (global-set-key "\M-," 'tags-search-tags-table)
 (global-set-key "\C-x\C-m" 'execute-extended-command)
-(global-set-key "\C-c\C-m" 'execute-extended-command)
 (global-set-key "\C-xm" 'execute-extended-command)
 (global-set-key "\C-w" 'backward-kill-word)
 (global-set-key "\C-x\C-k" 'kill-region)
-(global-set-key "\C-c\C-k" 'copy-region-as-kill)
 (global-set-key "\C-i" 'indent-region)
 (global-set-key "\C-s" 'isearch-forward-regexp)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; editing
-
-(when (not is-win32)
-  (keyboard-translate ?\C-h ?\C-?))
-
+(global-set-key "\C-x\C-h" 'mark-whole-buffer)
 (global-set-key "\C-\\"         'advertised-undo)
-(global-set-key "\C-c\C-u"      'uncomment-region)
 (global-set-key "\C-x\C-x"      'kill-region)
 (global-set-key "\C-x\C-b"      'electric-buffer-list)
 (global-set-key "\M-."          'find-tag-non-interactive)
@@ -146,12 +138,6 @@
 (global-set-key [C-right]       'indent-for-tab-command)
 (global-set-key [C-tab]         'abtags-find-next-file)
 (global-set-key-override "\177" 'backward-delete-char-untabify)
-
-;; mini-buffer
-(define-key minibuffer-local-map "\t" 'hippie-expand)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; movement
 (global-set-key "\M-z"          'pager-row-up)
 (global-set-key "\C-z"          'pager-row-down)
 (global-set-key [home]          'beginning-of-line)
@@ -165,34 +151,19 @@
 (global-set-key [C-kp-down]     'next-line)
 (global-set-key [C-kp-left]     'backward-word)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; mistakes
-
 (global-set-key "\C-xf"     'find-file)
 (global-set-key "\C-x\C-f"  'find-file)
 (global-set-key "\C-xs"     'save-buffer)
 (global-set-key "\C-x\C-s"  'save-buffer)
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; compilation
-
-(global-set-key "\M-m"      'make)
-(global-set-key "\M-p"      'make-remake)
-(global-set-key-override "\M-s" 'make-magic)
-(global-set-key [M-up]      'previous-error)
-(global-set-key [M-down]    'next-error)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; shell
+(global-set-key "\C-h\C-k"  'describe-key)
 
 (global-set-key-override "\t" 'comint-dynamic-complete 'shell-mode)
-(global-set-key-override "\C-c\C-c" 'comint-interrupt-subjob 'shell-mode)
-
 (global-set-key-override "\C-x\C-g" 'grep)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; imenu
+; mini-buffer
+(define-key minibuffer-local-map "\t" 'hippie-expand)
+
+; imenu
 (when window-system
   (global-set-key [C-down-mouse-3] 'imenu))
 
@@ -238,14 +209,9 @@
 
 (setq ansi-color-map (ansi-color-make-color-map))
 
-;; Copy and Paste compatibility with windows
-(cua-mode t)
 ;; Don't tabify after rectangle
 (setq cua-auto-tabify-rectangles nil)
 ;; No region when it is not highlighted
 (transient-mark-mode 1)
 ;; Standard Windows behaviour
 (setq cua-keep-region-after-copy t)
-
-(global-set-key-override "\C-j" 'scroll-up-command)
-(global-set-key-override "\M-j" 'scroll-down-command)
