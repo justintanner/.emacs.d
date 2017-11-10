@@ -96,7 +96,6 @@
 (setq column-number-mode t)
 (setq confirm-before-kill-emacs nil)
 (setq line-number-mode t)
-;;(setq printer-name nil)
 (setq require-final-newline nil)
 
 (set-default 'indent-tabs-mode nil)
@@ -107,11 +106,18 @@
 (put 'downcase-region 'disabled nil)
 
 (defalias 'qrr 'query-replace-regexp)
-(global-set-key "\C-c\C-k" 'kill-ring-save)
-(global-set-key "\C-ck" 'kill-ring-save)
 
-(global-set-key "\C-c\C-c" 'comment-region)
+;; C-a start line
+;; C-b backward character
+;; C-c prefix / chord
 (global-set-key "\C-cc" 'comment-region)
+(global-set-key "\C-c\C-c" 'comment-region)
+;; C-d delete character
+;; C-e end of line
+;; C-f forward character
+;; C-g cancel / escape
+;; C-h prefix / chord
+(global-set-key "\C-i" 'indent-region)
 
 (global-set-key-override "\C-x\C-p" 'query-replace-regexp)
 (global-set-key-override "\C-xp" 'query-replace-regexp)
@@ -121,16 +127,10 @@
 (global-set-key "\C-x\C-m" 'execute-extended-command)
 (global-set-key "\C-xm" 'execute-extended-command)
 (global-set-key "\C-w" 'kill-region)
-(global-set-key "\C-i" 'indent-region)
 (global-set-key "\C-s" 'isearch-forward-regexp)
 (global-set-key "\C-x\C-h" 'mark-whole-buffer)
 (global-set-key "\C-\\"         'advertised-undo)
 (global-set-key "\C-x\C-b"      'electric-buffer-list)
-(global-set-key "\M-."          'find-tag-non-interactive)
-(global-set-key "\M-;"          'tags-return)
-(global-set-key "\M-g"          'goto-line)
-(global-set-key "\M-r"          'comment-region)
-(global-set-key "\M-n"          'create-empty-buffer)
 (global-set-key [C-backspace]   'backward-kill-word)
 (global-set-key [C-kp-right]    'indent-for-tab-command)
 (global-set-key [C-right]       'indent-for-tab-command)
