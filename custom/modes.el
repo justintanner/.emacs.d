@@ -51,8 +51,8 @@ functions from one source file."
               (cons msg code))))))
 
 ;; smart shift
-(require 'smart-shift)
-(global-smart-shift-mode 1)
+;;(require 'smart-shift)
+;;(global-smart-shift-mode 1)
 
 ;; text
 (defun my-text-setup ()
