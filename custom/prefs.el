@@ -109,9 +109,7 @@
 
 ;; C-a start line
 ;; C-b backward character
-;; C-c prefix / chord
-(global-set-key "\C-cc" 'comment-region)
-(global-set-key "\C-c\C-c" 'comment-region)
+(global-set-key "\C-c" 'copy-region-as-kill)
 ;; C-d delete character
 ;; C-e end of line
 ;; C-f forward character
@@ -166,14 +164,14 @@
 (global-unset-key "\M-c")
 (global-unset-key "\M-d")
 (global-unset-key "\M-e")
-
+;; M-g goto-line
 (global-unset-key "\M-h")
 (global-unset-key "\M-i")
 (global-unset-key "\M-j")
 (global-unset-key "\M-k")
 (global-unset-key "\M-l")
 (global-unset-key "\M-m")
-
+;; M-n new-buffer
 (global-unset-key "\M-o")
 (global-unset-key "\M-p")
 (global-unset-key "\M-q")
@@ -181,7 +179,10 @@
 (global-unset-key "\M-s")
 (global-unset-key "\M-t")
 (global-unset-key "\M-u")
-
+;; M-v pageup
+(global-unset-key "\M-w")
+;; M-x M-x
+;; M-y yank pop
 (global-unset-key "\M-z")
 
 (global-set-key-override "\t" 'comint-dynamic-complete 'shell-mode)
