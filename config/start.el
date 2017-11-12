@@ -19,9 +19,6 @@
         (normal-top-level-add-subdirs-to-load-path))
     (setq default-directory old-dir)))
 
-;; where is emacs
-(setq source-directory (if is-win32 (getenv "emacs_dir") "/usr/share/emacs"))
-
 (load "packages")
 (load "prefs")
 (load "keys")
