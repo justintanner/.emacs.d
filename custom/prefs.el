@@ -206,7 +206,7 @@
 (global-unset-key "\M-t")
 (global-unset-key "\M-u")
 ;; M-v pageup
-(global-unset-key "\M-w")
+;; M-w copy
 ;; M-x M-x
 ;; M-y yank pop
 (global-unset-key "\M-z")
