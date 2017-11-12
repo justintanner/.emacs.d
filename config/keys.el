@@ -80,6 +80,9 @@
 (global-unset-key "\C-x\C-z")
 (global-unset-key "\C-xz")
 
+;; C-y yank (paste)
+(global-unset-key "\C-z")
+
 (global-unset-key "\M-a")
 (global-unset-key "\M-b")
 (global-unset-key "\M-c")
@@ -105,8 +108,3 @@
 ;; M-x M-x
 ;; M-y yank pop
 (global-unset-key "\M-z")
-
-;; C-y yank (paste)
-(global-unset-key "\C-z")
-
-
