@@ -109,7 +109,7 @@
 
 ;; C-a start line
 ;; C-b backward character
-(global-set-key "\C-c" 'copy-region-as-kill)
+;; C-c prefix
 ;; C-d delete character
 ;; C-e end of line
 ;; C-f forward character
@@ -167,8 +167,8 @@
 (global-set-key "\C-xp" 'query-replace-regexp)
 (global-unset-key "\C-x\C-q")
 (global-unset-key "\C-xq")
-(global-unset-key "\C-x\C-r")
-(global-unset-key "\C-xr")
+(global-set-key "\C-x\C-r" 'comment-region)
+(global-set-key "\C-xr" 'comment-region)
 (global-set-key "\C-x\C-s" 'save-buffer)
 (global-set-key "\C-xs" 'save-buffer)
 (global-unset-key "\C-x\C-t")
