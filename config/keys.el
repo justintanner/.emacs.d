@@ -1,3 +1,7 @@
+;; set tab to autocomplete everything
+(define-key minibuffer-local-map "\t" 'hippie-expand)
+(global-set-key (kbd "TAB") 'hippie-expand)
+x
 ;; C-a start line
 ;; C-b backward character
 ;; C-c prefix
@@ -104,3 +108,5 @@
 
 ;; C-y yank (paste)
 (global-unset-key "\C-z")
+
+

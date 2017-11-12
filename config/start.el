@@ -19,13 +19,9 @@
         (normal-top-level-add-subdirs-to-load-path))
     (setq default-directory old-dir)))
 
-;; running emacs on windows?
-(setq is-win32 (memq system-type '(windows-nt ms-dos ms-windows)))
-
 ;; where is emacs
 (setq source-directory (if is-win32 (getenv "emacs_dir") "/usr/share/emacs"))
 
-;;(load "functions")
 (load "packages")
 (load "prefs")
 (load "keys")

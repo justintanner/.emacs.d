@@ -233,10 +233,10 @@
 
 (global-set-key-override "\t" 'comint-dynamic-complete 'shell-mode)
 
-; mini-buffer
+                                        ; mini-buffer
 (define-key minibuffer-local-map "\t" 'hippie-expand)
 
-; imenu
+                                        ; imenu
 (when window-system
   (global-set-key [C-down-mouse-3] 'imenu))
 
