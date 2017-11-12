@@ -199,8 +199,8 @@
 (global-unset-key "\M-m")
 ;; M-n new-buffer
 (global-unset-key "\M-o")
-(global-unset-key "\M-p")
 (global-unset-key "\M-q")
+;; M-p used in emacs console
 (global-unset-key "\M-r")
 (global-unset-key "\M-s")
 (global-unset-key "\M-t")
