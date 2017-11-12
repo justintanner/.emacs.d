@@ -1,7 +1,10 @@
 ;; turn off the menubars and scroll bars
 (menu-bar-mode -1)
 (toggle-scroll-bar -1) 
-(tool-bar-mode -1) 
+(tool-bar-mode -1)
+
+;; start maximized
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; so you can see what area you have selected
 (transient-mark-mode t)

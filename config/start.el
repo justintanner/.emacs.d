@@ -26,21 +26,12 @@
 (setq source-directory (if is-win32 (getenv "emacs_dir") "/usr/share/emacs"))
 
 ;;(load "functions")
-;;(load "prefs")
-
-;;(load "modes")
-;;(when window-system
-;;  (load "window"))
-
+(load "packages")
+(load "prefs")
 (load "keys")
-
-;;(load (format "%s/lisp/loaddefs" CONFIGDIR))
 
 ;; inhibit-startup-message is reset to nil right after this file is loaded resetting it
 (if inhibit-startup-message
     (add-hook 'after-init-hook (lambda () (setq inhibit-startup-message t))))
-
-(when (not is-win32)
-  (load "linux"))
 
 '(load-path)
