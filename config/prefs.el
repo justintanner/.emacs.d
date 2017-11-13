@@ -12,6 +12,9 @@
 ;; highlight paranthesis automatically
 (show-paren-mode t)
 
+;; stop the sounds!
+(setq ring-bell-function 'ignore)
+
 ;; default settings for grep
 (setq grep-command "grep -n -s -i -r --exclude=\*{TAGS,.svg,.log,.png,.jpg,*.o} \"")
 
