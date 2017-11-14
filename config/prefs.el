@@ -26,8 +26,6 @@
 
 (set-default 'ispell-skip-html t)
 
-(exec-path-from-shell-initialize)
-
 ;; cleanup make output
 (setenv "TERM" "emacs")
 
