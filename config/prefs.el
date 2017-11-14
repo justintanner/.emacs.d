@@ -18,6 +18,23 @@
 ;; default settings for grep
 (setq grep-command "grep -n -s -i -r --exclude=\*{TAGS,.svg,.log,.png,.jpg,*.o} \"")
 
+;; set spell checker to skip html tags
+(setq
+  ispell-program-name "aspell"
+  ispell-extra-args '("--mode=sgml")
+  ispell-silently-savep t)
+
+(set-default 'ispell-skip-html t)
+
+(exec-path-from-shell-initialize)
+
+;; cleanup make output
+(setenv "TERM" "emacs")
+
+;; Global tab settings
+(set-default 'indent-tabs-mode nil)
+(set-default 'tab-width 2)
+
 ;; list of things to try when hippie-expanding
 (setq hippie-expand-try-functions-list
       '(try-expand-dabbrev
@@ -53,16 +70,3 @@
 (setq confirm-before-kill-emacs nil)
 (setq line-number-mode t)
 (setq require-final-newline t)
-
-;; set ipspell to skip html tags
-(setq
- ispell-extra-args '("--mode=sgml")
- ispell-program-name "/usr/local/bin/aspell"
- ispell-silently-savep t)
-(set-default 'ispell-skip-html t)
-
-;; cleanup make output
-(setenv "TERM" "emacs")
-
-(set-default 'indent-tabs-mode nil)
-(set-default 'tab-width 2)
