@@ -33,6 +33,9 @@
 (set-default 'indent-tabs-mode nil)
 (set-default 'tab-width 2)
 
+;; Trying out this new font
+(set-default-font "Inconsolata-13")
+
 ;; list of things to try when hippie-expanding
 (setq hippie-expand-try-functions-list
       '(try-expand-dabbrev
