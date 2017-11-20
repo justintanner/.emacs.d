@@ -31,10 +31,11 @@
 
 ;; Global tab settings
 (set-default 'indent-tabs-mode nil)
-(set-default 'tab-width 2)
+(setq-default tab-width 2)
+(setq tab-width 2)
 
 ;; Trying out this new font
-(set-default-font "Inconsolata-13")
+(set-default-font "Inconsolata-15")
 
 ;; list of things to try when hippie-expanding
 (setq hippie-expand-try-functions-list
