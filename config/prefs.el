@@ -34,8 +34,9 @@
 (setq-default tab-width 2)
 (setq tab-width 2)
 
-;; Trying out this new font
-(set-default-font "Inconsolata-15")
+;; Font's for win10 and osx (add osx)
+(cond ((eq system-type 'windows-nt) (set-default-font "Inconsolata-13"))
+      ((eq system-type 'darwin) (set-default-font "Inconsolata-15")))
 
 ;; list of things to try when hippie-expanding
 (setq hippie-expand-try-functions-list
