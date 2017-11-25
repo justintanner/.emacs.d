@@ -44,7 +44,7 @@ If !(Rule("^f", "x", "") || Rule("", "", "Evernote.exe") || Rule("MacroEscape", 
 Return
 
 ^h::
-If (IsEmacs())
+If !(Rule("^a", "x", ""))
   SendDefault()
 Return
 
