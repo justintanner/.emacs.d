@@ -28,7 +28,7 @@ If !(Rule("MacroDeleteChar", "", ""))
 Return
 
 ^e::
-If !(Rule("MacroSkip", "", "chrome.exe") || Rule("MacroEndOfLine", "", ""))
+If !(Rule("MacroEndOfLine", "", ""))
   SendDefault()
 Return
 
