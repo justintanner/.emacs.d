@@ -1,5 +1,11 @@
 local keys = {
-  ["global"] = {
+  ["globalOverride"] = {
+    ["ctrl"] = {
+      ["t"] = {'cmd', 'tab', false, nil}, -- sort working
+      ["j"] = {'cmd', 'space', false, nil}
+    }
+  },
+  ["globalEmacs"] = {
     ["ctrl"] = {
       ["s"] = {'cmd', 'f', false, nil}
     }
@@ -10,30 +16,40 @@ local markActive = false
 local currentApp = nil
 local map = hs.hotkey.modal.new()
 
+map:bind('ctrl', 'j', nil, function() processKey('ctrl', 'j') end)
+map:bind('ctrl', 't', nil, function() processKey('ctrl', 't') end)
 map:bind('ctrl', 's', nil, function() processKey('ctrl', 's') end)
 
 map:enter()
 
 function processKey(mod, key)
   map:exit()
-  
-  if (isEmacs()) then
+
+  if keys["globalOverride"][mod][key] ~= nil then
+    config = keys["globalOverride"][mod][key]
+    changeKey(mod, key, config[1], config[2], config[3], config[4])    
+  elseif (isEmacs()) then
     print("Letting " .. mod .. "+" .. key .. " passthrough to Emacs")
     hs.eventtap.keyStroke(mod, key)
-  elseif keys["global"][mod][key] ~= nil then
-    config = keys["global"][mod][key]
-    print(dump(config))
-
-    if (config[4] ~= nil) then
-      print("Executing a macro " .. config[4] .. " for " .. mod .. "+" .. key)            
-      _G[config[4]]()
-    else
-      print("Changing " .. mod .. "+" .. key .. " to " .. config[1] .. "+" .. config[2])    
-      hs.eventtap.keyStroke(config[1], config[2])      
-    end  
+  elseif currentApp ~= nil and keys[currentApp][mod][key] ~= nil then
+    config = keys[currentApp][mod][key]
+    changeKey(mod, key, config[1], config[2], config[3], config[4])
+  elseif keys["globalEmacs"][mod][key] ~= nil then
+    config = keys["globalEmacs"][mod][key]
+    changeKey(mod, key, config[1], config[2], config[3], config[4])
   end
   
   map:enter()
+end
+
+function changeKey(mod, key, newMod, newKey, clearMark, macro)
+  if (macro ~= nil) then
+    print("Executing a macro " .. macro .. " for " .. mod .. "+" .. key)            
+    _G[macro]()
+  else
+    print("Changing " .. mod .. "+" .. key .. " to " .. newMod .. "+" .. newKey)    
+    hs.eventtap.keyStroke(newMod, newKey)
+  end    
 end
 
 function isEmacs()
