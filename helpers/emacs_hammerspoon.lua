@@ -1,21 +1,32 @@
 local keys = {
   ['globalOverride'] = {
     ['ctrl'] = {
-      ['t'] = {'cmd', 'tab', false, nil}, -- sorta working
+      ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
       ['j'] = {'cmd', 'space', false, nil}
     }
   },
   ['globalEmacs'] = {
     ['ctrl'] = {
-      ['s'] = {'cmd', 'f', false, nil},
+      ['a'] = {'ctrl', 'a', true, nil},
+      ['b'] = {nil, 'left', true, nil},
+      ['d'] = {nil, 'delete', false, nil},
+      ['e'] = {'ctrl', 'e', true, nil},
+      ['f'] = {nil, 'right', true, nil},
+      ['g'] = {nil, 'escape', false, nil},      
+      ['k'] = {nil, nil, true, 'macroKillLine'},
       ['n'] = {nil, 'down', true, nil},
-      ['x'] = {nil, nil, false, 'macroStartCtrlX'},     
-      ['space'] = {nil, nil, false, 'macroStartCtrlSpace'},
-    }
-  }
-  ['xPrefix'] = {
-    ['ctrl'] = {
-      ['b'] = { } -- Finish me!
+      ['o'] = {nil, 'enter', false, nil},
+      ['p'] = {nil, 'up', true, nil},
+      ['r'] = {'cmd', 'f', false, nil},      
+      ['s'] = {'cmd', 'f', false, nil},
+      ['v'] = {nil, 'pagedown', true, nil},
+      ['w'] = {'cmd', 'x', false, nil},
+      ['x'] = {nil, nil, false, 'macroStartCtrlX'},
+      ['y'] = {'cmd', 'v', false, nil},                        
+      ['space'] = {nil, nil, true, 'macroCtrlSpace'},
+    },
+    ['ctrlXPrefix'] = {
+      ['b'] = {'cmd', 'b', false, nil}
     }
   }
 }
@@ -24,58 +35,94 @@ local ctrlXActive = false
 local ctrlSpaceActive = false
 local currentApp = nil
 local map = hs.hotkey.modal.new()
+local overrideMap = hs.hotkey.modal.new()
 
-map:bind('ctrl', 'space', nil, function() processKey('ctrl', 'space') end)
-map:bind('ctrl', 'j', nil, function() processKey('ctrl', 'j') end)
-map:bind('ctrl', 'n', nil, function() processKey('ctrl', 'n') end)
-map:bind('ctrl', 't', nil, function() processKey('ctrl', 't') end)
-map:bind('ctrl', 's', nil, function() processKey('ctrl', 's') end)
-map:bind('ctrl', 'x', nil, function() processKey('ctrl', 'x') end)
+local function processKey(mod, key)
+  return function()
+    map:exit()
 
-map:enter()
+    if ctrlXActive then
+      mod = 'ctrlXPrefix'
+    end
 
-function macroStartMarkSpace()
-  hs.eventtap.keyStroke({}, 'shift')  
-  ctrlSpaceActive = true
+    namespace = 'globalEmacs'
+    
+    if keys['globalOverride'][mod][key] ~= nil then
+      namespace = 'globalOverride'   
+    elseif currentApp ~= nil and keys[currentApp] ~= nil and keys[currentApp][mod][key] ~= nil then
+      namespace = currentApp      
+    end
+
+    if keys[namespace][mod][key] ~= nil then
+      changeKey(namespace, mod, key)
+    else
+      tapKey(mod, key)
+    end
+
+    map:enter()
+  end
 end
 
-function marcroStartCtrlX()
+function macroAltTab()
+  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', true):post()
+  tapKey({}, 'left')
+  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', false):post()
+end
+
+function macroKillLine()
+  tapKey({'shift'}, 'end')
+  tapKey({}, 'shift')
+  tapKey({'cmd'}, 'x')
+  ctrlSpaceActive = false
+end
+
+function macroCtrlSpace()
+  ctrlSpaceActive = not ctrlSpaceActive
+  
+  tapKey({}, 'shift')
+end
+
+function macroStartCtrlX()
   ctrlXActive = true
 
   hs.timer.doAfter(0.75, function() ctrlXActive = false end)
 end
 
-function processKey(mod, key)
-  map:exit()
-
-  if keys['globalOverride'][mod][key] ~= nil then
-    config = keys['globalOverride'][mod][key]
-    changeKey(mod, key, config[1], config[2], config[3], config[4])    
-  elseif (isEmacs()) then
-    print('Letting ' .. mod .. '+' .. key .. ' passthrough to Emacs')
-    hs.eventtap.keyStroke(mod, key)
-  elseif currentApp ~= nil and keys[currentApp] ~= nil and keys[currentApp][mod][key] ~= nil then
-    config = keys[currentApp][mod][key]
-    changeKey(mod, key, config[1], config[2], config[3], config[4])
-  elseif keys['globalEmacs'][mod][key] ~= nil then
-    config = keys['globalEmacs'][mod][key]
-    changeKey(mod, key, config[1], config[2], config[3], config[4])
-  end
-  
-  map:enter()
+function tapKey(mod, key)
+  -- Faster than hs.eventtap.keystroke
+  hs.eventtap.event.newKeyEvent(mod, key, true):post()
+  hs.eventtap.event.newKeyEvent(mod, key, false):post()
 end
 
-function changeKey(mod, key, newMod, newKey, ctrlSpaceSensitive, macro)
+function changeKey(namespace, mod, key)
+  config = keys[namespace][mod][key]
+  newMod = config[1]
+  newKey = config[2]
+  ctrlSpaceSensitive = config[3]
+  macro = config[4]
+
   if macro ~= nil then
+    print(macro)
     _G[macro]()
     print('Executing a macro ' .. macro .. ' for ' .. (mod or '') .. '+' .. (key or ''))              
   else
     holdShift = (ctrlSpaceSensitive and ctrlSpaceActive)
     if holdShift then print 'Holding shift' end
-    hs.eventtap.keyStroke(prepModifier(newMod, holdShift), newKey)
     
-    print('Changing ' .. mod .. '+' .. key .. ' to ' .. (newMod or '') .. '+' .. (newKey or ''))
-  end    
+    tapKey(prepModifier(newMod, holdShift), newKey)
+    
+    message = 'Changing ' .. mod .. '+' .. key .. ' to '
+    if newMod ~= nil then
+      message = message .. (newMod or '') .. '+'
+    end
+    message = message .. (newKey or '')
+
+    print(message)
+  end
+
+  if not ctrlSpaceSensitive then
+    ctrlSpaceActive = false
+  end
 end
 
 function prepModifier(mod, holdShift)
@@ -105,16 +152,6 @@ function isEmacs()
   return (currentApp == 'Emacs')
 end
 
-function applicationWatcher(appName, eventType, appObject)
-  if (eventType == hs.application.watcher.activated) then
-    currentApp = appName
-    print(currentApp)
-  end
-end
-
-local appWatcher = hs.application.watcher.new(applicationWatcher)
-appWatcher:start()
-
 function dump(o)
   if type(o) == 'table' then
     local s = '{ '
@@ -127,5 +164,39 @@ function dump(o)
     return tostring(o)
   end
 end
+
+function applicationWatcher(appName, eventType, appObject)
+  if (eventType == hs.application.watcher.activated) then
+    currentApp = appName
+
+    if currentApp == 'Emacs' then
+      print('Turning off keybindings for Emacs')
+      map:exit()      
+      overrideMap:enter()      
+
+
+    else
+      print('Turning on keybindings for ' .. appName)
+      overrideMap:exit()      
+      map:enter()      
+    end
+  end
+end
+
+local appWatcher = hs.application.watcher.new(applicationWatcher)
+appWatcher:start()
+
+-- TODO: Put this in a function
+letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+
+map:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
+
+for i, letter in ipairs(letters) do
+  map:bind('ctrl', letter, processKey('ctrl', letter), nil)
+end
+
+overrideMap:bind('ctrl', 't', processKey('ctrl', 't'), nil)
+overrideMap:bind('ctrl', 'j', processKey('ctrl', 'j'), nil)
+
 
 
