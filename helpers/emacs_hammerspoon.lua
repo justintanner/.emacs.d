@@ -9,7 +9,7 @@ local keys = {
     ['ctrl'] = {
       ['a'] = {'ctrl', 'a', true, nil},
       ['b'] = {nil, 'left', true, nil},
-      ['d'] = {nil, 'delete', false, nil},
+      ['d'] = {'ctrl', 'd', false, nil},
       ['e'] = {'ctrl', 'e', true, nil},
       ['f'] = {nil, 'right', true, nil},
       ['g'] = {nil, 'escape', false, nil},      
@@ -26,7 +26,23 @@ local keys = {
       ['space'] = {nil, nil, true, 'macroCtrlSpace'},
     },
     ['ctrlXPrefix'] = {
-      ['b'] = {'cmd', 'b', false, nil}
+      ['f'] = {'cmd', 'o', false, nil},
+      ['g'] = {'cmd', 'f', false, nil},      
+      ['h'] = {'cmd', 'a', false, nil},
+      ['k'] = {'cmd', 'w', false, nil},
+      ['s'] = {'cmd', 's', false, nil},
+      ['u'] = {'cmd', 'z', false, nil},
+    },
+    ['alt'] = {
+      ['f'] = {'alt', 'f', true, nil},
+      ['n'] = {'cmd', 'n', false, nil},
+      ['v'] = {nil, 'pageup', true, nil},
+    }
+  },
+  ['Google Chrome'] = {
+    ['ctrl'] = {},
+    ['ctrlXPrefix'] = {
+      ['b'] = {'cmd', 'b', false, nil},
     }
   }
 }
@@ -37,24 +53,25 @@ local currentApp = nil
 local map = hs.hotkey.modal.new()
 local overrideMap = hs.hotkey.modal.new()
 
-local function processKey(mod, key)
+function processKey(mod, key)
   return function()
     map:exit()
 
-    if ctrlXActive then
-      mod = 'ctrlXPrefix'
+    alteredMod = mod
+    if ctrlXActive and mod == 'ctrl' then
+      alteredMod = 'ctrlXPrefix'
     end
 
     namespace = 'globalEmacs'
     
-    if keys['globalOverride'][mod][key] ~= nil then
+    if keybindingExists('globalOverride', alteredMod, key) then
       namespace = 'globalOverride'   
-    elseif currentApp ~= nil and keys[currentApp] ~= nil and keys[currentApp][mod][key] ~= nil then
+    elseif currentApp ~= nil and keybindingExists(currentApp, alteredMod, key) then
       namespace = currentApp      
     end
 
-    if keys[namespace][mod][key] ~= nil then
-      changeKey(namespace, mod, key)
+    if keybindingExists(namespace, alteredMod, key) then
+      changeKey(namespace, alteredMod, key)
     else
       tapKey(mod, key)
     end
@@ -85,7 +102,10 @@ end
 function macroStartCtrlX()
   ctrlXActive = true
 
-  hs.timer.doAfter(0.75, function() ctrlXActive = false end)
+  hs.timer.doAfter(0.75,function()
+                     ctrlXActive = false
+                     print('turning off ctrlX')
+  end)
 end
 
 function tapKey(mod, key)
@@ -123,6 +143,10 @@ function changeKey(namespace, mod, key)
   if not ctrlSpaceSensitive then
     ctrlSpaceActive = false
   end
+
+  if not macro == 'macroStartCtrlX' then
+    ctrlXActive = false
+  end
 end
 
 function prepModifier(mod, holdShift)
@@ -146,6 +170,10 @@ function addShift(mod)
   end
   
   return {'shift'}
+end
+
+function keybindingExists(namespace, mod, key)
+  return (keys[namespace] ~= nil and keys[namespace][mod] ~= nil and  keys[namespace][mod][key] ~= nil)
 end
 
 function isEmacs()
@@ -173,8 +201,6 @@ function applicationWatcher(appName, eventType, appObject)
       print('Turning off keybindings for Emacs')
       map:exit()      
       overrideMap:enter()      
-
-
     else
       print('Turning on keybindings for ' .. appName)
       overrideMap:exit()      
@@ -193,6 +219,7 @@ map:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
 
 for i, letter in ipairs(letters) do
   map:bind('ctrl', letter, processKey('ctrl', letter), nil)
+  map:bind('alt', letter, processKey('alt', letter), nil)  
 end
 
 overrideMap:bind('ctrl', 't', processKey('ctrl', 't'), nil)
