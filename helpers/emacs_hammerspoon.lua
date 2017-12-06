@@ -33,6 +33,10 @@ local keys = {
       ['s'] = {'cmd', 's', false, nil},
       ['u'] = {'cmd', 'z', false, nil},
     },
+    ['altShift'] = {
+      ['.'] = {nil, 'end', false, nil},
+      [','] = {nil, 'home', false, nil},      
+    },
     ['alt'] = {
       ['f'] = {'alt', 'f', true, nil},
       ['n'] = {'cmd', 'n', false, nil},
@@ -87,7 +91,7 @@ function macroAltTab()
 end
 
 function macroKillLine()
-  tapKey({'shift'}, 'end')
+  tapKey({'shift', 'ctrl'}, 'e')
   tapKey({}, 'shift')
   tapKey({'cmd'}, 'x')
   ctrlSpaceActive = false
@@ -216,6 +220,8 @@ appWatcher:start()
 letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
 
 map:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
+map:bind({'alt', 'shift'}, '.', processKey('altShift', '.'), nil)
+map:bind({'alt', 'shift'}, ',', processKey('altShift', ','), nil)
 
 for i, letter in ipairs(letters) do
   map:bind('ctrl', letter, processKey('ctrl', letter), nil)
