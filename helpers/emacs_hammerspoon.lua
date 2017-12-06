@@ -33,15 +33,15 @@ local keys = {
       ['s'] = {'cmd', 's', false, nil},
       ['u'] = {'cmd', 'z', false, nil},
     },
-    ['altShift'] = {
-      ['.'] = {nil, 'end', false, nil},
-      [','] = {nil, 'home', false, nil},      
-    },
     ['alt'] = {
       ['f'] = {'alt', 'f', true, nil},
       ['n'] = {'cmd', 'n', false, nil},
       ['v'] = {nil, 'pageup', true, nil},
-    }
+    },
+    ['altShift'] = {
+      ['.'] = {nil, 'end', false, nil},
+      [','] = {nil, 'home', false, nil},      
+    },
   },
   ['Google Chrome'] = {
     ['ctrl'] = {},
@@ -54,12 +54,12 @@ local keys = {
 local ctrlXActive = false
 local ctrlSpaceActive = false
 local currentApp = nil
-local map = hs.hotkey.modal.new()
+local emacsMap = hs.hotkey.modal.new()
 local overrideMap = hs.hotkey.modal.new()
 
 function processKey(mod, key)
   return function()
-    map:exit()
+    emacsMap:exit()
 
     alteredMod = mod
     if ctrlXActive and mod == 'ctrl' then
@@ -80,36 +80,8 @@ function processKey(mod, key)
       tapKey(mod, key)
     end
 
-    map:enter()
+    emacsMap:enter()
   end
-end
-
-function macroAltTab()
-  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', true):post()
-  tapKey({}, 'left')
-  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', false):post()
-end
-
-function macroKillLine()
-  tapKey({'shift', 'ctrl'}, 'e')
-  tapKey({}, 'shift')
-  tapKey({'cmd'}, 'x')
-  ctrlSpaceActive = false
-end
-
-function macroCtrlSpace()
-  ctrlSpaceActive = not ctrlSpaceActive
-  
-  tapKey({}, 'shift')
-end
-
-function macroStartCtrlX()
-  ctrlXActive = true
-
-  hs.timer.doAfter(0.75,function()
-                     ctrlXActive = false
-                     print('turning off ctrlX')
-  end)
 end
 
 function tapKey(mod, key)
@@ -126,7 +98,6 @@ function changeKey(namespace, mod, key)
   macro = config[4]
 
   if macro ~= nil then
-    print(macro)
     _G[macro]()
     print('Executing a macro ' .. macro .. ' for ' .. (mod or '') .. '+' .. (key or ''))              
   else
@@ -177,24 +148,56 @@ function addShift(mod)
 end
 
 function keybindingExists(namespace, mod, key)
-  return (keys[namespace] ~= nil and keys[namespace][mod] ~= nil and  keys[namespace][mod][key] ~= nil)
+  return (
+    keys[namespace] ~= nil and
+    keys[namespace][mod] ~= nil and
+    keys[namespace][mod][key] ~= nil)
 end
 
 function isEmacs()
   return (currentApp == 'Emacs')
 end
 
-function dump(o)
-  if type(o) == 'table' then
-    local s = '{ '
-    for k,v in pairs(o) do
-      if type(k) ~= 'number' then k = '"'..k..'"' end
-      s = s .. '['..k..'] = ' .. dump(v) .. ','
-    end
-    return s .. '} '
-  else
-    return tostring(o)
+function assignKeys()
+  letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+  
+  for i, letter in ipairs(letters) do
+    emacsMap:bind('ctrl', letter, processKey('ctrl', letter), nil)
+    emacsMap:bind('alt', letter, processKey('alt', letter), nil)  
   end
+  
+  emacsMap:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
+  emacsMap:bind({'alt', 'shift'}, '.', processKey('altShift', '.'), nil)
+  emacsMap:bind({'alt', 'shift'}, ',', processKey('altShift', ','), nil)
+
+  overrideMap:bind('ctrl', 't', processKey('ctrl', 't'), nil)
+  overrideMap:bind('ctrl', 'j', processKey('ctrl', 'j'), nil)
+end
+
+function macroAltTab()
+  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', true):post()
+  tapKey({}, 'left')
+  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', false):post()
+end
+
+function macroKillLine()
+  tapKey({'shift', 'ctrl'}, 'e')
+  tapKey({}, 'shift')
+  tapKey({'cmd'}, 'x')
+  ctrlSpaceActive = false
+end
+
+function macroCtrlSpace()
+  ctrlSpaceActive = not ctrlSpaceActive
+  
+  tapKey({}, 'shift')
+end
+
+function macroStartCtrlX()
+  ctrlXActive = true
+
+  hs.timer.doAfter(0.75,function() ctrlXActive = false end)
 end
 
 function applicationWatcher(appName, eventType, appObject)
@@ -203,33 +206,24 @@ function applicationWatcher(appName, eventType, appObject)
 
     if currentApp == 'Emacs' then
       print('Turning off keybindings for Emacs')
-      map:exit()      
+      emacsMap:exit()      
       overrideMap:enter()      
     else
       print('Turning on keybindings for ' .. appName)
       overrideMap:exit()      
-      map:enter()      
+      emacsMap:enter()      
     end
   end
 end
 
+-- Application start
+
+assignKeys()
+emacsMap:enter()
+
+-- TODO: Need a way to get the currently focused app on startup
+-- https://stackoverflow.com/questions/47678320/in-hammerspoon-how-do-i-get-the-currently-focused-application-name-on-startup
+--print(hs.application:focusedWindow())
+
 local appWatcher = hs.application.watcher.new(applicationWatcher)
 appWatcher:start()
-
--- TODO: Put this in a function
-letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
-
-map:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
-map:bind({'alt', 'shift'}, '.', processKey('altShift', '.'), nil)
-map:bind({'alt', 'shift'}, ',', processKey('altShift', ','), nil)
-
-for i, letter in ipairs(letters) do
-  map:bind('ctrl', letter, processKey('ctrl', letter), nil)
-  map:bind('alt', letter, processKey('alt', letter), nil)  
-end
-
-overrideMap:bind('ctrl', 't', processKey('ctrl', 't'), nil)
-overrideMap:bind('ctrl', 'j', processKey('ctrl', 'j'), nil)
-
-
-
