@@ -51,6 +51,12 @@ local keys = {
   }
 }
 
+local appsWithNativeEmacsKeybindings = {
+  'Emacs',
+  'RubyMine',
+  'Terminal'
+}
+
 local ctrlXActive = false
 local ctrlSpaceActive = false
 local currentApp = nil
@@ -154,10 +160,6 @@ function keybindingExists(namespace, mod, key)
     keys[namespace][mod][key] ~= nil)
 end
 
-function isEmacs()
-  return (currentApp == 'Emacs')
-end
-
 function assignKeys()
   letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
@@ -176,9 +178,12 @@ function assignKeys()
 end
 
 function macroAltTab()
-  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', true):post()
-  tapKey({}, 'left')
-  hs.eventtap.event.newKeyEvent({'cmd'}, 'tab', false):post()
+  -- include minimized/hidden windows, current Space only
+  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
+  switcher_space.nextWindow()
+
+  window = hs.window.frontmostWindow()
+  window:focus()
 end
 
 function macroKillLine()
@@ -200,13 +205,23 @@ function macroStartCtrlX()
   hs.timer.doAfter(0.75,function() ctrlXActive = false end)
 end
 
+function hasValue (tab, val)
+  for index, value in ipairs(tab) do
+    if value == val then
+      return true
+    end
+  end
+
+  return false
+end
+
 function chooseKeyMap()
-  if currentApp == 'Emacs' then
-    print('Turning off keybindings for Emacs')
+  if hasValue(appsWithNativeEmacsKeybindings, currentApp) then
+    print('Turnning OFF keybindings for: ' .. currentApp)
     emacsMap:exit()      
     overrideMap:enter()      
   else
-    print('Turning on keybindings for ' .. currentApp)
+    print('Turning ON keybindings for: ' .. currentApp)
     overrideMap:exit()      
     emacsMap:enter()      
   end
