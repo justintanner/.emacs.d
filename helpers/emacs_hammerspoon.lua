@@ -200,30 +200,43 @@ function macroStartCtrlX()
   hs.timer.doAfter(0.75,function() ctrlXActive = false end)
 end
 
-function applicationWatcher(appName, eventType, appObject)
+function chooseKeyMap()
+  if currentApp == 'Emacs' then
+    print('Turning off keybindings for Emacs')
+    emacsMap:exit()      
+    overrideMap:enter()      
+  else
+    print('Turning on keybindings for ' .. currentApp)
+    overrideMap:exit()      
+    emacsMap:enter()      
+  end
+end
+
+function appOnStartup()
+  app = hs.application.frontmostApplication()
+
+  if app ~= nil then
+    return app:title()
+  end
+
+  return ''
+end
+
+function appWatcherFunction(appName, eventType, appObject)
   if (eventType == hs.application.watcher.activated) then
     currentApp = appName
-
-    if currentApp == 'Emacs' then
-      print('Turning off keybindings for Emacs')
-      emacsMap:exit()      
-      overrideMap:enter()      
-    else
-      print('Turning on keybindings for ' .. appName)
-      overrideMap:exit()      
-      emacsMap:enter()      
-    end
+    
+    chooseKeyMap()    
   end
 end
 
 -- Application start
-
+print('Starting emacs_hammerspoon')
 assignKeys()
-emacsMap:enter()
 
--- TODO: Need a way to get the currently focused app on startup
--- https://stackoverflow.com/questions/47678320/in-hammerspoon-how-do-i-get-the-currently-focused-application-name-on-startup
---print(hs.application:focusedWindow())
+currentApp = appOnStartup()
 
-local appWatcher = hs.application.watcher.new(applicationWatcher)
+chooseKeyMap()
+
+local appWatcher = hs.application.watcher.new(appWatcherFunction)
 appWatcher:start()
