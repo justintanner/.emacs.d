@@ -15,7 +15,7 @@ local keys = {
       ['g'] = {nil, 'escape', false, nil},      
       ['k'] = {nil, nil, true, 'macroKillLine'},
       ['n'] = {nil, 'down', true, nil},
-      ['o'] = {nil, 'enter', false, nil},
+      ['o'] = {nil, 'return', false, nil},
       ['p'] = {nil, 'up', true, nil},
       ['r'] = {'cmd', 'f', false, nil},      
       ['s'] = {'cmd', 'f', false, nil},
@@ -32,6 +32,7 @@ local keys = {
       ['k'] = {'cmd', 'w', false, nil},
       ['s'] = {'cmd', 's', false, nil},
       ['u'] = {'cmd', 'z', false, nil},
+      -- ['w'] = {{'shift', 'cmd'}, 's', false, nil},      
     },
     ['alt'] = {
       ['f'] = {'alt', 'f', true, nil},
@@ -44,17 +45,20 @@ local keys = {
     },
   },
   ['Google Chrome'] = {
-    ['ctrl'] = {},
+    ['ctrl'] = {
+      ['l'] = {'cmd', 'l', false, nil},            
+    },
     ['ctrlXPrefix'] = {
       ['b'] = {'cmd', 'b', false, nil},
     }
   }
 }
 
+-- NOTE: Use lower case app names
 local appsWithNativeEmacsKeybindings = {
-  'Emacs',
-  'RubyMine',
-  'Terminal'
+  'emacs',
+  'rubymine',
+  'terminal'
 }
 
 local ctrlXActive = false
@@ -177,34 +181,6 @@ function assignKeys()
   overrideMap:bind('ctrl', 'j', processKey('ctrl', 'j'), nil)
 end
 
-function macroAltTab()
-  -- include minimized/hidden windows, current Space only
-  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
-  switcher_space.nextWindow()
-
-  window = hs.window.frontmostWindow()
-  window:focus()
-end
-
-function macroKillLine()
-  tapKey({'shift', 'ctrl'}, 'e')
-  tapKey({}, 'shift')
-  tapKey({'cmd'}, 'x')
-  ctrlSpaceActive = false
-end
-
-function macroCtrlSpace()
-  ctrlSpaceActive = not ctrlSpaceActive
-  
-  tapKey({}, 'shift')
-end
-
-function macroStartCtrlX()
-  ctrlXActive = true
-
-  hs.timer.doAfter(0.75,function() ctrlXActive = false end)
-end
-
 function hasValue (tab, val)
   for index, value in ipairs(tab) do
     if value == val then
@@ -216,7 +192,7 @@ function hasValue (tab, val)
 end
 
 function chooseKeyMap()
-  if hasValue(appsWithNativeEmacsKeybindings, currentApp) then
+  if hasValue(appsWithNativeEmacsKeybindings, currentApp:lower()) then
     print('Turnning OFF keybindings for: ' .. currentApp)
     emacsMap:exit()      
     overrideMap:enter()      
@@ -245,8 +221,38 @@ function appWatcherFunction(appName, eventType, appObject)
   end
 end
 
+function macroAltTab()
+  -- include minimized/hidden windows, current Space only
+  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
+  switcher_space.nextWindow()
+
+  window = hs.window.frontmostWindow()
+  window:focus()
+end
+
+function macroKillLine()
+  tapKey({'shift', 'ctrl'}, 'e')
+  tapKey({}, 'shift')
+  tapKey({'cmd'}, 'x')
+  ctrlSpaceActive = false
+end
+
+function macroCtrlSpace()
+  ctrlSpaceActive = not ctrlSpaceActive
+  
+  tapKey({}, 'shift')
+end
+
+function macroStartCtrlX()
+  ctrlXActive = true
+
+  hs.timer.doAfter(0.75,function() ctrlXActive = false end)
+end
+
+
 -- Application start
-print('Starting emacs_hammerspoon')
+print('---------------------------------')
+print('Starting Emacs hammerspoon Script')
 assignKeys()
 
 currentApp = appOnStartup()
