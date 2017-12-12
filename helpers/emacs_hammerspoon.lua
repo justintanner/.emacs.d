@@ -2,7 +2,8 @@ local keys = {
   ['globalOverride'] = {
     ['ctrl'] = {
       ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
-      ['j'] = {'cmd', 'space', false, nil}
+      ['j'] = {'cmd', 'space', false, nil},
+      ['g'] = {nil, 'escape', false, nil},
     }
   },
   ['globalEmacs'] = {
@@ -32,12 +33,13 @@ local keys = {
       ['k'] = {'cmd', 'w', false, nil},
       ['s'] = {'cmd', 's', false, nil},
       ['u'] = {'cmd', 'z', false, nil},
-      -- ['w'] = {{'shift', 'cmd'}, 's', false, nil},      
+      ['w'] = {{'shift', 'cmd'}, 's', false, nil},      
     },
     ['alt'] = {
       ['f'] = {'alt', 'f', true, nil},
       ['n'] = {'cmd', 'n', false, nil},
       ['v'] = {nil, 'pageup', true, nil},
+      ['w'] = {'cmd', 'c', false, nil},      
     },
     ['altShift'] = {
       ['.'] = {nil, 'end', false, nil},
@@ -109,29 +111,37 @@ function changeKey(namespace, mod, key)
 
   if macro ~= nil then
     _G[macro]()
-    print('Executing a macro ' .. macro .. ' for ' .. (mod or '') .. '+' .. (key or ''))              
+    print('Executing a macro ' .. macro)              
   else
     holdShift = (ctrlSpaceSensitive and ctrlSpaceActive)
-    if holdShift then print 'Holding shift' end
+    if holdShift then print('Holding shift') end
     
     tapKey(prepModifier(newMod, holdShift), newKey)
-    
-    message = 'Changing ' .. mod .. '+' .. key .. ' to '
-    if newMod ~= nil then
-      message = message .. (newMod or '') .. '+'
-    end
-    message = message .. (newKey or '')
 
-    print(message)
+    print(changingMessage(mod, key, newMod, newKey))
   end
 
   if not ctrlSpaceSensitive then
     ctrlSpaceActive = false
   end
 
-  if not macro == 'macroStartCtrlX' then
+  if macro ~= 'macroStartCtrlX' then
     ctrlXActive = false
   end
+end
+
+function changingMessage(fromMod, fromKey, toMod, toKey)
+  message = 'Changing ' .. fromMod .. '+' .. fromKey .. ' to '
+  
+  if type(toMod) == 'string' then
+    message = message .. (toMod or '')
+  elseif type(toMod) == 'table' then
+    for index, mod in pairs(toMod) do
+      message = message .. mod .. ','
+    end
+  end
+  
+  return message .. ' + ' .. (toKey or '')
 end
 
 function prepModifier(mod, holdShift)
@@ -195,10 +205,9 @@ function chooseKeyMap()
   if hasValue(appsWithNativeEmacsKeybindings, currentApp:lower()) then
     print('Turnning OFF keybindings for: ' .. currentApp)
     emacsMap:exit()      
-    overrideMap:enter()      
+
   else
     print('Turning ON keybindings for: ' .. currentApp)
-    overrideMap:exit()      
     emacsMap:enter()      
   end
 end
@@ -209,8 +218,6 @@ function appOnStartup()
   if app ~= nil then
     return app:title()
   end
-
-  return ''
 end
 
 function appWatcherFunction(appName, eventType, appObject)
@@ -261,3 +268,5 @@ chooseKeyMap()
 
 local appWatcher = hs.application.watcher.new(appWatcherFunction)
 appWatcher:start()
+
+overrideMap:enter()      
