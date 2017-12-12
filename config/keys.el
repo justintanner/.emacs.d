@@ -8,7 +8,8 @@
 ;; C-h prefix / chord
 (global-set-key "\C-h\C-k"  'describe-key)
 (global-set-key "\C-i" 'indent-region)
-;; C-j indent and newline
+;; C-j is now global search (windows and mac)
+(global-unset-key "\C-j")
 ;; C-k kill line
 (global-unset-key "\C-l")
 ;; C-m RET
@@ -78,6 +79,10 @@
 
 ;; C-y yank (paste)
 (global-unset-key "\C-z")
+
+;; Unsetting undo
+(global-unset-key "\C-_")
+
 
 (global-unset-key "\M-a")
 (global-unset-key "\M-b")

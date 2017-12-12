@@ -54,8 +54,7 @@ If (IsEmacs())
 Return
 
 ^j::
-If !(Rule("MacroEnter", "", ""))
-  SendDefault()
+Send, {Ctrl up}{LWin}
 Return
 
 ^k::
