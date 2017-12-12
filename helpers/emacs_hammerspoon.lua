@@ -2,8 +2,7 @@ local keys = {
   ['globalOverride'] = {
     ['ctrl'] = {
       ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
-      ['j'] = {'cmd', 'space', false, nil},
-      ['g'] = {nil, 'escape', false, nil},
+      ['j'] = {'cmd', 'space', false, nil}
     }
   },
   ['globalEmacs'] = {
@@ -39,7 +38,8 @@ local keys = {
       ['f'] = {'alt', 'f', true, nil},
       ['n'] = {'cmd', 'n', false, nil},
       ['v'] = {nil, 'pageup', true, nil},
-      ['w'] = {'cmd', 'c', false, nil},      
+      ['w'] = {'cmd', 'c', false, nil},
+      ['y'] = {'cmd', 'v', false, nil},            
     },
     ['altShift'] = {
       ['.'] = {nil, 'end', false, nil},
@@ -47,11 +47,9 @@ local keys = {
     },
   },
   ['Google Chrome'] = {
-    ['ctrl'] = {
-      ['l'] = {'cmd', 'l', false, nil},            
-    },
     ['ctrlXPrefix'] = {
       ['b'] = {'cmd', 'b', false, nil},
+      ['f'] = {'cmd', 'l', false, nil},      
     }
   }
 }
@@ -69,6 +67,9 @@ local currentApp = nil
 local emacsMap = hs.hotkey.modal.new()
 local overrideMap = hs.hotkey.modal.new()
 
+--- Processes a keybinding. Translates keys or runs a macro.
+-- @param mod String containing a modifier such as: ctrl, alt or ctrlXPrefix
+-- @param key String containing a key such as: a, b, c, etc
 function processKey(mod, key)
   return function()
     emacsMap:exit()
@@ -87,7 +88,7 @@ function processKey(mod, key)
     end
 
     if keybindingExists(namespace, alteredMod, key) then
-      changeKey(namespace, alteredMod, key)
+      lookupKey(namespace, alteredMod, key)
     else
       tapKey(mod, key)
     end
@@ -96,48 +97,58 @@ function processKey(mod, key)
   end
 end
 
-function tapKey(mod, key)
+--- Executes a keystroke with hammerspoon.
+-- @param mods String or table containing a modifiers
+-- @param key String containing a key such a key
+function tapKey(mods, key)
   -- Faster than hs.eventtap.keystroke
-  hs.eventtap.event.newKeyEvent(mod, key, true):post()
-  hs.eventtap.event.newKeyEvent(mod, key, false):post()
+  hs.eventtap.event.newKeyEvent(mods, key, true):post()
+  hs.eventtap.event.newKeyEvent(mods, key, false):post()
 end
 
-function changeKey(namespace, mod, key)
+--- Looks up a keybinding in the global keybindings table and translates that keybinding or runs a macro.
+-- @param namespace String containg the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
+-- @param mod String containing a modifier key such as ctrl or alt. Also accepts modifiers with states such as ctrlXPrefix
+-- @param key String containing a key such as: a, b or c
+function lookupKey(namespace, mod, key)
   config = keys[namespace][mod][key]
-  newMod = config[1]
-  newKey = config[2]
+  toMod = config[1]
+  toKey = config[2]
   ctrlSpaceSensitive = config[3]
-  macro = config[4]
+  toMacro = config[4]
 
-  if macro ~= nil then
-    _G[macro]()
-    print('Executing a macro ' .. macro)              
+  if toMacro ~= nil then
+    _G[toMacro]()
+    print('Executing a macro ' .. toMacro)              
   else
     holdShift = (ctrlSpaceSensitive and ctrlSpaceActive)
-    if holdShift then print('Holding shift') end
     
-    tapKey(prepModifier(newMod, holdShift), newKey)
+    tapKey(prepModifier(toMod, holdShift), toKey)
 
-    print(changingMessage(mod, key, newMod, newKey))
+    print(changingMessage(mod, key, toMod, toKey, holdShift))
   end
 
   if not ctrlSpaceSensitive then
     ctrlSpaceActive = false
   end
 
-  if macro ~= 'macroStartCtrlX' then
+  if toMacro ~= 'macroStartCtrlX' then
     ctrlXActive = false
   end
 end
 
-function changingMessage(fromMod, fromKey, toMod, toKey)
+function changingMessage(fromMod, fromKey, toMod, toKey, holdingShift)
   message = 'Changing ' .. fromMod .. '+' .. fromKey .. ' to '
-  
+
+  if holdingShift then
+    message = message .. 'shift'
+   end
+
   if type(toMod) == 'string' then
-    message = message .. (toMod or '')
+    message = message .. toMod
   elseif type(toMod) == 'table' then
     for index, mod in pairs(toMod) do
-      message = message .. mod .. ','
+      message = message .. mod .. '+'
     end
   end
   
