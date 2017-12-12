@@ -42,8 +42,8 @@
 (global-set-key "\C-xg" 'grep)
 (global-set-key "\C-x\C-h" 'mark-whole-buffer)
 ;; C-xh mark-whole-buffer
-(global-set-key "\C-x\C-i" 'indent-region)
-(global-set-key "\C-xi" 'indent-region)
+(global-unset-key "\C-x\C-i")
+(global-unset-key "\C-xi")
 ;; C-xC-j, Cxj unbound
 (global-set-key "\C-x\C-k" 'kill-buffer)
 (global-set-key "\C-xk" 'kill-buffer)

@@ -1,68 +1,283 @@
 local keys = {
-  ["global"] = {
-    ["ctrl"] = {
-      ["s"] = {'cmd', 'f', false, nil}
+  ['globalOverride'] = {
+    ['ctrl'] = {
+      ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
+      ['j'] = {'cmd', 'space', false, nil}
+    }
+  },
+  ['globalEmacs'] = {
+    ['ctrl'] = {
+      ['a'] = {'ctrl', 'a', true, nil},
+      ['b'] = {nil, 'left', true, nil},
+      ['d'] = {'ctrl', 'd', false, nil},
+      ['e'] = {'ctrl', 'e', true, nil},
+      ['f'] = {nil, 'right', true, nil},
+      ['g'] = {nil, 'escape', false, nil},      
+      ['k'] = {nil, nil, true, 'macroKillLine'},
+      ['n'] = {nil, 'down', true, nil},
+      ['o'] = {nil, 'return', false, nil},
+      ['p'] = {nil, 'up', true, nil},
+      ['r'] = {'cmd', 'f', false, nil},      
+      ['s'] = {'cmd', 'f', false, nil},
+      ['v'] = {nil, 'pagedown', true, nil},
+      ['w'] = {'cmd', 'x', false, nil},
+      ['x'] = {nil, nil, false, 'macroStartCtrlX'},
+      ['y'] = {'cmd', 'v', false, nil},                        
+      ['space'] = {nil, nil, true, 'macroCtrlSpace'},
+    },
+    ['ctrlXPrefix'] = {
+      ['f'] = {'cmd', 'o', false, nil},
+      ['g'] = {'cmd', 'f', false, nil},      
+      ['h'] = {'cmd', 'a', false, nil},
+      ['k'] = {'cmd', 'w', false, nil},
+      ['s'] = {'cmd', 's', false, nil},
+      ['u'] = {'cmd', 'z', false, nil},
+      ['w'] = {{'shift', 'cmd'}, 's', false, nil},      
+    },
+    ['alt'] = {
+      ['f'] = {'alt', 'f', true, nil},
+      ['n'] = {'cmd', 'n', false, nil},
+      ['v'] = {nil, 'pageup', true, nil},
+      ['w'] = {'cmd', 'c', false, nil},
+      ['y'] = {'cmd', 'v', false, nil},            
+    },
+    ['altShift'] = {
+      ['.'] = {nil, 'end', false, nil},
+      [','] = {nil, 'home', false, nil},      
+    },
+  },
+  ['Google Chrome'] = {
+    ['ctrlXPrefix'] = {
+      ['b'] = {'cmd', 'b', false, nil},
+      ['f'] = {'cmd', 'l', false, nil},      
     }
   }
 }
 
-local markActive = false
+-- NOTE: Use lower case app names
+local appsWithNativeEmacsKeybindings = {
+  'emacs',
+  'rubymine',
+  'terminal'
+}
+
+local ctrlXActive = false
+local ctrlSpaceActive = false
 local currentApp = nil
-local map = hs.hotkey.modal.new()
+local emacsMap = hs.hotkey.modal.new()
+local overrideMap = hs.hotkey.modal.new()
 
-map:bind('ctrl', 's', nil, function() processKey('ctrl', 's') end)
-
-map:enter()
-
+--- Processes a keybinding. Translates keys or runs a macro.
+-- @param mod String containing a modifier such as: ctrl, alt or ctrlXPrefix
+-- @param key String containing a key such as: a, b, c, etc
 function processKey(mod, key)
-  map:exit()
-  
-  if (isEmacs()) then
-    print("Letting " .. mod .. "+" .. key .. " passthrough to Emacs")
-    hs.eventtap.keyStroke(mod, key)
-  elseif keys["global"][mod][key] ~= nil then
-    config = keys["global"][mod][key]
-    print(dump(config))
+  return function()
+    emacsMap:exit()
 
-    if (config[4] ~= nil) then
-      print("Executing a macro " .. config[4] .. " for " .. mod .. "+" .. key)            
-      _G[config[4]]()
+    alteredMod = mod
+    if ctrlXActive and mod == 'ctrl' then
+      alteredMod = 'ctrlXPrefix'
+    end
+
+    namespace = 'globalEmacs'
+    
+    if keybindingExists('globalOverride', alteredMod, key) then
+      namespace = 'globalOverride'   
+    elseif currentApp ~= nil and keybindingExists(currentApp, alteredMod, key) then
+      namespace = currentApp      
+    end
+
+    if keybindingExists(namespace, alteredMod, key) then
+      lookupKey(namespace, alteredMod, key)
     else
-      print("Changing " .. mod .. "+" .. key .. " to " .. config[1] .. "+" .. config[2])    
-      hs.eventtap.keyStroke(config[1], config[2])      
-    end  
+      tapKey(mod, key)
+    end
+
+    emacsMap:enter()
+  end
+end
+
+--- Executes a keystroke with hammerspoon.
+-- @param mods String or table containing a modifiers
+-- @param key String containing a key such a key
+function tapKey(mods, key)
+  -- Faster than hs.eventtap.keystroke
+  hs.eventtap.event.newKeyEvent(mods, key, true):post()
+  hs.eventtap.event.newKeyEvent(mods, key, false):post()
+end
+
+--- Looks up a keybinding in the global keybindings table and translates that keybinding or runs a macro.
+-- @param namespace String containg the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
+-- @param mod String containing a modifier key such as ctrl or alt. Also accepts modifiers with states such as ctrlXPrefix
+-- @param key String containing a key such as: a, b or c
+function lookupKey(namespace, mod, key)
+  config = keys[namespace][mod][key]
+  toMod = config[1]
+  toKey = config[2]
+  ctrlSpaceSensitive = config[3]
+  toMacro = config[4]
+
+  if toMacro ~= nil then
+    _G[toMacro]()
+    print('Executing a macro ' .. toMacro)              
+  else
+    holdShift = (ctrlSpaceSensitive and ctrlSpaceActive)
+    
+    tapKey(prepModifier(toMod, holdShift), toKey)
+
+    print(changingMessage(mod, key, toMod, toKey, holdShift))
+  end
+
+  if not ctrlSpaceSensitive then
+    ctrlSpaceActive = false
+  end
+
+  if toMacro ~= 'macroStartCtrlX' then
+    ctrlXActive = false
+  end
+end
+
+function changingMessage(fromMod, fromKey, toMod, toKey, holdingShift)
+  message = 'Changing ' .. fromMod .. '+' .. fromKey .. ' to '
+
+  if holdingShift then
+    message = message .. 'shift'
+   end
+
+  if type(toMod) == 'string' then
+    message = message .. toMod
+  elseif type(toMod) == 'table' then
+    for index, mod in pairs(toMod) do
+      message = message .. mod .. '+'
+    end
   end
   
-  map:enter()
+  return message .. ' + ' .. (toKey or '')
 end
 
-function isEmacs()
-  return (currentApp == 'Emacs')
+function prepModifier(mod, holdShift)
+  if holdShift then
+    return addShift(mod)
+  end
+
+  if type(mod) == 'string' then
+    return {mod}
+  end
+
+  return {}
 end
 
-function applicationWatcher(appName, eventType, appObject)
+function addShift(mod)
+  if type(mod) == 'string' then
+    return {'shift', mod}
+  elseif type(mod) == 'table' then
+    table.insert(mod, 1, 'shift')
+    return mod
+  end
+  
+  return {'shift'}
+end
+
+function keybindingExists(namespace, mod, key)
+  return (
+    keys[namespace] ~= nil and
+    keys[namespace][mod] ~= nil and
+    keys[namespace][mod][key] ~= nil)
+end
+
+function assignKeys()
+  letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+  
+  for i, letter in ipairs(letters) do
+    emacsMap:bind('ctrl', letter, processKey('ctrl', letter), nil)
+    emacsMap:bind('alt', letter, processKey('alt', letter), nil)  
+  end
+  
+  emacsMap:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
+  emacsMap:bind({'alt', 'shift'}, '.', processKey('altShift', '.'), nil)
+  emacsMap:bind({'alt', 'shift'}, ',', processKey('altShift', ','), nil)
+
+  overrideMap:bind('ctrl', 't', processKey('ctrl', 't'), nil)
+  overrideMap:bind('ctrl', 'j', processKey('ctrl', 'j'), nil)
+end
+
+function hasValue (tab, val)
+  for index, value in ipairs(tab) do
+    if value == val then
+      return true
+    end
+  end
+
+  return false
+end
+
+function chooseKeyMap()
+  if hasValue(appsWithNativeEmacsKeybindings, currentApp:lower()) then
+    print('Turnning OFF keybindings for: ' .. currentApp)
+    emacsMap:exit()      
+
+  else
+    print('Turning ON keybindings for: ' .. currentApp)
+    emacsMap:enter()      
+  end
+end
+
+function appOnStartup()
+  app = hs.application.frontmostApplication()
+
+  if app ~= nil then
+    return app:title()
+  end
+end
+
+function appWatcherFunction(appName, eventType, appObject)
   if (eventType == hs.application.watcher.activated) then
     currentApp = appName
-    print(currentApp)
+    
+    chooseKeyMap()    
   end
 end
 
-local appWatcher = hs.application.watcher.new(applicationWatcher)
+function macroAltTab()
+  -- include minimized/hidden windows, current Space only
+  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
+  switcher_space.nextWindow()
+
+  window = hs.window.frontmostWindow()
+  window:focus()
+end
+
+function macroKillLine()
+  tapKey({'shift', 'ctrl'}, 'e')
+  tapKey({}, 'shift')
+  tapKey({'cmd'}, 'x')
+  ctrlSpaceActive = false
+end
+
+function macroCtrlSpace()
+  ctrlSpaceActive = not ctrlSpaceActive
+  
+  tapKey({}, 'shift')
+end
+
+function macroStartCtrlX()
+  ctrlXActive = true
+
+  hs.timer.doAfter(0.75,function() ctrlXActive = false end)
+end
+
+
+-- Application start
+print('---------------------------------')
+print('Starting Emacs hammerspoon Script')
+assignKeys()
+
+currentApp = appOnStartup()
+
+chooseKeyMap()
+
+local appWatcher = hs.application.watcher.new(appWatcherFunction)
 appWatcher:start()
 
-function dump(o)
-  if type(o) == 'table' then
-    local s = '{ '
-    for k,v in pairs(o) do
-      if type(k) ~= 'number' then k = '"'..k..'"' end
-      s = s .. '['..k..'] = ' .. dump(v) .. ','
-    end
-    return s .. '} '
-  else
-    return tostring(o)
-  end
-end
-
--- hs.timer.doAfter(0.5, function()
---   print 'timer is up!'                   
--- end)
+overrideMap:enter()      
