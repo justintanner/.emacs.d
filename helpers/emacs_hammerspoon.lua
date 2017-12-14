@@ -1,3 +1,27 @@
+--- Emacs Hammerspoon Script
+-- Author: Justin Tanner
+-- Email: work@jwtanner.com
+-- License: MIT
+
+--- What does this thing do?
+-- Allows you to have Emacs *like* keybindings in apps other than Emacs.
+-- You can use Ctrl-Space to mark and cut text just like Emacs. Also enables Emacs prefix keys such as Ctrl-xs (save).
+
+--- Installation
+-- 1) Download and hammerspoon http://www.hammerspoon.org/
+-- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua
+-- 3) Reload hammerspoon if already running
+
+--- Keybindings Lookup Table
+
+-- Namespaces:
+-- globalOverride overrides both Emacs and non-Emacs apps
+-- globalEmacs overrides all apps except those specified in appsWithNativeEmacsKeybindings
+-- App Name (eg Google Chrome) specifies app specific exceptions
+
+-- Usage:
+-- keys[namespace][modifier-key][key] = {to-modifier, to-key, mark-sensitive, macro}
+
 local keys = {
   ['globalOverride'] = {
     ['ctrl'] = {
@@ -13,7 +37,7 @@ local keys = {
       ['e'] = {'ctrl', 'e', true, nil},
       ['f'] = {nil, 'right', true, nil},
       ['g'] = {nil, 'escape', false, nil},      
-      ['k'] = {nil, nil, true, 'macroKillLine'},
+      ['k'] = {'ctrl', 'k', false, nil},      
       ['n'] = {nil, 'down', true, nil},
       ['o'] = {nil, 'return', false, nil},
       ['p'] = {nil, 'up', true, nil},
@@ -49,7 +73,7 @@ local keys = {
   ['Google Chrome'] = {
     ['ctrlXPrefix'] = {
       ['b'] = {'cmd', 'b', false, nil},
-      ['f'] = {'cmd', 'l', false, nil},      
+      ['f'] = {'cmd', 'l', false, nil},
     }
   }
 }
@@ -74,21 +98,20 @@ function processKey(mod, key)
   return function()
     emacsMap:exit()
 
-    alteredMod = mod
     if ctrlXActive and mod == 'ctrl' then
-      alteredMod = 'ctrlXPrefix'
+      mod = 'ctrlXPrefix'
     end
 
     namespace = 'globalEmacs'
     
-    if keybindingExists('globalOverride', alteredMod, key) then
+    if keybindingExists('globalOverride', mod, key) then
       namespace = 'globalOverride'   
-    elseif currentApp ~= nil and keybindingExists(currentApp, alteredMod, key) then
+    elseif currentApp ~= nil and keybindingExists(currentApp, mod, key) then
       namespace = currentApp      
     end
 
-    if keybindingExists(namespace, alteredMod, key) then
-      lookupKey(namespace, alteredMod, key)
+    if keybindingExists(namespace, mod, key) then
+      lookupKeyAndTranslate(namespace, mod, key)
     else
       tapKey(mod, key)
     end
@@ -110,7 +133,7 @@ end
 -- @param namespace String containg the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
 -- @param mod String containing a modifier key such as ctrl or alt. Also accepts modifiers with states such as ctrlXPrefix
 -- @param key String containing a key such as: a, b or c
-function lookupKey(namespace, mod, key)
+function lookupKeyAndTranslate(namespace, mod, key)
   config = keys[namespace][mod][key]
   toMod = config[1]
   toKey = config[2]
@@ -239,20 +262,21 @@ function appWatcherFunction(appName, eventType, appObject)
   end
 end
 
-function macroAltTab()
-  -- include minimized/hidden windows, current Space only
-  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
-  switcher_space.nextWindow()
-
-  window = hs.window.frontmostWindow()
-  window:focus()
-end
-
+-- Macro for apps that map ctrl+k to something else
 function macroKillLine()
   tapKey({'shift', 'ctrl'}, 'e')
   tapKey({}, 'shift')
   tapKey({'cmd'}, 'x')
   ctrlSpaceActive = false
+end
+
+function macroAltTab()
+  -- Include minimized/hidden windows (sorta works)
+  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
+  switcher_space.nextWindow()
+
+  window = hs.window.frontmostWindow()
+  window:focus()
 end
 
 function macroCtrlSpace()
@@ -266,7 +290,6 @@ function macroStartCtrlX()
 
   hs.timer.doAfter(0.75,function() ctrlXActive = false end)
 end
-
 
 -- Application start
 print('---------------------------------')
