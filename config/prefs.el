@@ -23,8 +23,11 @@
   ispell-program-name "aspell"
   ispell-extra-args '("--mode=sgml")
   ispell-silently-savep t)
-
 (set-default 'ispell-skip-html t)
+
+;; osx can't seem to find apsell 
+(when (eq system-type 'darwin)
+  (setq ispell-program-name "/usr/local/bin/aspell"))
 
 ;; cleanup make output
 (setenv "TERM" "emacs")

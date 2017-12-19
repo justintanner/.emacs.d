@@ -54,6 +54,7 @@ local keys = {
       ['g'] = {'cmd', 'f', false, nil},      
       ['h'] = {'cmd', 'a', false, nil},
       ['k'] = {'cmd', 'w', false, nil},
+      ['r'] = {'cmd', 'r', false, nil},      
       ['s'] = {'cmd', 's', false, nil},
       ['u'] = {'cmd', 'z', false, nil},
       ['w'] = {{'shift', 'cmd'}, 's', false, nil},      
