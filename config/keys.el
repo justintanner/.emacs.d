@@ -1,6 +1,8 @@
 ;; C-a start line
 ;; C-b backward character
 ;; C-c prefix
+(global-set-key "\C-c\C-c"  'comment-region)
+(global-set-key "\C-cc"  'comment-region)
 ;; C-d delete character
 ;; C-e end of line
 ;; C-f forward character
