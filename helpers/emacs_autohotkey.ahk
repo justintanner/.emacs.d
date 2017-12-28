@@ -92,7 +92,7 @@ if (IsEmacs())
 Return
 
 ^r::
-If !(Rule("MacroFind", "", ""))
+If !(Rule("{F5}", "x", "") || Rule("MacroFind", "", ""))
   SendDefault()
 Return
 
