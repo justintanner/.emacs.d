@@ -49,8 +49,8 @@
 ;; C-xC-j, Cxj unbound
 (global-set-key "\C-x\C-k" 'kill-buffer)
 (global-set-key "\C-xk" 'kill-buffer)
-(global-unset-key "\C-x\C-l")
-(global-unset-key "\C-xl")
+(global-set-key "\C-x\C-l" 'dumb-jump-go)
+(global-set-key "\C-xl" 'dumb-jump-go)
 (global-set-key "\C-x\C-m" 'execute-extended-command)
 (global-set-key "\C-xm" 'execute-extended-command)
 (global-unset-key "\C-x\C-n")
