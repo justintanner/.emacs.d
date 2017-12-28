@@ -9,7 +9,7 @@
 ;; C-g cancel / escape
 ;; C-h prefix / chord
 (global-set-key "\C-h\C-k"  'describe-key)
-(global-set-key "\C-i" 'indent-region)
+;; C-i **not** emacs is resolving C-i to C-TAB
 ;; C-j is now global search (windows and mac)
 (global-unset-key "\C-j")
 ;; C-k kill line
@@ -44,8 +44,8 @@
 (global-set-key "\C-xg" 'grep)
 (global-set-key "\C-x\C-h" 'mark-whole-buffer)
 ;; C-xh mark-whole-buffer
-(global-unset-key "\C-x\C-i")
-(global-unset-key "\C-xi")
+(global-set-key "\C-x\C-i" 'indent-region)
+(global-set-key "\C-xi" 'indent-region)
 ;; C-xC-j, Cxj unbound
 (global-set-key "\C-x\C-k" 'kill-buffer)
 (global-set-key "\C-xk" 'kill-buffer)
