@@ -74,7 +74,7 @@ local keys = {
   ['Google Chrome'] = {
     ['ctrlXPrefix'] = {
       ['b'] = {'cmd', 'b', false, nil},
-      ['d'] = {{'ctrl', 'shift'}, 'j', false, nil}, 
+      ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
       ['f'] = {'cmd', 'l', false, nil},
     }
   }
