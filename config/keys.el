@@ -34,8 +34,8 @@
 (global-set-key "\C-xb" 'electric-buffer-list)
 (global-set-key "\C-x\C-c" 'save-buffers-kill-emacs)
 (global-set-key "\C-xc" 'save-buffers-kill-emacs)
-(global-set-key "\C-x\C-d" 'dired-other-window)
-;; C-xd dired-other-window
+(global-set-key "\C-x\C-d" 'show-message-log)
+(global-set-key "\C-xd" 'show-message-log)
 ;; C-xC-e eval-last-sexp
 (global-set-key "\C-xe" 'eval-last-sexp)
 (global-set-key "\C-xf" 'find-file)
@@ -46,7 +46,8 @@
 ;; C-xh mark-whole-buffer
 (global-set-key "\C-x\C-i" 'indent-region)
 (global-set-key "\C-xi" 'indent-region)
-;; C-xC-j, Cxj unbound
+(global-unset-key "\C-x\C-j")
+(global-unset-key "\C-xj")
 (global-set-key "\C-x\C-k" 'kill-buffer)
 (global-set-key "\C-xk" 'kill-buffer)
 (global-set-key "\C-x\C-l" 'dumb-jump-go)

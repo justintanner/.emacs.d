@@ -23,7 +23,7 @@ StartChord("c")
 return
 
 ^d::
-If !(Rule("MacroDeleteChar", "", ""))
+If !(Rule("^+j", "x", "chrome.exe") || Rule("MacroDeleteChar", "", ""))
   SendDefault()
 Return
 

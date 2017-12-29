@@ -19,6 +19,7 @@
         (normal-top-level-add-subdirs-to-load-path))
     (setq default-directory old-dir)))
 
+(load "functions")
 (load "packages")
 (load "prefs")
 (load "keys")
