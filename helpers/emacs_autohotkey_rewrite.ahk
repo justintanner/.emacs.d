@@ -63,21 +63,30 @@ global keys
 ;   }
 ; }
 
-^a::
-^b::
+^z::
 ;hey := keys["globalOverride"]["ctrl"]["j"][1]
 ProcessKey(A_ThisHotkey)
 Return
 
 ProcessKey(key)
 {
-  MsgBox %key%
+  modifier := ParseMod(key)
+  MsgBox %modifier%
   Return
 }
 
 ParseMod(key)
 {
-  ; Parse out modifiers
+  If InStr(key, "^")
+  {
+    Return "ctrl"
+  }
+  Else If InStr(key, "!")
+  {
+    Return "alt"
+  }
+
+  Return key
 }
 
 ParseKey(key)
