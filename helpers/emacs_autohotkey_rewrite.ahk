@@ -1,6 +1,7 @@
 #SingleInstance
 #Installkeybdhook
 #UseHook
+SetKeyDelay 0
 
 global keys
 := {"globalOverride"
@@ -63,19 +64,110 @@ global keys
 ;   }
 ; }
 
+global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
+global ctrlXActive := False
+global ctrlSpaceActive := False
+
 ^z::
 ;hey := keys["globalOverride"]["ctrl"]["j"][1]
 ProcessKey(A_ThisHotkey)
 Return
 
+; function processKey(mod, key)
+;   return function()
+;     emacsMap:exit()
+;     if ctrlXActive and mod == 'ctrl' then
+;       mod = 'ctrlXPrefix'
+;     end
+
+;     namespace = 'globalEmacs'
+    
+;     if keybindingExists('globalOverride', mod, key) then
+;       namespace = 'globalOverride'   
+;     elseif currentApp ~= nil and keybindingExists(currentApp, mod, key) then
+;       namespace = currentApp      
+;     end
+
+;     if keybindingExists(namespace, mod, key) then
+;       lookupKeyAndTranslate(namespace, mod, key)
+;     else
+;       tapKey(mod, key)
+;     end
+
+;     emacsMap:enter()
+;   end
+; end
+
 ProcessKey(key)
 {
-  modifier := ParseMod(key)
-  MsgBox %modifier%
+  If IsEmacs()
+  {
+    Send key
+    Return
+  }
+
+  modifiers := ParseMods(key)
+  letter := ParseLetter(key)
+
+  If (ctrlXActive && (modifiers == "ctrl"))
+  {
+    modidifers := "ctrlXPrefix"
+  }
+
+  namespace := "globalEmacs"
+    
+  If KeybindingExists("globalOverride", modifiers, key)
+  {
+    namespace := "globalOverride"   
+  }
+  Else If (currentApp && KeybindingExists(currentApp, modifiers, key))
+  {
+    namespace := currentApp      
+  }
+
+  ; LookupKeyAndTranslate(namespace, modifiers, key)
+
+  ;MsgBox %modifiers% + %letter%
   Return
 }
 
-ParseMod(key)
+LookupKeyAndTranslate(namespace, mod, key)
+{
+  config := keys[namespace][mod][key]
+  toMod := config[1]
+  toKey := config[2]
+  ctrlSpaceSensitive := config[3]
+  toMacro := config[4]
+
+  If (toMacro && (toMacro != ""))
+  {
+    %toMacro%()
+    OutputDebug "Executing a macro " + toMacro
+  }
+  Else
+  {
+    holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
+    ;; Send Key
+    ;; Debug statement
+  }
+
+  If !ctrlSpaceSensitive
+  {
+    ctrlSpaceActive := false
+  }
+
+  If toMacro = 'macroStartCtrlX'
+  {
+    ctrlXActive := false
+  }
+}
+
+KeybindingExists(namespace, mods, letter)
+{
+  Return (keys[namespace] && keys[namespace][mods] && keys[namespace][mods][letter])
+}
+
+ParseMods(key)
 {
   If InStr(key, "^")
   {
@@ -89,7 +181,38 @@ ParseMod(key)
   Return key
 }
 
-ParseKey(key)
+ParseLetter(key)
 {
-  ; Parse out modifiers
+  letter = ""
+  StringRight, letter, key, 1
+  Return letter
+}
+
+IsEmacs()
+{
+  For index, appName in appsWithNativeEmacsKeybindings
+  {
+    appNameLower := ""
+    StringLower, appNameLower, appName
+    If IsProgram(appNameLower)
+    {
+      Return True
+    }
+  }
+
+  Return False
+}
+
+IsProgram(classOrExec)
+{
+  IfWinActive, ahk_class %classOrExec%
+  {
+    Return True
+  }
+  IfWinActive, ahk_exe %classOrExec%
+  {
+    Return True
+  }
+
+  Return False
 }
