@@ -7,7 +7,10 @@ global keys
 := {"globalOverride"
   : {"ctrl"
     : {"t": ["", "", False, "macroAltTab"]
-      ,"j": ["alt", "tab", False, ""]}}}
+      ,"j": ["alt", "tab", False, ""] }}
+ , "globalEmacs"
+    : {"ctrl"
+      : {"z": ["", "", False, "MacroTest"] }}}
 
 ;       ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
 ;       ['j'] = {'cmd', 'space', false, nil}
@@ -69,34 +72,13 @@ global ctrlXActive := False
 global ctrlSpaceActive := False
 
 ^z::
-;hey := keys["globalOverride"]["ctrl"]["j"][1]
 ProcessKey(A_ThisHotkey)
 Return
 
-; function processKey(mod, key)
-;   return function()
-;     emacsMap:exit()
-;     if ctrlXActive and mod == 'ctrl' then
-;       mod = 'ctrlXPrefix'
-;     end
-
-;     namespace = 'globalEmacs'
-    
-;     if keybindingExists('globalOverride', mod, key) then
-;       namespace = 'globalOverride'   
-;     elseif currentApp ~= nil and keybindingExists(currentApp, mod, key) then
-;       namespace = currentApp      
-;     end
-
-;     if keybindingExists(namespace, mod, key) then
-;       lookupKeyAndTranslate(namespace, mod, key)
-;     else
-;       tapKey(mod, key)
-;     end
-
-;     emacsMap:enter()
-;   end
-; end
+MacroTest()
+{
+  MsgBox YoDawg
+}
 
 ProcessKey(key)
 {
@@ -109,6 +91,8 @@ ProcessKey(key)
   modifiers := ParseMods(key)
   letter := ParseLetter(key)
 
+  currentApp := CurrentApp()
+
   If (ctrlXActive && (modifiers == "ctrl"))
   {
     modidifers := "ctrlXPrefix"
@@ -116,39 +100,49 @@ ProcessKey(key)
 
   namespace := "globalEmacs"
     
-  If KeybindingExists("globalOverride", modifiers, key)
+  If KeybindingExists("globalOverride", modifiers, letter)
   {
     namespace := "globalOverride"   
   }
-  Else If (currentApp && KeybindingExists(currentApp, modifiers, key))
+  Else If (currentApp && KeybindingExists(currentApp, modifiers, letter))
   {
     namespace := currentApp      
   }
 
-  ; LookupKeyAndTranslate(namespace, modifiers, key)
+  ;MsgBox %currentApp% + %namespace% + %modifiers% + %letter%
 
-  ;MsgBox %modifiers% + %letter%
+  If KeybindingExists(namespace, modifiers, letter)
+  {
+    LookupKeyAndTranslate(namespace, modifiers, letter)
+  }
+  Else
+  {
+    Send key
+  }
+
   Return
 }
 
 LookupKeyAndTranslate(namespace, mod, key)
 {
   config := keys[namespace][mod][key]
-  toMod := config[1]
+  toMod := ShortModifiers(config[1])
   toKey := config[2]
   ctrlSpaceSensitive := config[3]
   toMacro := config[4]
 
   If (toMacro && (toMacro != ""))
   {
+    ; MsgBox Executing a macro: %toMacro%
     %toMacro%()
-    OutputDebug "Executing a macro " + toMacro
+
   }
   Else
   {
+    ; MsgBox Sending: %toMod%%toKey%
     holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
-    ;; Send Key
-    ;; Debug statement
+    ; TODO: Move create a function that deals with shift
+    Send %toMod%%toKey%
   }
 
   If !ctrlSpaceSensitive
@@ -156,6 +150,7 @@ LookupKeyAndTranslate(namespace, mod, key)
     ctrlSpaceActive := false
   }
 
+  ; Does this work? (need parens?)
   If toMacro = 'macroStartCtrlX'
   {
     ctrlXActive := false
@@ -183,17 +178,28 @@ ParseMods(key)
 
 ParseLetter(key)
 {
-  letter = ""
   StringRight, letter, key, 1
   Return letter
+}
+
+ShortModifiers(longModifiers)
+{
+  If (longModifiers = "ctrl")
+  {
+    Return "^"
+  }
+  Else If (longModifiers = "alt")
+  {
+    Return "!"
+  }
 }
 
 IsEmacs()
 {
   For index, appName in appsWithNativeEmacsKeybindings
   {
-    appNameLower := ""
     StringLower, appNameLower, appName
+
     If IsProgram(appNameLower)
     {
       Return True
@@ -209,10 +215,19 @@ IsProgram(classOrExec)
   {
     Return True
   }
+
   IfWinActive, ahk_exe %classOrExec%
   {
     Return True
   }
 
   Return False
+}
+
+CurrentApp()
+{
+  WinGet, exeName, ProcessName, A
+  StringLower, exeName, exeName
+
+  Return exeName
 }
