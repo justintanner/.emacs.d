@@ -6,11 +6,47 @@ SetKeyDelay 0
 global keys
 := {"globalOverride"
   : {"ctrl"
-    : {"t": ["", "", False, "macroAltTab"]
-      ,"j": ["alt", "tab", False, ""] }}
+    : {"t": ["!{Esc}", False, ""]
+      ,"j": ["{Ctrl up}{LWin}", False, ""] }}
  , "globalEmacs"
     : {"ctrl"
-      : {"z": ["", "", False, "MacroTest"] }}}
+      : {"a": ["{Home}", False, ""]
+        ,"b": ["{Left}", False, ""]
+        ,"d": ["{Del}", False, ""]
+        ,"e": ["{End}", True, ""]
+        ,"f": ["{Right}", True, ""]
+        ,"g": ["{Escape}", False, ""]
+        ,"k": ["", False, "MacroKillLine"]
+        ,"n": ["{Down}", True, ""]
+        ,"o": ["{Enter}", False, ""]
+        ,"p": ["{Up}", True, ""]
+        ,"r": ["^f", False, ""]
+        ,"s": ["^f", False, ""]
+        ,"v": ["{PgDown}", True, ""]
+        ,"w": ["^x", False, ""]
+        ,"x": ["", False, "MacroStartCtrlX"]
+        ,"y": ["^v", False, ""]
+        ,"Space": ["", False, "MacroCtrlSpace"] }}}
+
+
+;       ['d'] = {'ctrl', 'd', false, nil},
+;       ['e'] = {'ctrl', 'e', true, nil},
+;       ['f'] = {nil, 'right', true, nil},
+;       ['g'] = {nil, 'escape', false, nil},      
+;       ['k'] = {'ctrl', 'k', false, nil},      
+;       ['n'] = {nil, 'down', true, nil},
+;       ['o'] = {nil, 'return', false, nil},
+;       ['p'] = {nil, 'up', true, nil},
+;       ['r'] = {'cmd', 'f', false, nil},      
+;       ['s'] = {'cmd', 'f', false, nil},
+;       ['v'] = {nil, 'pagedown', true, nil},
+;       ['w'] = {'cmd', 'x', false, nil},
+;       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
+;       ['y'] = {'cmd', 'v', false, nil},                        
+;       ['space'] = {nil, nil, true, 'macroCtrlSpace'},
+
+
+
 
 ;       ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
 ;       ['j'] = {'cmd', 'space', false, nil}
@@ -71,23 +107,66 @@ global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu6
 global ctrlXActive := False
 global ctrlSpaceActive := False
 
+^a::
+^b::
+^c::
+^d::
+^e::
+^f::
+^g::
+^h::
+^i::
+^j::
+^k::
+^l::
+^m::
+^n::
+^o::
+^p::
+^q::
+^r::
+^s::
+^t::
+^u::
+^v::
+^w::
+^x::
+^y::
 ^z::
+^Space::
 ProcessKey(A_ThisHotkey)
 Return
 
-MacroTest()
+MacroCtrlSpace()
 {
-  MsgBox YoDawg
+  ctrlSpaceActive := True
+  Send {Shift}
 }
+
+MacroStartCtrlX()
+{
+  ctrlXActive := True
+  SetTimer, ClearCtrlX, -750
+}
+
+ClearCtrlX()
+{
+  ctrlXActive := False
+}
+
+MacroKillLine()
+{
+  Send {ShiftDown}{END}{ShiftUp}
+  Sleep 50
+  Send ^x
+  ; Can't detect an empty line!... hmm
+  ;Send {Del}
+  ctrlSpaceActive := False
+}
+
 
 ProcessKey(key)
 {
-  If IsEmacs()
-  {
-    Send key
-    Return
-  }
-
   modifiers := ParseMods(key)
   letter := ParseLetter(key)
 
@@ -109,6 +188,12 @@ ProcessKey(key)
     namespace := currentApp      
   }
 
+  If IsEmacs() && namespace != "globalOverride"
+  {
+    Send %key%
+    Return
+  }
+
   ;MsgBox %currentApp% + %namespace% + %modifiers% + %letter%
 
   If KeybindingExists(namespace, modifiers, letter)
@@ -123,37 +208,33 @@ ProcessKey(key)
   Return
 }
 
-LookupKeyAndTranslate(namespace, mod, key)
+LookupKeyAndTranslate(namespace, modifiers, letter)
 {
-  config := keys[namespace][mod][key]
-  toMod := ShortModifiers(config[1])
-  toKey := config[2]
-  ctrlSpaceSensitive := config[3]
-  toMacro := config[4]
+  config := keys[namespace][modifiers][letter]
+  toKeys := config[1]
+  ctrlSpaceSensitive := config[2]
+  toMacro := config[3]
 
   If (toMacro && (toMacro != ""))
   {
-    ; MsgBox Executing a macro: %toMacro%
+    MsgBox Executing a macro: %toMacro%
     %toMacro%()
-
   }
   Else
   {
-    ; MsgBox Sending: %toMod%%toKey%
-    holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
-    ; TODO: Move create a function that deals with shift
-    Send %toMod%%toKey%
+    ;MsgBox Sending: %toModifiers%%toLetter%
+    toKeys := AddShift(toKeys, ctrlSpaceSensitive)
+    Send %toKeys%
   }
 
   If !ctrlSpaceSensitive
   {
-    ctrlSpaceActive := false
+    ctrlSpaceActive := False
   }
 
-  ; Does this work? (need parens?)
   If toMacro = 'macroStartCtrlX'
   {
-    ctrlXActive := false
+    ctrlXActive := False
   }
 }
 
@@ -182,23 +263,39 @@ ParseLetter(key)
   Return letter
 }
 
-ShortModifiers(longModifiers)
+ShortModifiers(longModifiers, ctrlSpaceSensitive)
 {
+  modifiers := ""
+
   If (longModifiers = "ctrl")
   {
-    Return "^"
+    modifiers := "^"
   }
   Else If (longModifiers = "alt")
   {
-    Return "!"
+    modifiers := "!"
   }
+
+  Return AddShift(modifiers, ctrlSpaceSensitive)
+}
+
+AddShift(modifiers, ctrlSpaceSensitive)
+{
+  holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
+
+  If (holdShift)
+  {
+    Return "+" . modifiers
+  }
+
+  Return modifiers
 }
 
 IsEmacs()
 {
   For index, appName in appsWithNativeEmacsKeybindings
   {
-    StringLower, appNameLower, appName
+    StringLower appNameLower, appName
 
     If IsProgram(appNameLower)
     {
