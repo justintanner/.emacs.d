@@ -26,7 +26,7 @@ global keys
         ,"w": ["^x", False, ""]
         ,"x": ["", False, "MacroStartCtrlX"]
         ,"y": ["^v", False, ""]
-        ,"Space": ["", False, "MacroCtrlSpace"] }}}
+        ,"space": ["", True, "MacroCtrlSpace"] }}}
 
 
 ;       ['d'] = {'ctrl', 'd', false, nil},
@@ -159,9 +159,7 @@ MacroKillLine()
   Send {ShiftDown}{END}{ShiftUp}
   Sleep 50
   Send ^x
-  ; Can't detect an empty line!... hmm
-  ;Send {Del}
-  ctrlSpaceActive := False
+  Send {Del}
 }
 
 
@@ -190,11 +188,9 @@ ProcessKey(key)
 
   If IsEmacs() && namespace != "globalOverride"
   {
-    Send %key%
+    Passthrough(key)
     Return
   }
-
-  ;MsgBox %currentApp% + %namespace% + %modifiers% + %letter%
 
   If KeybindingExists(namespace, modifiers, letter)
   {
@@ -202,7 +198,7 @@ ProcessKey(key)
   }
   Else
   {
-    Send key
+    Passthrough(key)
   }
 
   Return
@@ -217,7 +213,7 @@ LookupKeyAndTranslate(namespace, modifiers, letter)
 
   If (toMacro && (toMacro != ""))
   {
-    MsgBox Executing a macro: %toMacro%
+    ; MsgBox Executing a macro: %toMacro%
     %toMacro%()
   }
   Else
@@ -245,7 +241,7 @@ KeybindingExists(namespace, mods, letter)
 
 ParseMods(key)
 {
-  If InStr(key, "^")
+  If InStr(key, "^") || InStr(key, "$^")
   {
     Return "ctrl"
   }
@@ -259,6 +255,11 @@ ParseMods(key)
 
 ParseLetter(key)
 {
+  If InStr(key, "Space")
+  {
+    Return "space"
+  }
+
   StringRight, letter, key, 1
   Return letter
 }
@@ -289,6 +290,18 @@ AddShift(modifiers, ctrlSpaceSensitive)
   }
 
   Return modifiers
+}
+
+Passthrough(key)
+{
+    If InStr(key, "Space")
+    {
+      Send ^{Space}
+    }
+    Else
+    {
+      Send %key%
+    }
 }
 
 IsEmacs()
