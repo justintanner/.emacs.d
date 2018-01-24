@@ -26,82 +26,30 @@ global keys
         ,"w": ["^x", False, ""]
         ,"x": ["", False, "MacroStartCtrlX"]
         ,"y": ["^v", False, ""]
-        ,"space": ["", True, "MacroCtrlSpace"] }}}
-
-
-;       ['d'] = {'ctrl', 'd', false, nil},
-;       ['e'] = {'ctrl', 'e', true, nil},
-;       ['f'] = {nil, 'right', true, nil},
-;       ['g'] = {nil, 'escape', false, nil},      
-;       ['k'] = {'ctrl', 'k', false, nil},      
-;       ['n'] = {nil, 'down', true, nil},
-;       ['o'] = {nil, 'return', false, nil},
-;       ['p'] = {nil, 'up', true, nil},
-;       ['r'] = {'cmd', 'f', false, nil},      
-;       ['s'] = {'cmd', 'f', false, nil},
-;       ['v'] = {nil, 'pagedown', true, nil},
-;       ['w'] = {'cmd', 'x', false, nil},
-;       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
-;       ['y'] = {'cmd', 'v', false, nil},                        
-;       ['space'] = {nil, nil, true, 'macroCtrlSpace'},
-
-
-
-
-;       ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
-;       ['j'] = {'cmd', 'space', false, nil}
-;     }
-;   },
-;   ['globalEmacs'] = {
-;     ['ctrl'] = {
-;       ['a'] = {'ctrl', 'a', true, nil},
-;       ['b'] = {nil, 'left', true, nil},
-;       ['d'] = {'ctrl', 'd', false, nil},
-;       ['e'] = {'ctrl', 'e', true, nil},
-;       ['f'] = {nil, 'right', true, nil},
-;       ['g'] = {nil, 'escape', false, nil},      
-;       ['k'] = {'ctrl', 'k', false, nil},      
-;       ['n'] = {nil, 'down', true, nil},
-;       ['o'] = {nil, 'return', false, nil},
-;       ['p'] = {nil, 'up', true, nil},
-;       ['r'] = {'cmd', 'f', false, nil},      
-;       ['s'] = {'cmd', 'f', false, nil},
-;       ['v'] = {nil, 'pagedown', true, nil},
-;       ['w'] = {'cmd', 'x', false, nil},
-;       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
-;       ['y'] = {'cmd', 'v', false, nil},                        
-;       ['space'] = {nil, nil, true, 'macroCtrlSpace'},
-;     },
-;     ['ctrlXPrefix'] = {
-;       ['f'] = {'cmd', 'o', false, nil},
-;       ['g'] = {'cmd', 'f', false, nil},      
-;       ['h'] = {'cmd', 'a', false, nil},
-;       ['k'] = {'cmd', 'w', false, nil},
-;       ['r'] = {'cmd', 'r', false, nil},      
-;       ['s'] = {'cmd', 's', false, nil},
-;       ['u'] = {'cmd', 'z', false, nil},
-;       ['w'] = {{'shift', 'cmd'}, 's', false, nil},      
-;     },
-;     ['alt'] = {
-;       ['f'] = {'alt', 'f', true, nil},
-;       ['n'] = {'cmd', 'n', false, nil},
-;       ['v'] = {nil, 'pageup', true, nil},
-;       ['w'] = {'cmd', 'c', false, nil},
-;       ['y'] = {'cmd', 'v', false, nil},            
-;     },
-;     ['altShift'] = {
-;       ['.'] = {nil, 'end', false, nil},
-;       [','] = {nil, 'home', false, nil},      
-;     },
-;   },
-;   ['Google Chrome'] = {
-;     ['ctrlXPrefix'] = {
-;       ['b'] = {'cmd', 'b', false, nil},
-;       ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
-;       ['f'] = {'cmd', 'l', false, nil},
-;     }
-;   }
-; }
+        ,"space": ["", True, "MacroCtrlSpace"] }
+    , "ctrlXPrefix"
+      : {"f": ["^o", False, ""]
+        ,"g": ["^f", False, ""]
+        ,"h": ["^a", False, ""]
+        ,"k": ["!{F4}", False, ""]
+        ,"r": ["{F5}", False, ""]
+        ,"s": ["^s", False, ""]
+        ,"u": ["^z", False, ""]
+        ,"w": ["{F12}", False, ""] }
+    , "alt"
+      : {"f": ["^{Right}", True, ""]
+        ,"n": ["^n", False, ""]
+        ,"v": ["{PgUp}", True, ""]
+        ,"w": ["^c", False, ""]
+        ,"y": ["^v", False, ""] }
+   , "altShift"
+      : {".": ["^{End}", True, ""]
+       , ",": ["^{Home}", True, ""] }}
+ , "chrome.exe"
+   : {"ctrlXPrefix"
+     : {"b": ["^o", False, ""]
+      , "d": ["^+j", False, ""]
+      , "f": ["^l", False, ""] }}}
 
 global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
 global ctrlXActive := False
@@ -133,7 +81,35 @@ global ctrlSpaceActive := False
 ^x::
 ^y::
 ^z::
+!a::
+!b::
+!c::
+!d::
+!e::
+!f::
+!g::
+!h::
+!i::
+!j::
+!k::
+!l::
+!m::
+!n::
+!o::
+!p::
+!q::
+!r::
+!s::
+!t::
+!u::
+!v::
+!w::
+!x::
+!y::
+!z::
 ^Space::
+!+,::
+!+.::
 ProcessKey(A_ThisHotkey)
 Return
 
@@ -162,18 +138,12 @@ MacroKillLine()
   Send {Del}
 }
 
-
 ProcessKey(key)
 {
   modifiers := ParseMods(key)
   letter := ParseLetter(key)
 
   currentApp := CurrentApp()
-
-  If (ctrlXActive && (modifiers == "ctrl"))
-  {
-    modidifers := "ctrlXPrefix"
-  }
 
   namespace := "globalEmacs"
     
@@ -192,6 +162,7 @@ ProcessKey(key)
     Return
   }
 
+  ;MsgBox %namespace%%modifiers%%letter%
   If KeybindingExists(namespace, modifiers, letter)
   {
     LookupKeyAndTranslate(namespace, modifiers, letter)
@@ -204,10 +175,10 @@ ProcessKey(key)
   Return
 }
 
-LookupKeyAndTranslate(namespace, modifiers, letter)
+LookupKeyAndTranslate(namespace, modifiers, key)
 {
-  config := keys[namespace][modifiers][letter]
-  toKeys := config[1]
+  config := keys[namespace][modifiers][key]
+  toKey := config[1]
   ctrlSpaceSensitive := config[2]
   toMacro := config[3]
 
@@ -218,9 +189,9 @@ LookupKeyAndTranslate(namespace, modifiers, letter)
   }
   Else
   {
-    ;MsgBox Sending: %toModifiers%%toLetter%
-    toKeys := AddShift(toKeys, ctrlSpaceSensitive)
-    Send %toKeys%
+    toKey := AddShift(toKey, ctrlSpaceSensitive)
+    ;MsgBox Sending: %toModifiers%%toKey%
+    Send %toKey%
   }
 
   If !ctrlSpaceSensitive
@@ -228,7 +199,7 @@ LookupKeyAndTranslate(namespace, modifiers, letter)
     ctrlSpaceActive := False
   }
 
-  If toMacro = 'macroStartCtrlX'
+  If toMacro = 'MacroStartCtrlX'
   {
     ctrlXActive := False
   }
@@ -241,9 +212,20 @@ KeybindingExists(namespace, mods, letter)
 
 ParseMods(key)
 {
+  If InStr(key, "!+")
+  {
+    Return "altShift"
+  }
   If InStr(key, "^") || InStr(key, "$^")
   {
-    Return "ctrl"
+    If (ctrlXActive)
+    {
+      Return "ctrlXPrefix"
+    }
+    Else
+    {
+      Return "ctrl"
+    }
   }
   Else If InStr(key, "!")
   {
