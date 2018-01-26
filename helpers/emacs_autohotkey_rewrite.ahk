@@ -138,38 +138,25 @@ MacroKillLine()
   Send {Del}
 }
 
-ProcessKey(key)
+ProcessKey(modAndKey)
 {
-  modifiers := ParseMods(key)
-  letter := ParseLetter(key)
+  mods := ParseMods(modAndKey)
+  key := ParseKey(modAndKey)
+  namespace := CurrentNamespace(mods, key)
 
-  currentApp := CurrentApp()
-
-  namespace := "globalEmacs"
-    
-  If KeybindingExists("globalOverride", modifiers, letter)
+  If (IsEmacs() && namespace != "globalOverride")
   {
-    namespace := "globalOverride"   
-  }
-  Else If (currentApp && KeybindingExists(currentApp, modifiers, letter))
-  {
-    namespace := currentApp      
-  }
-
-  If IsEmacs() && namespace != "globalOverride"
-  {
-    Passthrough(key)
+    Passthrough(modAndKey)
     Return
   }
 
-  ;MsgBox %namespace%%modifiers%%letter%
-  If KeybindingExists(namespace, modifiers, letter)
+  If KeybindingExists(namespace, mods, key)
   {
-    LookupKeyAndTranslate(namespace, modifiers, letter)
+    LookupKeyAndTranslate(namespace, mods, key)
   }
   Else
   {
-    Passthrough(key)
+    Passthrough(modAndKey)
   }
 
   Return
@@ -190,7 +177,7 @@ LookupKeyAndTranslate(namespace, modifiers, key)
   Else
   {
     toKey := AddShift(toKey, ctrlSpaceSensitive)
-    ;MsgBox Sending: %toModifiers%%toKey%
+    ; MsgBox Sending: %toModifiers%%toKey%
     Send %toKey%
   }
 
@@ -199,7 +186,7 @@ LookupKeyAndTranslate(namespace, modifiers, key)
     ctrlSpaceActive := False
   }
 
-  If toMacro = 'MacroStartCtrlX'
+  If (toMacro != "MacroStartCtrlX")
   {
     ctrlXActive := False
   }
@@ -216,7 +203,7 @@ ParseMods(key)
   {
     Return "altShift"
   }
-  If InStr(key, "^") || InStr(key, "$^")
+  Else If InStr(key, "^")
   {
     If (ctrlXActive)
     {
@@ -235,7 +222,7 @@ ParseMods(key)
   Return key
 }
 
-ParseLetter(key)
+ParseKey(key)
 {
   If InStr(key, "Space")
   {
@@ -244,22 +231,6 @@ ParseLetter(key)
 
   StringRight, letter, key, 1
   Return letter
-}
-
-ShortModifiers(longModifiers, ctrlSpaceSensitive)
-{
-  modifiers := ""
-
-  If (longModifiers = "ctrl")
-  {
-    modifiers := "^"
-  }
-  Else If (longModifiers = "alt")
-  {
-    modifiers := "!"
-  }
-
-  Return AddShift(modifiers, ctrlSpaceSensitive)
 }
 
 AddShift(modifiers, ctrlSpaceSensitive)
@@ -314,6 +285,22 @@ IsProgram(classOrExec)
   }
 
   Return False
+}
+
+CurrentNamespace(mods, key)
+{
+  currentApp := CurrentApp()
+    
+  If KeybindingExists("globalOverride", mods, key)
+  {
+    Return "globalOverride"   
+  }
+  Else If (currentApp && KeybindingExists(currentApp, mods, key))
+  {
+    Return currentApp      
+  }
+
+  Return "globalEmacs"
 }
 
 CurrentApp()
