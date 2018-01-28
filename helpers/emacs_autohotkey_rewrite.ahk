@@ -1,3 +1,35 @@
+; Emacs AutoHotkey Script
+; Author: Justin Tanner
+; Email: work@jwtanner.com
+; License: MIT
+
+; What does this script do?
+; Allows you to have *most* Emacs keybindings in other apps.
+; Ctrl-Space space be used to mark and cut text just like Emacs. Also enables Emacs prefix keys such as Ctrl-xs (save).
+
+; Installation
+; 1) Download and Install AutoHotkey https://autohotkey.com/
+; 2) Launch emacs_autohotkey.ahk
+; 3) Add emacs_authotkey to your Windows startup script.
+
+; Customization
+; To customize the keybindings modfiy the global "keys" below. AutoHotkey is a little fussy about whitespace, so please
+; follow the syntax of the existing data structure exactly without adding whitespace or newlines.
+
+; Namespaces
+; This script uses namespaces to send different commands to different apps.
+; "globalOverride" contains keybindings that override all other apps (including Emacs)
+; "globalEmacs" brings Emacs style keybindings to all other apps
+; "chrom.exe" (and other EXE names) specifies app specific keybindings taking precendence over "globalEmacs"
+
+; Syntax Example
+; "globalEmacs" : { "ctrl" { "a": ["{Home}", False, ""] } }
+; This keybinding states, for all apps other than Emacs map Ctrl+a to Home and maintain any mark previously set while editing text.
+
+; "globalEmacs" : { "ctrl" { "k": ["", False, "MacroKillLine"] } }
+; This keybinding states, for all apps other than Emacs map Ctrl+k to a macro called "MacroKillLine" (defined in a function) and unset
+; any mark previously set.
+
 #SingleInstance
 #Installkeybdhook
 #UseHook
@@ -10,8 +42,8 @@ global keys
       ,"j": ["{Ctrl up}{LWin}", False, ""] }}
  , "globalEmacs"
     : {"ctrl"
-      : {"a": ["{Home}", False, ""]
-        ,"b": ["{Left}", False, ""]
+      : {"a": ["{Home}", True, ""]
+        ,"b": ["{Left}", True, ""]
         ,"d": ["{Del}", False, ""]
         ,"e": ["{End}", True, ""]
         ,"f": ["{Right}", True, ""]
@@ -110,61 +142,36 @@ global ctrlSpaceActive := False
 ^Space::
 !+,::
 !+.::
-ProcessKey(A_ThisHotkey)
+ProcessKeystrokes(A_ThisHotkey)
 Return
 
-MacroCtrlSpace()
+ProcessKeystrokes(keystrokes)
 {
-  ctrlSpaceActive := True
-  Send {Shift}
-}
-
-MacroStartCtrlX()
-{
-  ctrlXActive := True
-  SetTimer, ClearCtrlX, -750
-}
-
-ClearCtrlX()
-{
-  ctrlXActive := False
-}
-
-MacroKillLine()
-{
-  Send {ShiftDown}{END}{ShiftUp}
-  Sleep 50
-  Send ^x
-  Send {Del}
-}
-
-ProcessKey(modAndKey)
-{
-  mods := ParseMods(modAndKey)
-  key := ParseKey(modAndKey)
+  mods := ParseMods(keystrokes)
+  key := ParseKey(keystrokes)
   namespace := CurrentNamespace(mods, key)
 
   If (IsEmacs() && namespace != "globalOverride")
   {
-    Passthrough(modAndKey)
+    Passthrough(keystrokes)
     Return
   }
 
   If KeybindingExists(namespace, mods, key)
   {
-    LookupKeyAndTranslate(namespace, mods, key)
+    LookupAndTranslate(namespace, mods, key)
   }
   Else
   {
-    Passthrough(modAndKey)
+    Passthrough(keystrokes)
   }
 
   Return
 }
 
-LookupKeyAndTranslate(namespace, modifiers, key)
+LookupAndTranslate(namespace, mods, key)
 {
-  config := keys[namespace][modifiers][key]
+  config := keys[namespace][mods][key]
   toKey := config[1]
   ctrlSpaceSensitive := config[2]
   toMacro := config[3]
@@ -177,7 +184,7 @@ LookupKeyAndTranslate(namespace, modifiers, key)
   Else
   {
     toKey := AddShift(toKey, ctrlSpaceSensitive)
-    ; MsgBox Sending: %toModifiers%%toKey%
+    ; MsgBox Sending: %toMods%%toKey%
     Send %toKey%
   }
 
@@ -192,18 +199,18 @@ LookupKeyAndTranslate(namespace, modifiers, key)
   }
 }
 
-KeybindingExists(namespace, mods, letter)
+KeybindingExists(namespace, mods, key)
 {
-  Return (keys[namespace] && keys[namespace][mods] && keys[namespace][mods][letter])
+  Return (keys[namespace] && keys[namespace][mods] && keys[namespace][mods][key])
 }
 
-ParseMods(key)
+ParseMods(keystrokes)
 {
-  If InStr(key, "!+")
+  If InStr(keystrokes, "!+")
   {
     Return "altShift"
   }
-  Else If InStr(key, "^")
+  Else If InStr(keystrokes, "^")
   {
     If (ctrlXActive)
     {
@@ -214,46 +221,46 @@ ParseMods(key)
       Return "ctrl"
     }
   }
-  Else If InStr(key, "!")
+  Else If InStr(keystrokes, "!")
   {
     Return "alt"
   }
 
-  Return key
+  Return keystrokes
 }
 
-ParseKey(key)
+ParseKey(keystrokes)
 {
-  If InStr(key, "Space")
+  If InStr(keystrokes, "Space")
   {
     Return "space"
   }
 
-  StringRight, letter, key, 1
+  StringRight, letter, keystrokes, 1
   Return letter
 }
 
-AddShift(modifiers, ctrlSpaceSensitive)
+AddShift(mods, ctrlSpaceSensitive)
 {
   holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
 
   If (holdShift)
   {
-    Return "+" . modifiers
+    Return "+" . mods
   }
 
-  Return modifiers
+  Return mods
 }
 
-Passthrough(key)
+Passthrough(keystrokes)
 {
-    If InStr(key, "Space")
+    If InStr(keystrokes, "Space")
     {
       Send ^{Space}
     }
     Else
     {
-      Send %key%
+      Send %keystrokes%
     }
 }
 
@@ -309,4 +316,29 @@ CurrentApp()
   StringLower, exeName, exeName
 
   Return exeName
+}
+
+MacroCtrlSpace()
+{
+  ctrlSpaceActive := True
+  Send {Shift}
+}
+
+MacroStartCtrlX()
+{
+  ctrlXActive := True
+  SetTimer, ClearCtrlX, -750
+}
+
+ClearCtrlX()
+{
+  ctrlXActive := False
+}
+
+MacroKillLine()
+{
+  Send {ShiftDown}{END}{ShiftUp}
+  Sleep 50
+  Send ^x
+  Send {Del}
 }
