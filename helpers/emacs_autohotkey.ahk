@@ -1,373 +1,338 @@
+; Emacs AutoHotkey Script
+; Author: Justin Tanner
+; Email: work@jwtanner.com
+; License: MIT
+
+; What does this script do?
+; Allows you to have *most* Emacs keybindings in other apps.
+; Ctrl-Space space be used to mark and cut text just like Emacs. Also enables Emacs prefix keys such as Ctrl-xs (save).
+
+; Installation
+; 1) Download and Install AutoHotkey https://autohotkey.com/
+; 2) Launch emacs_autohotkey.ahk
+; 3) Add emacs_authotkey to your Windows startup script.
+
+; Customization
+; To customize the keybindings modfiy the global "keys" below. AutoHotkey is a little fussy about whitespace, so please
+; follow the syntax of the existing data structure exactly without adding whitespace or newlines.
+
+; Namespaces
+; This script uses namespaces to send different commands to different apps.
+; "globalOverride" contains keybindings that override all other apps (including Emacs)
+; "globalEmacs" brings Emacs style keybindings to all other apps
+; "chrom.exe" (and other EXE names) specifies app specific keybindings taking precendence over "globalEmacs"
+
+; Syntax Example
+; "globalEmacs" : { "ctrl" { "a": ["{Home}", False, ""] } }
+; This keybinding states, for all apps other than Emacs map Ctrl+a to Home and maintain any mark previously set while editing text.
+
+; "globalEmacs" : { "ctrl" { "k": ["", False, "MacroKillLine"] } }
+; This keybinding states, for all apps other than Emacs map Ctrl+k to a macro called "MacroKillLine" (defined in a function) and unset
+; any mark previously set.
+
 #SingleInstance
 #Installkeybdhook
 #UseHook
 SetKeyDelay 0
 
-global activeChords := {}
-global markActive := False
+global keys
+:= {"globalOverride"
+  : {"ctrl"
+    : {"t": ["!{Esc}", False, ""]
+      ,"j": ["{Ctrl up}{LWin}", False, ""] }}
+ , "globalEmacs"
+    : {"ctrl"
+      : {"a": ["{Home}", True, ""]
+        ,"b": ["{Left}", True, ""]
+        ,"d": ["{Del}", False, ""]
+        ,"e": ["{End}", True, ""]
+        ,"f": ["{Right}", True, ""]
+        ,"g": ["{Escape}", False, ""]
+        ,"k": ["", False, "MacroKillLine"]
+        ,"n": ["{Down}", True, ""]
+        ,"o": ["{Enter}", False, ""]
+        ,"p": ["{Up}", True, ""]
+        ,"r": ["^f", False, ""]
+        ,"s": ["^f", False, ""]
+        ,"v": ["{PgDown}", True, ""]
+        ,"w": ["^x", False, ""]
+        ,"x": ["", False, "MacroStartCtrlX"]
+        ,"y": ["^v", False, ""]
+        ,"space": ["", True, "MacroCtrlSpace"] }
+    , "ctrlXPrefix"
+      : {"f": ["^o", False, ""]
+        ,"g": ["^f", False, ""]
+        ,"h": ["^a", False, ""]
+        ,"k": ["!{F4}", False, ""]
+        ,"r": ["{F5}", False, ""]
+        ,"s": ["^s", False, ""]
+        ,"u": ["^z", False, ""]
+        ,"w": ["{F12}", False, ""] }
+    , "alt"
+      : {"f": ["^{Right}", True, ""]
+        ,"n": ["^n", False, ""]
+        ,"v": ["{PgUp}", True, ""]
+        ,"w": ["^c", False, ""]
+        ,"y": ["^v", False, ""] }
+   , "altShift"
+      : {".": ["^{End}", True, ""]
+       , ",": ["^{Home}", True, ""] }}
+ , "chrome.exe"
+   : {"ctrlXPrefix"
+     : {"b": ["^o", False, ""]
+      , "d": ["^+j", False, ""]
+      , "f": ["^l", False, ""] }}}
+
+global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
+global ctrlXActive := False
+global ctrlSpaceActive := False
 
 ^a::
-If !(Rule("MacroStartOfLine", "", ""))
-  SendDefault()
-Return
-
 ^b::
-If !(Rule("^o", "x", "chrome.exe") || Rule("MacroBackChar","", ""))
-  SendDefault()
-return
-
 ^c::
-If !(Rule("^c", "", "ConEmu64.exe"))
-  Send %A_ThisHotkey%
-StartChord("c")
-return
-
 ^d::
-If !(Rule("^+j", "x", "chrome.exe") || Rule("MacroDeleteChar", "", ""))
-  SendDefault()
-Return
-
 ^e::
-If !(Rule("MacroEndOfLine", "", ""))
-  SendDefault()
-Return
-
 ^f::
-If !(Rule("^l", "x", "chrome.exe") || Rule("^o", "x", "") || Rule("MacroForwardChar", "", ""))
-  SendDefault()
-Return
-
 ^g::
-; Evernote is doing weird things on Escape, I don't know a way to unselect all text.
-If !(Rule("^f", "x", "") || Rule("", "", "Evernote.exe") || Rule("MacroEscape", "", ""))
-  SendDefault()
-Return
-
 ^h::
-If !(Rule("^a", "x", ""))
-  SendDefault()
-Return
-
 ^i::
-If (IsEmacs())
-  SendDefault()
-Return
-
 ^j::
-Send, {Ctrl up}{LWin}
-Return
-
 ^k::
-If !(Rule("MacroKillLine", "", ""))
-  SendDefault()
-Return
-
 ^l::
-SendDefault()
-Return
-
 ^m::
-SendDefault()
-Return
-
 ^n::
-If !(Rule("MacroNextLine", "", ""))
-  SendDefault()
-Return
-
 ^o::
-; This is not exactly open line
-If !(Rule("MacroEnter", "", ""))
-  SendDefault()
-Return
-
 ^p::
-If !(Rule("MacroPreviousLine", "", ""))
-  SendDefault()
-Return
-
 ^q::
-if (IsEmacs())
-  SendDefault()
-Return
-
 ^r::
-If !(Rule("{F5}", "x", "") || Rule("MacroFind", "", ""))
-  SendDefault()
-Return
-
 ^s::
-If !(Rule("^s", "x", "") || Rule("MacroFind", "", ""))
-  SendDefault()
-Return
-
 ^t::
-Send !{Esc}
-Return
-
 ^u::
-If !(Rule("^z", "x", ""))
-  SendDefault()
-Return
-
 ^v::
-If !(Rule("MacroPageDown", "", ""))
-  SendDefault()
-Return
-
 ^w::
-If !(Rule("MacroCopyCut", "", "chrome.exe") || Rule("MacroCut", "", ""))
-  SendDefault()
-Return
-
 ^x::
-StartChord("x")
-If (IsEmacs())
-  Send %A_ThisHotkey%
-Return
-
 ^y::
-If !(Rule("MacroPaste", "", ""))
-  SendDefault()
-Return
-
-;; ALT Keys
+^z::
 !a::
-Return
-
 !b::
-Return
-
 !c::
-Return
-
 !d::
-Return
-
 !e::
-Return
-
 !f::
-If !(Rule("MacroJumpWordRight", "", ""))
-  SendDefault()
-Return
-
 !g::
-If (IsEmacs())
-  SendDefault()
-Return
-
 !h::
-Return
-
 !i::
-Return
-
 !j::
-Return
-
 !k::
-Return
-
 !l::
-Return
-
 !m::
-If !(Rule("MacroCopyCut", "", "chrome") || Rule("MacroCopy", "", ""))
-  SendDefault()
-Return
-
 !n::
-If !(Rule("^t", "", "chrome.exe") || Rule("MacroNew", "", ""))
-  SendDefault()
-Return
-
 !o::
-Return
-
 !p::
-If (IsEmacs())
-  SendDefault()
-Return
-
 !q::
-Return
-
 !r::
-Return
-
 !s::
-Return
-
 !t::
-Return
-
 !u::
-Return
-
 !v::
-If !(Rule("MacroPageUp", "", ""))
-  SendDefault()
-Return
-
 !w::
-If !(Rule("MacroCopy", "", ""))
-  SendDefault()
-Return
-
 !x::
-Return
-
 !y::
-If !(Rule("MacroPaste", "", ""))
-  SendDefault()
-Return
-
 !z::
-Return
-
-;; Misc Keys
+^Space::
 !+,::
-If !(Rule("MacroDocumentHome", "", ""))
-  SendDefault()
-Return
-
 !+.::
-If !(Rule("MacroDocumentEnd", "", ""))
-  SendDefault()
+ProcessKeystrokes(A_ThisHotkey)
 Return
 
-$^Space::
-markActive := !markActive
-If (IsEmacs())
+ProcessKeystrokes(keystrokes)
 {
-  Send ^{Space}
-}
-Return
+  mods := ParseMods(keystrokes)
+  key := ParseKey(keystrokes)
+  namespace := CurrentNamespace(mods, key)
 
-; Note: ~$ commands will let input passthrough without capturing it.
-~$Enter::
-markActive := False
-Return
+  If (IsEmacs() && namespace != "globalOverride")
+  {
+    Passthrough(keystrokes)
+    Return
+  }
 
-~$Ctrl UP::
-ClearActiveChords()
-markActive := False
-Return
+  If KeybindingExists(namespace, mods, key)
+  {
+    LookupAndTranslate(namespace, mods, key)
+  }
+  Else
+  {
+    Passthrough(keystrokes)
+  }
 
-MacroSkip()
-{
   Return
 }
 
-MacroEnter()
+LookupAndTranslate(namespace, mods, key)
 {
-  SendAndClearMark("{Enter}")
+  config := keys[namespace][mods][key]
+  toKey := config[1]
+  ctrlSpaceSensitive := config[2]
+  toMacro := config[3]
+
+  If (toMacro && (toMacro != ""))
+  {
+    ; MsgBox Executing a macro: %toMacro%
+    %toMacro%()
+  }
+  Else
+  {
+    toKey := AddShift(toKey, ctrlSpaceSensitive)
+    ; MsgBox Sending: %toMods%%toKey%
+    Send %toKey%
+  }
+
+  If !ctrlSpaceSensitive
+  {
+    ctrlSpaceActive := False
+  }
+
+  If (toMacro != "MacroStartCtrlX")
+  {
+    ctrlXActive := False
+  }
 }
 
-MacroCopy()
+KeybindingExists(namespace, mods, key)
 {
-  SendAndClearMark("^c")
+  Return (keys[namespace] && keys[namespace][mods] && keys[namespace][mods][key])
 }
 
-MacroCopyCut()
+ParseMods(keystrokes)
 {
-  SendAndClearMark("^x^c")
+  If InStr(keystrokes, "!+")
+  {
+    Return "altShift"
+  }
+  Else If InStr(keystrokes, "^")
+  {
+    If (ctrlXActive)
+    {
+      Return "ctrlXPrefix"
+    }
+    Else
+    {
+      Return "ctrl"
+    }
+  }
+  Else If InStr(keystrokes, "!")
+  {
+    Return "alt"
+  }
+
+  Return keystrokes
 }
 
-MacroPaste()
+ParseKey(keystrokes)
 {
-  SendAndClearMark("^v")
+  If InStr(keystrokes, "Space")
+  {
+    Return "space"
+  }
+
+  StringRight, letter, keystrokes, 1
+  Return letter
 }
 
-MacroCut()
+AddShift(mods, ctrlSpaceSensitive)
 {
-  SendAndClearMark("^x")
+  holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
+
+  If (holdShift)
+  {
+    Return "+" . mods
+  }
+
+  Return mods
 }
 
-MacroFind()
+Passthrough(keystrokes)
 {
-  SendAndClearMark("^f")
+    If InStr(keystrokes, "Space")
+    {
+      Send ^{Space}
+    }
+    Else
+    {
+      Send %keystrokes%
+    }
 }
 
-MacroEscape()
+IsEmacs()
 {
-  SendAndClearMark("{ESC}")
+  For index, appName in appsWithNativeEmacsKeybindings
+  {
+    StringLower appNameLower, appName
+
+    If IsProgram(appNameLower)
+    {
+      Return True
+    }
+  }
+
+  Return False
 }
 
-MacroDeleteChar()
+IsProgram(classOrExec)
 {
-  SendAndClearMark("{Del}")
+  IfWinActive, ahk_class %classOrExec%
+  {
+    Return True
+  }
+
+  IfWinActive, ahk_exe %classOrExec%
+  {
+    Return True
+  }
+
+  Return False
 }
 
-MacroKillWord()
+CurrentNamespace(mods, key)
 {
-  SendAndClearMark("^{Backspace}")
+  currentApp := CurrentApp()
+    
+  If KeybindingExists("globalOverride", mods, key)
+  {
+    Return "globalOverride"   
+  }
+  Else If (currentApp && KeybindingExists(currentApp, mods, key))
+  {
+    Return currentApp      
+  }
+
+  Return "globalEmacs"
 }
 
-MacroNew()
+CurrentApp()
 {
-  SendAndClearMark("^n")
+  WinGet, exeName, ProcessName, A
+  StringLower, exeName, exeName
+
+  Return exeName
 }
 
-MacroSwitchApps()
+MacroCtrlSpace()
 {
-  SendAndClearMark("!{Tab}")
+  ctrlSpaceActive := True
+  Send {Shift}
 }
 
-MacroJumpWordRight()
+MacroStartCtrlX()
 {
-  SendMarkSensitive("^{Right}")
+  ctrlXActive := True
+  SetTimer, ClearCtrlX, -750
 }
 
-MacroBackChar()
+ClearCtrlX()
 {
-  SendMarkSensitive("{Left}")
-}
-
-MacroForwardChar()
-{
-  SendMarkSensitive("{Right}")
-}
-
-MacroNextLine()
-{
-  SendMarkSensitive("{Down}")
-}
-
-MacroPreviousLine()
-{
-  SendMarkSensitive("{Up}")
-}
-
-MacroEndOfLine()
-{
-  SendMarkSensitive("{End}")
-}
-
-MacroStartOfLine()
-{
-  SendMarkSensitive("{Home}")
-}
-
-MacroPageUp()
-{
-  SendMarkSensitive("{PgUp}")
-}
-
-MacroPageDown()
-{
-  SendMarkSensitive("{PgDn}")
-}
-
-MacroDocumentHome()
-{
-  SendMarkSensitive("^{Home}")
-}
-
-MacroDocumentEnd()
-{
-  SendMarkSensitive("^{End}")
+  ctrlXActive := False
 }
 
 MacroKillLine()
@@ -375,140 +340,5 @@ MacroKillLine()
   Send {ShiftDown}{END}{ShiftUp}
   Sleep 50
   Send ^x
-  ; Can't detect an empty line!... hmm
-  ;Send {Del}
-  markActive := False
-}
-
-SendAndClearMark(key)
-{
-  IfInString, key, "{"
-  {
-    stripedKey := StripCurlies(key)
-    Send +{%stripedKey%}
-  }
-  Else
-  {
-    Send %key%
-  }
-  markActive := False
-}
-
-SendMarkSensitive(key)
-{
-  If (markActive)
-  {
-    IfInString, key, "{"
-    {
-      stripedKey := StripCurlies(key)
-      Send +{%stripedKey%}
-    }
-    Else
-    {
-      Send +%key%
-    }
-  }
-  Else
-  {
-    IfInString, key, "{"
-    {
-      stripedKey := StripCurlies(key)
-      Send {%stripedKey%}
-    }
-    Else
-    {
-      Send %key%
-    }
-  }
-}
-
-ClearActiveChords()
-{
-  For key, value in activeChords
-    activeChords[key] := False
-  Return
-}
-
-ChordTimer()
-{
-  ClearActiveChords()
-  Return
-}
-
-StartChord(key)
-{
-  SetTimer, ChordTimer, -750
-  activeChords[key] := True
-
-  Return
-}
-
-IsProgram(classOrExec)
-{
-  IfWinActive, ahk_class %classOrExec%
-  {
-    Return 1
-  }
-  IfWinActive, ahk_exe %classOrExec%
-  {
-    Return 1
-  }
-
-  Return 0
-}
-
-IsEmacs()
-{
-  Return (IsProgram("Emacs") || IsProgram("rubymine64.exe") || IsProgram("ConEmu64.exe"))
-}
-
-Rule(key, withChord := "", withProgram := "")
-{
-  If (IsEmacs())
-  {
-    Return 0
-  }
-
-  If ((withProgram != "") && !IsProgram(withProgram))
-  {
-    Return 0
-  }
-
-  If ((withChord != "") && !activeChords[withChord])
-  {
-    Return 0
-  }
-
-  IfInString, key, "{"
-  {
-    stripedKey := StripCurlies(key)
-    Send {%stripedKey%}
-  }
-  Else If IsFunc(key)
-  {
-    %key%()
-  }
-  Else
-  {
-    Send %key%
-  }
-
-  ClearActiveChords()
-
-  Return 1
-}
-
-StripCurlies(string)
-{
-  striped := StrReplace(string, "{", "")
-  striped := StrReplace(striped, "}", "")
-  Return striped
-}
-
-SendDefault()
-{
-  Send %A_ThisHotkey%
-  ClearActiveChords()
-
-  Return
+  Send {Del}
 }
