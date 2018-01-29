@@ -114,5 +114,5 @@
 (global-unset-key "\M-z")
 
 ;; set tab to autocomplete everything
-(define-key minibuffer-local-map "\t" 'hippie-expand)
-(global-set-key (kbd "TAB") 'hippie-expand)
+(define-key minibuffer-local-map "\t" 'indent-or-hippie-expand)
+(global-set-key (kbd "TAB") 'indent-or-hippie-expand)

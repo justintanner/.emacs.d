@@ -1,26 +1,32 @@
---- Emacs Hammerspoon Script
+-- Emacs Hammerspoon Script
 -- Author: Justin Tanner
 -- Email: work@jwtanner.com
 -- License: MIT
 
---- What does this thing do?
--- Allows you to have Emacs *like* keybindings in apps other than Emacs.
--- You can use Ctrl-Space to mark and cut text just like Emacs. Also enables Emacs prefix keys such as Ctrl-xs (save).
+-- What does this script do?
+-- Allows you to have *most* Emacs keybindings in other apps.
+-- Ctrl-Space space be used to mark and cut text just like Emacs. Also enables Emacs prefix keys such as Ctrl-xs (save).
 
---- Installation
+-- Installation
 -- 1) Download and hammerspoon http://www.hammerspoon.org/
--- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua
--- 3) Reload hammerspoon if already running
+-- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua (or import emacs_hammerspoon.lue into your exisiting inti.lua)
+-- 3) Start Hammerspoon
 
---- Keybindings Lookup Table
+-- Customization
+-- To customize the keybindings modfiy the global "keys" below.
 
--- Namespaces:
--- globalOverride overrides both Emacs and non-Emacs apps
--- globalEmacs overrides all apps except those specified in appsWithNativeEmacsKeybindings
--- App Name (eg Google Chrome) specifies app specific exceptions
+-- Namespaces
+-- This script uses namespaces to send different commands to different apps.
+-- "globalOverride" contains keybindings that override all other apps (including Emacs)
+-- "globalEmacs" brings Emacs style keybindings to all other apps
+-- "Google Chrome" (and app names) specifies app specific keybindings taking precendence over "globalEmacs"
 
--- Usage:
--- keys[namespace][modifier-key][key] = {to-modifier, to-key, mark-sensitive, macro}
+-- Syntax Example
+-- ['globalEmacs'] = { ["ctrl"] = { ['f'] = {nil, 'right', true, nil} } }
+-- This keybinding states, for all apps other than Emacs map Ctrl+f to the right arrow key. true maintains the current mark (if set).
+
+-- ['globalEmacs'] = { ["ctrl"] = { ['x'] = {nil, nil, false, 'macroStartCtrlX'} } }
+-- This keybinding states, for all apps other than Emacs map Ctrl+x to a macro called "macroStartCtrlX" and unset any previous mark.
 
 local keys = {
   ['globalOverride'] = {
@@ -74,7 +80,7 @@ local keys = {
   ['Google Chrome'] = {
     ['ctrlXPrefix'] = {
       ['b'] = {'cmd', 'b', false, nil},
-      ['d'] = {{'alt', 'cmd'}, 'j', false, nil}, 
+      ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
       ['f'] = {'cmd', 'l', false, nil},
     }
   }
@@ -93,10 +99,10 @@ local currentApp = nil
 local emacsMap = hs.hotkey.modal.new()
 local overrideMap = hs.hotkey.modal.new()
 
---- Processes a keybinding. Translates keys or runs a macro.
+--- Processes a keystroke. Translates keys or runs a macro.
 -- @param mod String containing a modifier such as: ctrl, alt or ctrlXPrefix
 -- @param key String containing a key such as: a, b, c, etc
-function processKey(mod, key)
+function processKeystrokes(mod, key)
   return function()
     emacsMap:exit()
 
@@ -104,16 +110,10 @@ function processKey(mod, key)
       mod = 'ctrlXPrefix'
     end
 
-    namespace = 'globalEmacs'
-    
-    if keybindingExists('globalOverride', mod, key) then
-      namespace = 'globalOverride'   
-    elseif currentApp ~= nil and keybindingExists(currentApp, mod, key) then
-      namespace = currentApp      
-    end
+    namespace = currentNamespace()
 
     if keybindingExists(namespace, mod, key) then
-      lookupKeyAndTranslate(namespace, mod, key)
+      lookupAndTranslate(namespace, mod, key)
     else
       tapKey(mod, key)
     end
@@ -122,20 +122,11 @@ function processKey(mod, key)
   end
 end
 
---- Executes a keystroke with hammerspoon.
--- @param mods String or table containing a modifiers
--- @param key String containing a key such a key
-function tapKey(mods, key)
-  -- Faster than hs.eventtap.keystroke
-  hs.eventtap.event.newKeyEvent(mods, key, true):post()
-  hs.eventtap.event.newKeyEvent(mods, key, false):post()
-end
-
 --- Looks up a keybinding in the global keybindings table and translates that keybinding or runs a macro.
 -- @param namespace String containg the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
 -- @param mod String containing a modifier key such as ctrl or alt. Also accepts modifiers with states such as ctrlXPrefix
 -- @param key String containing a key such as: a, b or c
-function lookupKeyAndTranslate(namespace, mod, key)
+function lookupAndTranslate(namespace, mod, key)
   config = keys[namespace][mod][key]
   toMod = config[1]
   toKey = config[2]
@@ -180,6 +171,22 @@ function changingMessage(fromMod, fromKey, toMod, toKey, holdingShift)
   return message .. ' + ' .. (toKey or '')
 end
 
+function currentNamespace(mod, key)
+  if keybindingExists('globalOverride', mod, key) then
+    return 'globalOverride'   
+  elseif currentApp ~= nil and keybindingExists(currentApp, mod, key) then
+    return currentApp      
+  end
+
+  return 'globalEmacs'
+end
+
+function tapKey(mods, key)
+  -- Faster than hs.eventtap.keystroke
+  hs.eventtap.event.newKeyEvent(mods, key, true):post()
+  hs.eventtap.event.newKeyEvent(mods, key, false):post()
+end
+
 function prepModifier(mod, holdShift)
   if holdShift then
     return addShift(mod)
@@ -215,16 +222,16 @@ function assignKeys()
              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
   
   for i, letter in ipairs(letters) do
-    emacsMap:bind('ctrl', letter, processKey('ctrl', letter), nil)
-    emacsMap:bind('alt', letter, processKey('alt', letter), nil)  
+    emacsMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
+    emacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)  
   end
   
-  emacsMap:bind('ctrl', 'space', processKey('ctrl', 'space'), nil)
-  emacsMap:bind({'alt', 'shift'}, '.', processKey('altShift', '.'), nil)
-  emacsMap:bind({'alt', 'shift'}, ',', processKey('altShift', ','), nil)
+  emacsMap:bind('ctrl', 'space', processKeystrokes('ctrl', 'space'), nil)
+  emacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
+  emacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
 
-  overrideMap:bind('ctrl', 't', processKey('ctrl', 't'), nil)
-  overrideMap:bind('ctrl', 'j', processKey('ctrl', 'j'), nil)
+  overrideMap:bind('ctrl', 't', processKeystrokes('ctrl', 't'), nil)
+  overrideMap:bind('ctrl', 'j', processKeystrokes('ctrl', 'j'), nil)
 end
 
 function hasValue (tab, val)
