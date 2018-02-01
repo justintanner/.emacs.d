@@ -105,12 +105,13 @@ local overrideMap = hs.hotkey.modal.new()
 function processKeystrokes(mod, key)
   return function()
     emacsMap:exit()
+    overrideMap:exit()
 
     if ctrlXActive and mod == 'ctrl' then
       mod = 'ctrlXPrefix'
     end
 
-    namespace = currentNamespace()
+    namespace = currentNamespace(mod, key)
 
     if keybindingExists(namespace, mod, key) then
       lookupAndTranslate(namespace, mod, key)
@@ -118,7 +119,7 @@ function processKeystrokes(mod, key)
       tapKey(mod, key)
     end
 
-    emacsMap:enter()
+    chooseKeyMap()
   end
 end
 
@@ -171,6 +172,13 @@ function changingMessage(fromMod, fromKey, toMod, toKey, holdingShift)
   return message .. ' + ' .. (toKey or '')
 end
 
+function keybindingExists(namespace, mod, key)
+  return (
+    keys[namespace] ~= nil and
+    keys[namespace][mod] ~= nil and
+    keys[namespace][mod][key] ~= nil)
+end
+
 function currentNamespace(mod, key)
   if keybindingExists('globalOverride', mod, key) then
     return 'globalOverride'   
@@ -210,13 +218,6 @@ function addShift(mod)
   return {'shift'}
 end
 
-function keybindingExists(namespace, mod, key)
-  return (
-    keys[namespace] ~= nil and
-    keys[namespace][mod] ~= nil and
-    keys[namespace][mod][key] ~= nil)
-end
-
 function assignKeys()
   letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
@@ -245,12 +246,14 @@ function hasValue (tab, val)
 end
 
 function chooseKeyMap()
+  -- TODO: lowercase appWithNativeEmacsKeybindings and remove comment above
   if hasValue(appsWithNativeEmacsKeybindings, currentApp:lower()) then
-    print('Turnning OFF keybindings for: ' .. currentApp)
-    emacsMap:exit()      
-
+    -- print('Passingthrough keys to: ' .. currentApp)
+    emacsMap:exit()
+    overrideMap:enter()     
   else
-    print('Turning ON keybindings for: ' .. currentApp)
+    -- print('Translating keys for: ' .. currentApp)
+    overrideMap:exit()         
     emacsMap:enter()      
   end
 end
@@ -312,4 +315,4 @@ chooseKeyMap()
 local appWatcher = hs.application.watcher.new(appWatcherFunction)
 appWatcher:start()
 
-overrideMap:enter()      
+
