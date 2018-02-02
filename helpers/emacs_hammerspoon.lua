@@ -99,8 +99,8 @@ local currentApp = nil
 local emacsMap = hs.hotkey.modal.new()
 local overrideMap = hs.hotkey.modal.new()
 
---- Processes a keystroke. Translates keys or runs a macro.
--- @param mod String containing a modifier such as: ctrl, alt or ctrlXPrefix
+--- Entry point for processing keystrokes and taking the appropriate action.
+-- @param mod String containing a modifier such as: ctrl or alt
 -- @param key String containing a key such as: a, b, c, etc
 function processKeystrokes(mod, key)
   return function()
@@ -136,13 +136,13 @@ function lookupAndTranslate(namespace, mod, key)
 
   if toMacro ~= nil then
     _G[toMacro]()
-    print('Executing a macro ' .. toMacro)              
+    print('Executing macro: ' .. toMacro)              
   else
-    holdShift = (ctrlSpaceSensitive and ctrlSpaceActive)
+    toMod = addShift(toMod, ctrlSpaceSensitive)
     
-    tapKey(prepModifier(toMod, holdShift), toKey)
+    tapKey(toMod, toKey)
 
-    print(changingMessage(mod, key, toMod, toKey, holdShift))
+    logTranslation(mod, key, toMod, toKey)
   end
 
   if not ctrlSpaceSensitive then
@@ -154,12 +154,13 @@ function lookupAndTranslate(namespace, mod, key)
   end
 end
 
-function changingMessage(fromMod, fromKey, toMod, toKey, holdingShift)
-  message = 'Changing ' .. fromMod .. '+' .. fromKey .. ' to '
-
-  if holdingShift then
-    message = message .. 'shift'
-   end
+--- Logs a keybinding translation to the Hammerspoon console
+-- @param fromMod String original modifier key from the user
+-- @param fromKey String original key from the user
+-- @param toMod String or Table destination modifiers
+-- @param toKey String destionation key
+function logTranslation(fromMod, fromKey, toMod, toKey)
+  message = 'Translating: ' .. fromMod .. '+' .. fromKey .. ' to '
 
   if type(toMod) == 'string' then
     message = message .. toMod
@@ -169,9 +170,13 @@ function changingMessage(fromMod, fromKey, toMod, toKey, holdingShift)
     end
   end
   
-  return message .. ' + ' .. (toKey or '')
+  print(message .. '+' .. (toKey or ''))
 end
 
+--- Checks the global keys table for a keybinding
+-- @param namespace String namespace of the keybinding (eg globalEmacs, Google Chrome, etc)
+-- @param mod String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param key String key such as a, b, c, etc
 function keybindingExists(namespace, mod, key)
   return (
     keys[namespace] ~= nil and
@@ -195,27 +200,19 @@ function tapKey(mods, key)
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
 end
 
-function prepModifier(mod, holdShift)
-  if holdShift then
-    return addShift(mod)
+function addShift(mod, ctrlSpaceSensitive)
+  if ctrlSpaceSensitive and ctrlSpaceActive then
+    if toMod == nil then
+      return 'shift'
+    elseif type(mod) == 'string' then
+      return {'shift', mod}
+    elseif type(mod) == 'table' then
+      table.insert(mod, 1, 'shift')
+      return mod
+    end
   end
-
-  if type(mod) == 'string' then
-    return {mod}
-  end
-
-  return {}
-end
-
-function addShift(mod)
-  if type(mod) == 'string' then
-    return {'shift', mod}
-  elseif type(mod) == 'table' then
-    table.insert(mod, 1, 'shift')
-    return mod
-  end
-  
-  return {'shift'}
+ 
+  return mod
 end
 
 function assignKeys()
@@ -301,6 +298,19 @@ function macroStartCtrlX()
   ctrlXActive = true
 
   hs.timer.doAfter(0.75,function() ctrlXActive = false end)
+end
+
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
 end
 
 -- Application start
