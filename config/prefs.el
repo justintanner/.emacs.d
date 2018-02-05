@@ -39,7 +39,7 @@
 
 ;; Font's for win10 and osx (add osx)
 (cond ((eq system-type 'windows-nt) (set-default-font "Inconsolata-13"))
-      ((eq system-type 'darwin) (set-default-font "Inconsolata-15")))
+      ((eq system-type 'darwin) (set-default-font "Inconsolata-16")))
 
 ;; list of things to try when hippie-expanding
 (setq hippie-expand-try-functions-list '(try-expand-dabbrev

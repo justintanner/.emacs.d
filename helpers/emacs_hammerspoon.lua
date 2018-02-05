@@ -31,7 +31,7 @@
 local keys = {
   ['globalOverride'] = {
     ['ctrl'] = {
-      ['t'] = {nil, nil, false, 'macroAltTab'}, -- sorta working
+      ['t'] = {nil, nil, false, 'macroAltTab'},
       ['j'] = {'cmd', 'space', false, nil}
     }
   },
@@ -73,8 +73,8 @@ local keys = {
       ['y'] = {'cmd', 'v', false, nil},            
     },
     ['altShift'] = {
-      ['.'] = {nil, 'end', false, nil},
-      [','] = {nil, 'home', false, nil},      
+      ['.'] = {'cmd', 'end', true, nil},
+      [','] = {'cmd', 'home', true, nil},      
     },
   },
   ['Google Chrome'] = {
@@ -86,7 +86,6 @@ local keys = {
   }
 }
 
--- NOTE: Use lower case app names
 local appsWithNativeEmacsKeybindings = {
   'emacs',
   'rubymine',
@@ -100,23 +99,28 @@ local emacsMap = hs.hotkey.modal.new()
 local overrideMap = hs.hotkey.modal.new()
 
 --- Entry point for processing keystrokes and taking the appropriate action.
--- @param mod String containing a modifier such as: ctrl or alt
--- @param key String containing a key such as: a, b, c, etc
-function processKeystrokes(mod, key)
+-- @param mods String modifiers such as: ctrl or alt
+-- @param key String keys such as: a, b, c, etc
+function processKeystrokes(mods, key)
   return function()
     emacsMap:exit()
     overrideMap:exit()
 
-    if ctrlXActive and mod == 'ctrl' then
-      mod = 'ctrlXPrefix'
+    if ctrlXActive and mods == 'ctrl' then
+      mods = 'ctrlXPrefix'
     end
 
-    namespace = currentNamespace(mod, key)
+    namespace = currentNamespace(mods, key)
 
-    if keybindingExists(namespace, mod, key) then
-      lookupAndTranslate(namespace, mod, key)
+    if isEmacs() and namesapce ~= "globalOverride" then
+      tapKey(mods, key)
+      return
+    end
+    
+    if keybindingExists(namespace, mods, key) then
+      lookupAndTranslate(namespace, mods, key)
     else
-      tapKey(mod, key)
+      tapKey(mods, key)
     end
 
     chooseKeyMap()
@@ -124,12 +128,12 @@ function processKeystrokes(mod, key)
 end
 
 --- Looks up a keybinding in the global keybindings table and translates that keybinding or runs a macro.
--- @param namespace String containg the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
--- @param mod String containing a modifier key such as ctrl or alt. Also accepts modifiers with states such as ctrlXPrefix
--- @param key String containing a key such as: a, b or c
-function lookupAndTranslate(namespace, mod, key)
-  config = keys[namespace][mod][key]
-  toMod = config[1]
+-- @param namespace String the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
+-- @param mods String modifiers key such as ctrl or alt.
+-- @param key String keys such as: a, b or c
+function lookupAndTranslate(namespace, mods, key)
+  config = keys[namespace][mods][key]
+  toMods = config[1]
   toKey = config[2]
   ctrlSpaceSensitive = config[3]
   toMacro = config[4]
@@ -138,11 +142,11 @@ function lookupAndTranslate(namespace, mod, key)
     _G[toMacro]()
     print('Executing macro: ' .. toMacro)              
   else
-    toMod = addShift(toMod, ctrlSpaceSensitive)
+    toMods = addShift(toMods, ctrlSpaceSensitive)
     
-    tapKey(toMod, toKey)
+    tapKey(toMods, toKey)
 
-    logTranslation(mod, key, toMod, toKey)
+    logTranslation(mods, key, toMods, toKey)
   end
 
   if not ctrlSpaceSensitive then
@@ -155,18 +159,18 @@ function lookupAndTranslate(namespace, mod, key)
 end
 
 --- Logs a keybinding translation to the Hammerspoon console
--- @param fromMod String original modifier key from the user
--- @param fromKey String original key from the user
--- @param toMod String or Table destination modifiers
+-- @param fromMods String original modifiers
+-- @param fromKey String original key
+-- @param toMods String or Table destination modifiers
 -- @param toKey String destionation key
-function logTranslation(fromMod, fromKey, toMod, toKey)
-  message = 'Translating: ' .. fromMod .. '+' .. fromKey .. ' to '
+function logTranslation(fromMods, fromKey, toMods, toKey)
+  message = 'Translating: ' .. fromMods .. '+' .. fromKey .. ' to '
 
-  if type(toMod) == 'string' then
-    message = message .. toMod
-  elseif type(toMod) == 'table' then
-    for index, mod in pairs(toMod) do
-      message = message .. mod .. '+'
+  if type(toMods) == 'string' then
+    message = message .. toMods
+  elseif type(toMods) == 'table' then
+    for index, mods in pairs(toMods) do
+      message = message .. mods .. '+'
     end
   end
   
@@ -175,66 +179,74 @@ end
 
 --- Checks the global keys table for a keybinding
 -- @param namespace String namespace of the keybinding (eg globalEmacs, Google Chrome, etc)
--- @param mod String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
 -- @param key String key such as a, b, c, etc
-function keybindingExists(namespace, mod, key)
+function keybindingExists(namespace, mods, key)
   return (
     keys[namespace] ~= nil and
-    keys[namespace][mod] ~= nil and
-    keys[namespace][mod][key] ~= nil)
+    keys[namespace][mods] ~= nil and
+    keys[namespace][mods][key] ~= nil)
 end
 
-function currentNamespace(mod, key)
-  if keybindingExists('globalOverride', mod, key) then
+--- Checks the global keys table for a keybinding
+-- @param namespace String namespace of the keybinding (eg globalEmacs, Google Chrome, etc)
+-- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param key String key such as a, b, c, etc
+function currentNamespace(mods, key)
+  if keybindingExists('globalOverride', mods, key) then
     return 'globalOverride'   
-  elseif currentApp ~= nil and keybindingExists(currentApp, mod, key) then
+  elseif currentApp ~= nil and keybindingExists(currentApp, mods, key) then
     return currentApp      
   end
 
   return 'globalEmacs'
 end
 
+--- Excutes a keystroke with modifiers (faster than hs.eventtap.keystroke)
+-- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param key String key such as a, b, c, etc
 function tapKey(mods, key)
-  -- Faster than hs.eventtap.keystroke
   hs.eventtap.event.newKeyEvent(mods, key, true):post()
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
 end
 
-function addShift(mod, ctrlSpaceSensitive)
+--- Appends a shift modifier key (if needed) to the existing mods
+-- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param ctrlSpaceSensitive Boolean current keybinding is amenable to holding shift
+function addShift(mods, ctrlSpaceSensitive)
   if ctrlSpaceSensitive and ctrlSpaceActive then
-    if toMod == nil then
+    if mods == nil then
       return 'shift'
-    elseif type(mod) == 'string' then
-      return {'shift', mod}
-    elseif type(mod) == 'table' then
-      table.insert(mod, 1, 'shift')
-      return mod
+    elseif type(mods) == 'string' then
+      return {'shift', mods}
+    elseif type(mods) == 'table' then
+      table.insert(mods, 1, 'shift')
+      return mods
     end
   end
  
-  return mod
+  return mods
 end
 
+--- 
 function assignKeys()
   letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'space'}
   
   for i, letter in ipairs(letters) do
     emacsMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
-    emacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)  
+    emacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)
+    overrideMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
+    overrideMap:bind('alt', letter, processKeystrokes('ctrl', letter), nil)    
   end
   
-  emacsMap:bind('ctrl', 'space', processKeystrokes('ctrl', 'space'), nil)
   emacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
   emacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
-
-  overrideMap:bind('ctrl', 't', processKeystrokes('ctrl', 't'), nil)
-  overrideMap:bind('ctrl', 'j', processKeystrokes('ctrl', 'j'), nil)
 end
 
-function hasValue (tab, val)
-  for index, value in ipairs(tab) do
-    if value == val then
+function isEmacs()
+  for index, value in ipairs(appsWithNativeEmacsKeybindings) do
+    if value:lower() == currentApp:lower() then
       return true
     end
   end
@@ -243,13 +255,12 @@ function hasValue (tab, val)
 end
 
 function chooseKeyMap()
-  -- TODO: lowercase appWithNativeEmacsKeybindings and remove comment above
-  if hasValue(appsWithNativeEmacsKeybindings, currentApp:lower()) then
-    -- print('Passingthrough keys to: ' .. currentApp)
+  if isEmacs() then
+    print('Passingthrough keys to: ' .. currentApp)
     emacsMap:exit()
     overrideMap:enter()     
   else
-    -- print('Translating keys for: ' .. currentApp)
+    print('Translating keys for: ' .. currentApp)
     overrideMap:exit()         
     emacsMap:enter()      
   end
