@@ -96,16 +96,16 @@ local appsWithNativeEmacsKeybindings = {
 local ctrlXActive = false
 local ctrlSpaceActive = false
 local currentApp = nil
-local emacsMap = hs.hotkey.modal.new()
-local overrideMap = hs.hotkey.modal.new()
+local globalEmacsMap = hs.hotkey.modal.new()
+local globalOverrideMap = hs.hotkey.modal.new()
 
 --- Entry point for processing keystrokes and taking the appropriate action.
 -- @param mods String modifiers such as: ctrl or alt
 -- @param key String keys such as: a, b, c, etc
 function processKeystrokes(mods, key)
   return function()
-    emacsMap:exit()
-    overrideMap:exit()
+    globalEmacsMap:exit()
+    globalOverrideMap:exit()
 
     if ctrlXActive and mods == 'ctrl' then
       mods = 'ctrlXPrefix'
@@ -236,14 +236,14 @@ function assignKeys()
   
   for i, letter in ipairs(letters) do
     -- TODO: Only bind what is needed, not everything!
-    emacsMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
-    emacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)
-    overrideMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
-    overrideMap:bind('alt', letter, processKeystrokes('alt', letter), nil)    
+    globalEmacsMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
+    globalEmacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)
+    globalOverrideMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
+    globalOverrideMap:bind('alt', letter, processKeystrokes('alt', letter), nil)    
   end
   
-  emacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
-  emacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
+  globalEmacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
+  globalEmacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
 end
 
 --- Does the current app already have Emacs keybinings
@@ -262,12 +262,12 @@ end
 function chooseKeyMap()
   if isEmacs() then
     print('Passingthrough keys to: ' .. currentApp)
-    emacsMap:exit()
-    overrideMap:enter()     
+    globalEmacsMap:exit()
+    globalOverrideMap:enter()     
   else
     print('Translating keys for: ' .. currentApp)
-    overrideMap:exit()         
-    emacsMap:enter()      
+    globalOverrideMap:exit()         
+    globalEmacsMap:enter()      
   end
 end
 
