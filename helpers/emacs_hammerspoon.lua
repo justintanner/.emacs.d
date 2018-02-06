@@ -56,6 +56,7 @@ local keys = {
       ['space'] = {nil, nil, true, 'macroCtrlSpace'},
     },
     ['ctrlXPrefix'] = {
+      ['c'] = {'cmd', 'q', false, nil},      
       ['f'] = {'cmd', 'o', false, nil},
       ['g'] = {'cmd', 'f', false, nil},      
       ['h'] = {'cmd', 'a', false, nil},
@@ -73,8 +74,8 @@ local keys = {
       ['y'] = {'cmd', 'v', false, nil},            
     },
     ['altShift'] = {
-      ['.'] = {'cmd', 'end', true, nil},
-      [','] = {'cmd', 'home', true, nil},      
+      ['.'] = {'cmd', 'down', true, nil},
+      [','] = {'cmd', 'up', true, nil},      
     },
   },
   ['Google Chrome'] = {
@@ -112,13 +113,8 @@ function processKeystrokes(mods, key)
 
     namespace = currentNamespace(mods, key)
 
-    if isEmacs() and namesapce ~= "globalOverride" then
-      tapKey(mods, key)
-      return
-    end
-    
     if keybindingExists(namespace, mods, key) then
-      lookupAndTranslate(namespace, mods, key)
+      lookupAndTranslate(namespace, mods, key)      
     else
       tapKey(mods, key)
     end
@@ -132,6 +128,11 @@ end
 -- @param mods String modifiers key such as ctrl or alt.
 -- @param key String keys such as: a, b or c
 function lookupAndTranslate(namespace, mods, key)
+  if isEmacs() and namespace ~= 'globalOverride' then
+    tapKey(mods, key)    
+    return
+  end
+  
   config = keys[namespace][mods][key]
   toMods = config[1]
   toKey = config[2]
@@ -210,7 +211,7 @@ function tapKey(mods, key)
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
 end
 
---- Appends a shift modifier key (if needed) to the existing mods
+--- Appends a shift modifier key (if needed) to the existing mods.
 -- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
 -- @param ctrlSpaceSensitive Boolean current keybinding is amenable to holding shift
 function addShift(mods, ctrlSpaceSensitive)
@@ -228,22 +229,25 @@ function addShift(mods, ctrlSpaceSensitive)
   return mods
 end
 
---- 
+--- Assign keybindings to all keys
 function assignKeys()
   letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'space'}
   
   for i, letter in ipairs(letters) do
+    -- TODO: Only bind what is needed, not everything!
     emacsMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
     emacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)
     overrideMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
-    overrideMap:bind('alt', letter, processKeystrokes('ctrl', letter), nil)    
+    overrideMap:bind('alt', letter, processKeystrokes('alt', letter), nil)    
   end
   
   emacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
   emacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
 end
 
+--- Does the current app already have Emacs keybinings
+-- @return Boolean true if Emacs
 function isEmacs()
   for index, value in ipairs(appsWithNativeEmacsKeybindings) do
     if value:lower() == currentApp:lower() then
@@ -254,6 +258,7 @@ function isEmacs()
   return false
 end
 
+--- Toggle on and off keybindings depending if we are in Emacs or not
 function chooseKeyMap()
   if isEmacs() then
     print('Passingthrough keys to: ' .. currentApp)
@@ -266,6 +271,7 @@ function chooseKeyMap()
   end
 end
 
+--- Currently running application on Hammerspoon start-up
 function appOnStartup()
   app = hs.application.frontmostApplication()
 
@@ -274,6 +280,7 @@ function appOnStartup()
   end
 end
 
+-- Updates the global currentApp when the user switches applications
 function appWatcherFunction(appName, eventType, appObject)
   if (eventType == hs.application.watcher.activated) then
     currentApp = appName
@@ -282,16 +289,8 @@ function appWatcherFunction(appName, eventType, appObject)
   end
 end
 
--- Macro for apps that map ctrl+k to something else
-function macroKillLine()
-  tapKey({'shift', 'ctrl'}, 'e')
-  tapKey({}, 'shift')
-  tapKey({'cmd'}, 'x')
-  ctrlSpaceActive = false
-end
-
+-- Launches the Hammerspoon alt-tab alternative. Include minimized/hidden windows (sorta works).
 function macroAltTab()
-  -- Include minimized/hidden windows (sorta works)
   switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
   switcher_space.nextWindow()
 
@@ -299,29 +298,18 @@ function macroAltTab()
   window:focus()
 end
 
+-- Start a selection mark in a non Emacs app.
 function macroCtrlSpace()
   ctrlSpaceActive = not ctrlSpaceActive
   
   tapKey({}, 'shift')
 end
 
+-- Activate the Ctrl-x prefix key
 function macroStartCtrlX()
   ctrlXActive = true
 
   hs.timer.doAfter(0.75,function() ctrlXActive = false end)
-end
-
-function dump(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
 end
 
 -- Application start

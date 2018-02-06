@@ -92,7 +92,7 @@
 (global-unset-key "\M-c")
 (global-unset-key "\M-d")
 (global-unset-key "\M-e")
-;; M-g goto-line
+;; M-g goto-line ( first M-g always fails for some reason )
 (global-unset-key "\M-h")
 (global-unset-key "\M-i")
 (global-unset-key "\M-j")
@@ -110,7 +110,7 @@
 ;; M-v pageup
 ;; M-w copy
 ;; M-x M-x
-;; M-y yank pop
+;; M-y yank pop 
 (global-unset-key "\M-z")
 
 ;; set tab to autocomplete everything
