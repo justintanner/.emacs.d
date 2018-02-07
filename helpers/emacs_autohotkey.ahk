@@ -81,6 +81,7 @@ global keys
    : {"ctrlXPrefix"
      : {"b": ["^o", False, ""]
       , "d": ["^+j", False, ""]
+      , "k": ["^w", False, ""]
       , "f": ["^l", False, ""] }
     , "alt"
       : {"n": ["^t", False, ""] }}}
