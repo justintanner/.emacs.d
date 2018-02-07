@@ -81,7 +81,9 @@ global keys
    : {"ctrlXPrefix"
      : {"b": ["^o", False, ""]
       , "d": ["^+j", False, ""]
-      , "f": ["^l", False, ""] }}}
+      , "f": ["^l", False, ""] }
+    , "alt"
+      : {"n": ["^t", False, ""] }}}
 
 global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
 global ctrlXActive := False
