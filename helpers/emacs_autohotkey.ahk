@@ -145,6 +145,8 @@ global ctrlSpaceActive := False
 ProcessKeystrokes(A_ThisHotkey)
 Return
 
+; Entry point for processing keystrokes and taking the appropriate action.
+; @param keystrokes String keystrokes pressed by the user (usually A_ThisHotkey)
 ProcessKeystrokes(keystrokes)
 {
   mods := ParseMods(keystrokes)
@@ -169,6 +171,10 @@ ProcessKeystrokes(keystrokes)
   Return
 }
 
+; Looks up a keybinding in the global keybindings table and translates that keybinding or runs a macro.
+; @param namespace String the namespace to lookup a key (eg Google Chrome or GlobalEmacs)
+; @param mods String modifiers key such as ctrl or alt.
+; @param key String keys such as: a, b or c
 LookupAndTranslate(namespace, mods, key)
 {
   config := keys[namespace][mods][key]
@@ -199,11 +205,18 @@ LookupAndTranslate(namespace, mods, key)
   }
 }
 
+; Checks the global keys table for a keybinding
+; @param namespace String namespace of the keybinding (eg globalEmacs, chrome.exe, etc)
+; @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+; @param key String key such as a, b, c, etc
 KeybindingExists(namespace, mods, key)
 {
   Return (keys[namespace] && keys[namespace][mods] && keys[namespace][mods][key])
 }
 
+; Parses out the modifiers from a keystrokes strings ommiting the key
+; @param keystroke String contains autohotkey keystrokes such as ^c
+; @return String translated modifiers such as ctrl or alt
 ParseMods(keystrokes)
 {
   If InStr(keystrokes, "!+")
@@ -229,6 +242,9 @@ ParseMods(keystrokes)
   Return keystrokes
 }
 
+; Parses out the key from a keystrokes string without the modifier
+; @param keystroke String contains autohotkey keystrokes such as ^c
+; @return String keys such as c
 ParseKey(keystrokes)
 {
   If InStr(keystrokes, "Space")
@@ -240,6 +256,9 @@ ParseKey(keystrokes)
   Return letter
 }
 
+; Appends a shift modifier key (if needed) to the existing mods.
+; @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+; @param ctrlSpaceSensitive Boolean current keybinding is amenable to holding shift
 AddShift(mods, ctrlSpaceSensitive)
 {
   holdShift := (ctrlSpaceSensitive && ctrlSpaceActive)
@@ -252,6 +271,8 @@ AddShift(mods, ctrlSpaceSensitive)
   Return mods
 }
 
+; Execute original keystrokes without translating
+; @param keystrokes String original keystrokes
 Passthrough(keystrokes)
 {
     If InStr(keystrokes, "Space")
@@ -264,13 +285,15 @@ Passthrough(keystrokes)
     }
 }
 
+; Does the current app already have Emacs keybinings
+; @return Boolean true if Emacs
 IsEmacs()
 {
   For index, appName in appsWithNativeEmacsKeybindings
   {
     StringLower appNameLower, appName
 
-    If IsProgram(appNameLower)
+    If IsProgramActive(appNameLower)
     {
       Return True
     }
@@ -279,7 +302,10 @@ IsEmacs()
   Return False
 }
 
-IsProgram(classOrExec)
+; Does the current foreground application match a class or exec name
+; @param classOrExec String class name (eg Google Chrome) or exe name (eg chrome.exe)
+; @return Boolean true on match
+IsProgramActive(classOrExec)
 {
   IfWinActive, ahk_class %classOrExec%
   {
@@ -294,6 +320,10 @@ IsProgram(classOrExec)
   Return False
 }
 
+; Current namespace based on the current app in the foreground and matching keybindings
+; @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+; @param key String key such as a, b, c, etc
+; @return String current namespace such as globalOverride, globalEmacs, etc
 CurrentNamespace(mods, key)
 {
   currentApp := CurrentApp()
@@ -310,6 +340,7 @@ CurrentNamespace(mods, key)
   Return "globalEmacs"
 }
 
+; Current foreground process name
 CurrentApp()
 {
   WinGet, exeName, ProcessName, A
@@ -318,23 +349,27 @@ CurrentApp()
   Return exeName
 }
 
+; Start a selection mark in a non Emacs app
 MacroCtrlSpace()
 {
   ctrlSpaceActive := True
   Send {Shift}
 }
 
+; Activate the Ctrl-x prefix key
 MacroStartCtrlX()
 {
   ctrlXActive := True
   SetTimer, ClearCtrlX, -750
 }
 
+; Clears Ctrl-x prefix state, invoked by the timer above.
 ClearCtrlX()
 {
   ctrlXActive := False
 }
 
+; Macro to kill a line and add it to the clipboard
 MacroKillLine()
 {
   Send {ShiftDown}{END}{ShiftUp}
