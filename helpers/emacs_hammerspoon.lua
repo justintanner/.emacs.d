@@ -83,6 +83,10 @@ local keys = {
       ['b'] = {'cmd', 'b', false, nil},
       ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
       ['f'] = {'cmd', 'l', false, nil},
+      ['k'] = {'cmd', 'w', false, nil},      
+    },
+    ['alt'] = {
+      ['n'] = {'cmd', 't', false, nil},            
     }
   }
 }
@@ -229,19 +233,18 @@ function addShift(mods, ctrlSpaceSensitive)
   return mods
 end
 
---- Assign keybindings to all keys
+--- Assign keybindings to every keys
 function assignKeys()
-  letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+  all_keys = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'space'}
   
-  for i, letter in ipairs(letters) do
-    -- TODO: Only bind what is needed, not everything!
-    globalEmacsMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
-    globalEmacsMap:bind('alt', letter, processKeystrokes('alt', letter), nil)
-    globalOverrideMap:bind('ctrl', letter, processKeystrokes('ctrl', letter), nil)
-    globalOverrideMap:bind('alt', letter, processKeystrokes('alt', letter), nil)    
+  for i, key in ipairs(all_keys) do
+    globalEmacsMap:bind('ctrl', key, processKeystrokes('ctrl', key), nil)
+    globalEmacsMap:bind('alt', key, processKeystrokes('alt', key), nil)
+    globalOverrideMap:bind('ctrl', key, processKeystrokes('ctrl', key), nil)
+    globalOverrideMap:bind('alt', key, processKeystrokes('alt', key), nil)
   end
-  
+
   globalEmacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
   globalEmacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
 end
@@ -298,7 +301,7 @@ function macroAltTab()
   window:focus()
 end
 
--- Start a selection mark in a non Emacs app.
+-- Start a selection mark in a non Emacs app
 function macroCtrlSpace()
   ctrlSpaceActive = not ctrlSpaceActive
   
@@ -312,9 +315,9 @@ function macroStartCtrlX()
   hs.timer.doAfter(0.75,function() ctrlXActive = false end)
 end
 
--- Application start
 print('---------------------------------')
 print('Starting Emacs hammerspoon Script')
+
 assignKeys()
 
 currentApp = appOnStartup()
