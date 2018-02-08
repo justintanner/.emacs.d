@@ -58,7 +58,8 @@ global keys
         ,"w": ["^x", False, ""]
         ,"x": ["", False, "MacroStartCtrlX"]
         ,"y": ["^v", False, ""]
-        ,"space": ["", True, "MacroCtrlSpace"] }
+        ,"Space": ["", True, "MacroCtrlSpace"]
+        ,"Backspace": ["^+{Left}^x", False,""] }
     , "ctrlXPrefix"
       : {"f": ["^o", False, ""]
         ,"g": ["^f", False, ""]
@@ -73,7 +74,8 @@ global keys
         ,"n": ["^n", False, ""]
         ,"v": ["{PgUp}", True, ""]
         ,"w": ["^c", False, ""]
-        ,"y": ["^v", False, ""] }
+        ,"y": ["^v", False, ""]
+        ,"Backspace": ["^z", False, ""] }
    , "altShift"
       : {".": ["^{End}", True, ""]
        , ",": ["^{Home}", True, ""] }}
@@ -143,6 +145,8 @@ global ctrlSpaceActive := False
 !y::
 !z::
 ^Space::
+^Backspace::
+!Backspace::
 !+,::
 !+.::
 ProcessKeystrokes(A_ThisHotkey)
@@ -250,9 +254,13 @@ ParseMods(keystrokes)
 ; @return String keys such as c
 ParseKey(keystrokes)
 {
-  If InStr(keystrokes, "Space")
+  If InStr(keystrokes, "Backspace")
   {
-    Return "space"
+    Return "Backspace"
+  }
+  Else If InStr(keystrokes, "Space")
+  {
+    Return "Space"
   }
 
   StringRight, letter, keystrokes, 1
@@ -278,7 +286,11 @@ AddShift(mods, ctrlSpaceSensitive)
 ; @param keystrokes String original keystrokes
 Passthrough(keystrokes)
 {
-    If InStr(keystrokes, "Space")
+    If InStr(keystrokes, "Backspace")
+    {
+      Send ^{Backspace}
+    }
+    Else If InStr(keystrokes, "Space")
     {
       Send ^{Space}
     }
