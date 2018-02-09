@@ -54,10 +54,11 @@ global keys
         ,"p": ["{Up}", True, ""]
         ,"r": ["^f", False, ""]
         ,"s": ["^f", False, ""]
-        ,"v": ["{PgDown}", True, ""]
+        ,"v": ["{PgDn}", True, ""]
         ,"w": ["^x", False, ""]
         ,"x": ["", False, "MacroStartCtrlX"]
         ,"y": ["^v", False, ""]
+        ,"/": ["^z", False, ""]
         ,"Space": ["", True, "MacroCtrlSpace"]
         ,"Backspace": ["^+{Left}^x", False,""] }
     , "ctrlXPrefix"
@@ -144,6 +145,7 @@ global ctrlSpaceActive := False
 !x::
 !y::
 !z::
+^/::
 ^Space::
 ^Backspace::
 !Backspace::
@@ -388,7 +390,6 @@ ClearCtrlX()
 MacroKillLine()
 {
   Send {ShiftDown}{END}{ShiftUp}
-  Sleep 50
   Send ^x
   Send {Del}
 }
