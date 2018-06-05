@@ -85,6 +85,7 @@
 
 ;; Unsetting undo
 (global-unset-key "\C-_")
+(global-set-key (kbd "C-=") 'er/expand-region)
 
 
 (global-unset-key "\M-a")

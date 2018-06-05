@@ -48,6 +48,7 @@ global keys
         ,"e": ["{End}", True, ""]
         ,"f": ["{Right}", True, ""]
         ,"g": ["{Escape}", False, ""]
+        ,"h": ["", False, ""]
         ,"k": ["", False, "MacroKillLine"]
         ,"n": ["{Down}", True, ""]
         ,"o": ["{Enter}", False, ""]
@@ -62,7 +63,8 @@ global keys
         ,"Space": ["", True, "MacroCtrlSpace"]
         ,"Backspace": ["^+{Left}^x", False,""] }
     , "ctrlXPrefix"
-      : {"f": ["^o", False, ""]
+      : {"c": ["!{F4}", False, ""]
+        ,"f": ["^o", False, ""]
         ,"g": ["^f", False, ""]
         ,"h": ["^a", False, ""]
         ,"k": ["!{F4}", False, ""]
