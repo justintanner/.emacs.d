@@ -42,7 +42,8 @@
       ((eq system-type 'darwin) (set-default-font "Inconsolata-16")))
 
 ;; list of things to try when hippie-expanding
-(setq hippie-expand-try-functions-list '(try-expand-dabbrev
+(setq hippie-expand-try-functions-list '(yas-expand
+                                         try-expand-dabbrev
                                          try-expand-dabbrev-all-buffers
                                          try-expand-dabbrev-from-kill
                                          try-complete-file-name-partially
@@ -52,6 +53,7 @@
                                          ;;try-expand-line
                                          try-complete-lisp-symbol-partially
                                          try-complete-lisp-symbol))
+
 
 ;; TODO: see which of these seetings I still need.
 (setq PC-word-delimiters "-_.=")

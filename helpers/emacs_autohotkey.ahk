@@ -10,14 +10,14 @@
 ; Installation
 ; 1) Download and Install AutoHotkey https://autohotkey.com/
 ; 2) Launch emacs_autohotkey.ahk
-; 3) Add emacs_authotkey to your Windows startup script.
+; 3) Set emacs_authotkey.ahk to start on boot.
 
 ; Customization
 ; To customize the keybindings modfiy the global "keys" below. AutoHotkey is a little fussy about whitespace, so please
 ; follow the syntax of the existing data structure exactly without adding whitespace or newlines.
 
 ; Namespaces
-; This script uses namespaces to send different commands to different apps.
+; This script orangizes its keybindings into namespaces to send different commands to different apps.
 ; "globalOverride" contains keybindings that override all other apps (including Emacs)
 ; "globalEmacs" brings Emacs style keybindings to all other apps
 ; "chrome.exe" (and other EXE names) specifies app specific keybindings taking precendence over "globalEmacs"
@@ -38,8 +38,7 @@ SetKeyDelay 0
 global keys
 := {"globalOverride"
   : {"ctrl"
-    : {"t": ["!{Esc}", False, ""]
-      ,"j": ["{Ctrl up}{LWin}", False, ""] }}
+    : {"j": ["^{Esc}", False, ""] } }
  , "globalEmacs"
     : {"ctrl"
       : {"a": ["{Home}", True, ""]
@@ -95,6 +94,9 @@ global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu6
 global ctrlXActive := False
 global ctrlSpaceActive := False
 
+; Uncomment this line if you wish ctrl+t to activate the Alt+Tab app switcher.
+LCtrl & t::AltTab
+
 ^a::
 ^b::
 ^c::
@@ -114,7 +116,6 @@ global ctrlSpaceActive := False
 ^q::
 ^r::
 ^s::
-^t::
 ^u::
 ^v::
 ^w::
@@ -162,6 +163,7 @@ ProcessKeystrokes(keystrokes)
 {
   mods := ParseMods(keystrokes)
   key := ParseKey(keystrokes)
+  ;MsgBox %mods% %key%
   namespace := CurrentNamespace(mods, key)
 
   If (IsEmacs() && namespace != "globalOverride")
@@ -234,6 +236,10 @@ ParseMods(keystrokes)
   {
     Return "altShift"
   }
+  Else If InStr(keystrokes, "LCtrl")
+  {
+    Return "ctrl"
+  }
   Else If InStr(keystrokes, "^")
   {
     If (ctrlXActive)
@@ -258,7 +264,11 @@ ParseMods(keystrokes)
 ; @return String keys such as c
 ParseKey(keystrokes)
 {
-  If InStr(keystrokes, "Backspace")
+  If InStr(keystrokes, "& t")
+  {
+    Return "t"
+  }
+  Else If InStr(keystrokes, "Backspace")
   {
     Return "Backspace"
   }
@@ -395,3 +405,4 @@ MacroKillLine()
   Send ^x
   Send {Del}
 }
+
