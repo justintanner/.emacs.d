@@ -27,7 +27,9 @@
 )
 (add-hook 'web-mode-hook  'my-web-mode-hook)
 
+(setq js-indent-level 2)
 
 ;; Set yasnippets to global
 (require 'yasnippet)
 (yas-global-mode 1)
+(setq yas-snippet-dirs '("~/emacs.d/snippets"))

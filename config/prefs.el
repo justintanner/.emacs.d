@@ -42,7 +42,7 @@
       ((eq system-type 'darwin) (set-default-font "Inconsolata-16")))
 
 ;; list of things to try when hippie-expanding
-(setq hippie-expand-try-functions-list '(yas-expand
+(setq hippie-expand-try-functions-list '(yas-hippie-try-expand
                                          try-expand-dabbrev
                                          try-expand-dabbrev-all-buffers
                                          try-expand-dabbrev-from-kill
