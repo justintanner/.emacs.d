@@ -37,8 +37,11 @@ SetKeyDelay 0
 
 global keys
 := {"globalOverride"
-  : {"ctrl"
-    : {"j": ["^{Esc}", False, ""] } }
+    : {"ctrl"
+      : {"x": ["", False, "MacroStartCtrlX"] }
+     , "ctrlXPrefix"
+      : {"j": ["^{Esc}", False, ""]
+       , "t": ["", False, "MacroStartWindowSwitcher"] } }
  , "globalEmacs"
     : {"ctrl"
       : {"a": ["{Home}", True, ""]
@@ -56,7 +59,6 @@ global keys
         ,"s": ["^f", False, ""]
         ,"v": ["{PgDn}", True, ""]
         ,"w": ["^x", False, ""]
-        ,"x": ["", False, "MacroStartCtrlX"]
         ,"y": ["^v", False, ""]
         ,"/": ["^z", False, ""]
         ,"Space": ["", True, "MacroCtrlSpace"]
@@ -93,9 +95,7 @@ global keys
 global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
 global ctrlXActive := False
 global ctrlSpaceActive := False
-
-; Uncomment this line if you wish ctrl+t to activate the Alt+Tab app switcher.
-LCtrl & t::AltTab
+global windowSwitcherActive := False
 
 ^a::
 ^b::
@@ -116,6 +116,7 @@ LCtrl & t::AltTab
 ^q::
 ^r::
 ^s::
+^t::
 ^u::
 ^v::
 ^w::
@@ -154,17 +155,24 @@ LCtrl & t::AltTab
 !Backspace::
 !+,::
 !+.::
+!^t::
 ProcessKeystrokes(A_ThisHotkey)
+Return
+
+~*Escape::
+IfWinExist ahk_class #32771
+  ClearWindowSwitcher()
 Return
 
 ; Entry point for processing keystrokes and taking the appropriate action.
 ; @param keystrokes String keystrokes pressed by the user (usually A_ThisHotkey)
 ProcessKeystrokes(keystrokes)
 {
+  OutputDebug %keystrokes%
   mods := ParseMods(keystrokes)
   key := ParseKey(keystrokes)
-  ;MsgBox %mods% %key%
   namespace := CurrentNamespace(mods, key)
+  OutputDebug %mods% %key% %namespace%
 
   If (IsEmacs() && namespace != "globalOverride")
   {
@@ -232,13 +240,9 @@ KeybindingExists(namespace, mods, key)
 ; @return String translated modifiers such as ctrl or alt
 ParseMods(keystrokes)
 {
-  If InStr(keystrokes, "!+")
+  If InStr(keystrokes, "!^t")
   {
-    Return "altShift"
-  }
-  Else If InStr(keystrokes, "LCtrl")
-  {
-    Return "ctrl"
+    Return "ctrlXPrefix"
   }
   Else If InStr(keystrokes, "^")
   {
@@ -250,6 +254,10 @@ ParseMods(keystrokes)
     {
       Return "ctrl"
     }
+  }
+  Else If InStr(keystrokes, "!+")
+  {
+    Return "altShift"
   }
   Else If InStr(keystrokes, "!")
   {
@@ -378,7 +386,7 @@ CurrentApp()
   Return exeName
 }
 
-; Start a selection mark in a non Emacs app
+; Start text selection in a non Emacs app
 MacroCtrlSpace()
 {
   ctrlSpaceActive := True
@@ -390,12 +398,40 @@ MacroStartCtrlX()
 {
   ctrlXActive := True
   SetTimer, ClearCtrlX, -750
+
+  If (IsEmacs())
+  {
+    Send ^x
+  }
 }
 
 ; Clears Ctrl-x prefix state, invoked by the timer above.
 ClearCtrlX()
 {
   ctrlXActive := False
+}
+
+MacroStartWindowSwitcher()
+{
+  If windowSwitcherActive
+  {
+    Send {tab}
+  }
+  Else
+  {
+    Send {Alt down}{tab}
+  }
+
+  windowSwitcherActive := True
+
+  SetTimer, ClearWindowSwitcher, -2000
+  SetTimer, ClearCtrlX, -750
+}
+
+ClearWindowSwitcher()
+{
+  Send {Alt up}
+  windowSwitcherActive := False
 }
 
 ; Macro to kill a line and add it to the clipboard

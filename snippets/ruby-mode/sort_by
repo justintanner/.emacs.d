@@ -1,0 +1,4 @@
+#name : sort_by { |element| ... }
+#group : collections
+# --
+sort_by { |${element}| $0 }

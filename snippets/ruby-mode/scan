@@ -1,0 +1,4 @@
+#name : scan(/pattern/) { |match| ... }
+#group : collections
+# --
+scan(/$1/) { |${match}| $0 }

@@ -1,0 +1,6 @@
+#name : context '' do ... end
+#group : rspec
+# --
+context '$1' do
+  $0
+end

@@ -1,0 +1,6 @@
+#name : it '' do ... end
+#group : rspec
+# --
+it '$1' do
+  $0
+end

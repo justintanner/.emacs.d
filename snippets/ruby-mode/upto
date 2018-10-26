@@ -1,0 +1,4 @@
+#name : upto(...) { |n| ... }
+#group : control structure
+# --
+upto(${1:n}) { |${2:index}| $0 }

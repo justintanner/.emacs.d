@@ -1,0 +1,4 @@
+#name : downto(...) { |n| ... }
+#group : control structure
+# --
+downto(${1}) { |${n}| $0 }

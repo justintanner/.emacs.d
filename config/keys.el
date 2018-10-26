@@ -10,8 +10,7 @@
 ;; C-h prefix / chord
 (global-set-key "\C-h\C-k"  'describe-key)
 ;; C-i **not** emacs is resolving C-i to C-TAB
-;; C-j is now global search (windows and mac)
-(global-unset-key "\C-j")
+;; C-j something
 ;; C-k kill line
 (global-unset-key "\C-l")
 ;; C-m RET
@@ -21,10 +20,7 @@
 ;; C-q quoted insert
 ;; C-r i-search backwards
 (global-set-key "\C-s" 'isearch-forward-regexp)
-
-;; Used as next windows globally
-(global-unset-key "\C-t")
-
+(global-set-key "\C-t" 'transpose-lines)
 ;; C-u universal argument
 ;; C-v page down
 (global-set-key "\C-w" 'kill-region)
