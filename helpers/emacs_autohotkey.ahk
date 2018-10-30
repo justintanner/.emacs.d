@@ -52,11 +52,13 @@ global keys
         ,"g": ["{Escape}", False, ""]
         ,"h": ["", False, ""]
         ,"k": ["", False, "MacroKillLine"]
+        ,"j": ["", True, ""]
         ,"n": ["{Down}", True, ""]
         ,"o": ["{Enter}", False, ""]
         ,"p": ["{Up}", True, ""]
         ,"r": ["^f", False, ""]
         ,"s": ["^f", False, ""]
+        ,"t": ["", True, ""]
         ,"v": ["{PgDn}", True, ""]
         ,"w": ["^x", False, ""]
         ,"y": ["^v", False, ""]
@@ -424,7 +426,7 @@ MacroStartWindowSwitcher()
 
   windowSwitcherActive := True
 
-  SetTimer, ClearWindowSwitcher, -2000
+  SetTimer, ClearWindowSwitcher, -1000
   SetTimer, ClearCtrlX, -750
 }
 
