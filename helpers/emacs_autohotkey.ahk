@@ -36,13 +36,7 @@
 SetKeyDelay 0
 
 global keys
-:= {"globalOverride"
-    : {"ctrl"
-      : {"x": ["", False, "MacroStartCtrlX"] }
-     , "ctrlXPrefix"
-      : {"j": ["^{Esc}", False, ""]
-       , "t": ["", False, "MacroStartWindowSwitcher"] } }
- , "globalEmacs"
+:= {"globalEmacs"
     : {"ctrl"
       : {"a": ["{Home}", True, ""]
         ,"b": ["{Left}", True, ""]
@@ -84,15 +78,25 @@ global keys
         ,"Backspace": ["^z", False, ""] }
    , "altShift"
       : {".": ["^{End}", True, ""]
-       , ",": ["^{Home}", True, ""] }}
- , "chrome.exe"
-   : {"ctrlXPrefix"
-     : {"b": ["^o", False, ""]
-      , "d": ["^+j", False, ""]
-      , "k": ["^w", False, ""]
-      , "f": ["^l", False, ""] }
-    , "alt"
-      : {"n": ["^t", False, ""] }}}
+       , ",": ["^{Home}", True, ""] } } }
+
+keys["chrome.exe"]
+:= {"ctrlXPrefix"
+   : {"b": ["^o", False, ""]
+    , "d": ["^+j", False, ""]
+    , "k": ["^w", False, ""]
+    , "f": ["^l", False, ""] }
+  , "alt"
+    : {"n": ["^t", False, ""] } }
+
+keys["globalOverride"]
+:= {"ctrl"
+    : {"x": ["", False, "MacroStartCtrlX"] }
+  , "ctrlXPrefix"
+    : {"j": ["^{Esc}", False, ""]
+     , "t": ["", False, "MacroStartWindowSwitcher"] }
+  , "alt"
+    : {"m": ["{LWin down}{Up}{LWin up}", False, ""] } }
 
 global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
 global ctrlXActive := False
@@ -170,11 +174,11 @@ Return
 ; @param keystrokes String keystrokes pressed by the user (usually A_ThisHotkey)
 ProcessKeystrokes(keystrokes)
 {
-  OutputDebug %keystrokes%
   mods := ParseMods(keystrokes)
   key := ParseKey(keystrokes)
   namespace := CurrentNamespace(mods, key)
-  OutputDebug %mods% %key% %namespace%
+
+  OutputDebug Mods: %mods% key: %key% namespace: %namespace%
 
   If (IsEmacs() && namespace != "globalOverride")
   {
@@ -207,13 +211,13 @@ LookupAndTranslate(namespace, mods, key)
 
   If (toMacro && (toMacro != ""))
   {
-    ; MsgBox Executing a macro: %toMacro%
+    OutputDebug Executing a macro: %toMacro%
     %toMacro%()
   }
   Else
   {
     toKey := AddShift(toKey, ctrlSpaceSensitive)
-    ; MsgBox Sending: %toMods%%toKey%
+    OutputDebug Sending: %toKey%
     Send %toKey%
   }
 
@@ -413,6 +417,7 @@ ClearCtrlX()
   ctrlXActive := False
 }
 
+; Alt-tab replacement
 MacroStartWindowSwitcher()
 {
   If windowSwitcherActive
