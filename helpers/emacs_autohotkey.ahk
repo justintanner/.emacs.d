@@ -94,7 +94,9 @@ keys["globalOverride"]
     : {"x": ["", False, "MacroStartCtrlX"] }
   , "ctrlXPrefix"
     : {"j": ["^{Esc}", False, ""]
-     , "t": ["", False, "MacroStartWindowSwitcher"] }
+     , "t": ["", False, "MacroStartWindowSwitcher"]
+     , "]": ["^#{Right}", False, ""]
+     , "[": ["^#{Left}", False, ""] }
   , "alt"
     : {"m": ["{LWin down}{Up}{LWin up}", False, ""] } }
 
@@ -129,6 +131,8 @@ global windowSwitcherActive := False
 ^x::
 ^y::
 ^z::
+^[::
+^]::
 !a::
 !b::
 !c::
