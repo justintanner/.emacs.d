@@ -84,8 +84,8 @@ keys["chrome.exe"]
 := {"ctrlXPrefix"
    : {"b": ["^o", False, ""]
     , "d": ["^+j", False, ""]
-    , "k": ["^w", False, ""]
-    , "f": ["^l", False, ""] }
+    , "f": ["^l", False, ""]
+    , "k": ["^w", False, ""] }
   , "alt"
     : {"n": ["^t", False, ""] } }
 

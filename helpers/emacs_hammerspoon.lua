@@ -9,7 +9,7 @@
 
 -- Installation
 -- 1) Download and hammerspoon http://www.hammerspoon.org/
--- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua (or import emacs_hammerspoon.lue into your exisiting inti.lua)
+-- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua (or import emacs_hammerspoon.lua into your exisiting inti.lua)
 -- 3) Start Hammerspoon
 
 -- Customization
@@ -29,12 +29,6 @@
 -- This keybinding states, for all apps other than Emacs map Ctrl+x to a macro called "macroStartCtrlX" and unset any previous mark.
 
 local keys = {
-  ['globalOverride'] = {
-    ['ctrl'] = {
-      ['t'] = {nil, nil, false, 'macroAltTab'},
-      ['j'] = {'cmd', 'space', false, nil}
-    }
-  },
   ['globalEmacs'] = {
     ['ctrl'] = {
       ['a'] = {'ctrl', 'a', true, nil},
@@ -91,7 +85,21 @@ local keys = {
     ['alt'] = {
       ['n'] = {'cmd', 't', false, nil},            
     }
-  }
+  },
+  ['globalOverride'] = {
+    ['ctrl'] = {
+      ['x'] = {nil, nil, false, 'macroStartCtrlX'},
+    },
+    ['ctrlXPrefix'] = {
+      ['t'] = {nil, nil, false, 'macroAltTab'},
+      ['j'] = {'cmd', 'space', false, nil},
+      [']'] = {'ctrl', 'right', false, nil},
+      ['['] = {'ctrl', 'left', false, nil},            
+    },
+    ['alt'] = {
+      ['s'] = {{'shift', 'ctrl', 'cmd'}, '5', false, nil},
+    }
+  }  
 }
 
 local appsWithNativeEmacsKeybindings = {
@@ -103,30 +111,35 @@ local appsWithNativeEmacsKeybindings = {
 local ctrlXActive = false
 local ctrlSpaceActive = false
 local currentApp = nil
-local globalEmacsMap = hs.hotkey.modal.new()
-local globalOverrideMap = hs.hotkey.modal.new()
+local modal = hs.hotkey.modal.new()
 
 --- Entry point for processing keystrokes and taking the appropriate action.
 -- @param mods String modifiers such as: ctrl or alt
 -- @param key String keys such as: a, b, c, etc
-function processKeystrokes(mods, key)
+function processKeystrokes(originalMods, originalKey)
   return function()
-    globalEmacsMap:exit()
-    globalOverrideMap:exit()
-
+    -- My lack of understand of lua and closures probably requires this assignment.
+    mods = originalMods
+    key = originalKey
+    
     if ctrlXActive and mods == 'ctrl' then
       mods = 'ctrlXPrefix'
     end
 
     namespace = currentNamespace(mods, key)
 
+    if isEmacs() and namespace ~= 'globalOverride' then
+      print('Passingthrough to Emacs mods: ' .. mods .. ' keys: ' .. key)
+      tapKey(mods, key)    
+      return
+    end
+
     if keybindingExists(namespace, mods, key) then
       lookupAndTranslate(namespace, mods, key)      
     else
+      print('Passingthrough mods: ' .. mods .. ' keys: ' .. key)
       tapKey(mods, key)
     end
-
-    chooseKeyMap()
   end
 end
 
@@ -135,11 +148,6 @@ end
 -- @param mods String modifiers key such as ctrl or alt.
 -- @param key String keys such as: a, b or c
 function lookupAndTranslate(namespace, mods, key)
-  if isEmacs() and namespace ~= 'globalOverride' then
-    tapKey(mods, key)    
-    return
-  end
-  
   config = keys[namespace][mods][key]
   toMods = config[1]
   toKey = config[2]
@@ -163,7 +171,7 @@ function lookupAndTranslate(namespace, mods, key)
 
   if toMacro ~= 'macroStartCtrlX' then
     ctrlXActive = false
-  end
+  end  
 end
 
 --- Logs a keybinding translation to the Hammerspoon console
@@ -196,6 +204,8 @@ function keybindingExists(namespace, mods, key)
     keys[namespace][mods][key] ~= nil)
 end
 
+
+
 --- Checks the global keys table for a keybinding
 -- @param namespace String namespace of the keybinding (eg globalEmacs, Google Chrome, etc)
 -- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
@@ -211,11 +221,15 @@ function currentNamespace(mods, key)
 end
 
 --- Excutes a keystroke with modifiers (faster than hs.eventtap.keystroke)
--- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param mods String modifier keys such as alt, ctrl, shift
 -- @param key String key such as a, b, c, etc
 function tapKey(mods, key)
+  modal:exit()
+  
   hs.eventtap.event.newKeyEvent(mods, key, true):post()
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
+
+  modal:enter()
 end
 
 --- Appends a shift modifier key (if needed) to the existing mods.
@@ -236,23 +250,6 @@ function addShift(mods, ctrlSpaceSensitive)
   return mods
 end
 
---- Assign keybindings to every keys
-function assignKeys()
-  all_keys = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-              'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-              '/', 'space', 'delete'}
-  
-  for i, key in ipairs(all_keys) do
-    globalEmacsMap:bind('ctrl', key, processKeystrokes('ctrl', key), nil)
-    globalEmacsMap:bind('alt', key, processKeystrokes('alt', key), nil)
-    globalOverrideMap:bind('ctrl', key, processKeystrokes('ctrl', key), nil)
-    globalOverrideMap:bind('alt', key, processKeystrokes('alt', key), nil)
-  end
-
-  globalEmacsMap:bind({'alt', 'shift'}, '.', processKeystrokes('altShift', '.'), nil)
-  globalEmacsMap:bind({'alt', 'shift'}, ',', processKeystrokes('altShift', ','), nil)
-end
-
 --- Does the current app already have Emacs keybinings
 -- @return Boolean true if Emacs
 function isEmacs()
@@ -263,19 +260,6 @@ function isEmacs()
   end
 
   return false
-end
-
---- Toggle on and off keybindings depending if we are in Emacs or not
-function chooseKeyMap()
-  if isEmacs() then
-    print('Passingthrough keys to: ' .. currentApp)
-    globalEmacsMap:exit()
-    globalOverrideMap:enter()     
-  else
-    print('Translating keys for: ' .. currentApp)
-    globalOverrideMap:exit()         
-    globalEmacsMap:enter()      
-  end
 end
 
 --- Currently running application on Hammerspoon start-up
@@ -291,9 +275,25 @@ end
 function appWatcherFunction(appName, eventType, appObject)
   if (eventType == hs.application.watcher.activated) then
     currentApp = appName
-    
-    chooseKeyMap()    
   end
+end
+
+--- Assign keybindings
+function assignKeys()
+  for namespace, modTable in pairs(keys) do
+    for mod, keyTable in pairs(modTable) do
+      for key, keyConfig in pairs(keyTable) do      
+        print('key: ' .. key .. ' mod: ' .. mod .. ' namespace: ' .. namespace)              
+        if mod == 'altShift' then
+          modal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
+        elseif mod:match('alt') then
+          modal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
+        elseif mod:match('ctrl') then
+          modal:bind('ctrl', key, processKeystrokes('ctrl', key), nil, nil)
+        end
+      end
+    end
+  end  
 end
 
 -- Launches the Hammerspoon alt-tab alternative. Include minimized/hidden windows (sorta works).
@@ -316,13 +316,18 @@ end
 function macroStartCtrlX()
   ctrlXActive = true
 
-  hs.timer.doAfter(0.75,function() ctrlXActive = false end)
+  hs.timer.doAfter(1, function() print 'End CtrlX'; ctrlXActive = false end)
+
+  if isEmacs() then
+    print('Passingthrough C-x to Emacs')
+    tapKey({'ctrl'}, 'x')
+  end
 end
 
 -- Kill a word behind the cursor and put it in the clipboard
 function macroBackwardsKillWord()
   tapKey({'shift', 'alt'}, 'left')
-  tapKey('cmd', 'x')  
+  tapKey('cmd', 'x')
 end
 
 print('---------------------------------')
@@ -332,7 +337,7 @@ assignKeys()
 
 currentApp = appOnStartup()
 
-chooseKeyMap()
-
 local appWatcher = hs.application.watcher.new(appWatcherFunction)
 appWatcher:start()
+
+modal:enter()  
