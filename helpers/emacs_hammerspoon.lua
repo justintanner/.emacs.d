@@ -19,7 +19,7 @@
 -- This script uses namespaces to send different commands to different apps.
 -- "globalOverride" contains keybindings that override all other apps (including Emacs)
 -- "globalEmacs" brings Emacs style keybindings to all other apps
--- "Google Chrome" (and app names) specifies app specific keybindings taking precendence over "globalEmacs"
+-- "Google Chrome" (and other app names) creates app specific keybindings that take precendence over "globalEmacs"
 
 -- Syntax Example
 -- ['globalEmacs'] = { ["ctrl"] = { ['f'] = {nil, 'right', true, nil} } }
@@ -93,8 +93,8 @@ local keys = {
     ['ctrlXPrefix'] = {
       ['t'] = {nil, nil, false, 'macroAltTab'},
       ['j'] = {'cmd', 'space', false, nil},
-      [']'] = {'ctrl', 'right', false, nil},
-      ['['] = {'ctrl', 'left', false, nil},            
+      [']'] = {{'ctrl', 'cmd'}, '2', false, nil},
+      ['['] = {{'ctrl', 'cmd'}, '1', false, nil},            
     },
     ['alt'] = {
       ['s'] = {{'shift', 'ctrl', 'cmd'}, '5', false, nil},
@@ -155,8 +155,8 @@ function lookupAndTranslate(namespace, mods, key)
   toMacro = config[4]
 
   if toMacro ~= nil then
-    _G[toMacro]()
     print('Executing macro: ' .. toMacro)              
+    _G[toMacro]()
   else
     toMods = addShift(toMods, ctrlSpaceSensitive)
     
@@ -220,13 +220,29 @@ function currentNamespace(mods, key)
   return 'globalEmacs'
 end
 
---- Excutes a keystroke with modifiers (faster than hs.eventtap.keystroke)
+--- Presses and releases a keystroke with modifiers (faster than hs.eventtap.keystroke)
 -- @param mods String modifier keys such as alt, ctrl, shift
 -- @param key String key such as a, b, c, etc
 function tapKey(mods, key)
   modal:exit()
   
   hs.eventtap.event.newKeyEvent(mods, key, true):post()
+  hs.eventtap.event.newKeyEvent(mods, key, false):post()
+
+  modal:enter()
+end
+
+function holdKey(mods, key)
+  modal:exit()
+  
+  hs.eventtap.event.newKeyEvent(mods, key, true):post()
+
+  modal:enter()
+end
+
+function releaseKey(mods, key)
+  modal:exit()
+  
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
 
   modal:enter()
@@ -278,21 +294,27 @@ function appWatcherFunction(appName, eventType, appObject)
   end
 end
 
---- Assign keybindings
+--- Assign all keybindings based on the entries in the global keys
 function assignKeys()
   for namespace, modTable in pairs(keys) do
     for mod, keyTable in pairs(modTable) do
-      for key, keyConfig in pairs(keyTable) do      
-        print('key: ' .. key .. ' mod: ' .. mod .. ' namespace: ' .. namespace)              
-        if mod == 'altShift' then
-          modal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
-        elseif mod:match('alt') then
-          modal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
-        elseif mod:match('ctrl') then
-          modal:bind('ctrl', key, processKeystrokes('ctrl', key), nil, nil)
-        end
+      for key, keyConfig in pairs(keyTable) do
+        assignKey(mod, key)
       end
     end
+  end  
+end
+
+--- Assigns a single keystroke to the global modal, which allows this script to intercept keys
+-- @param mod String modifier key such as alt, ctrl, shift
+-- @param key String key such as a, b, c, etc
+function assignKey(mod, key)
+  if mod == 'altShift' then
+    modal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
+  elseif mod:match('alt') then
+    modal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
+  elseif mod:match('ctrl') then
+    modal:bind('ctrl', key, processKeystrokes('ctrl', key), nil, nil)
   end  
 end
 
