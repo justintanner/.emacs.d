@@ -110,8 +110,7 @@ local appsWithNativeEmacsKeybindings = {
 
 local ctrlXActive = false
 local ctrlSpaceActive = false
-local currentApp = nil
-local modal = hs.hotkey.modal.new()
+local hotkeyModal = hs.hotkey.modal.new()
 
 --- Entry point for processing keystrokes and taking the appropriate action.
 -- @param mods String modifiers such as: ctrl or alt
@@ -213,8 +212,8 @@ end
 function currentNamespace(mods, key)
   if keybindingExists('globalOverride', mods, key) then
     return 'globalOverride'   
-  elseif currentApp ~= nil and keybindingExists(currentApp, mods, key) then
-    return currentApp      
+  elseif currentApp() ~= nil and keybindingExists(currentApp(), mods, key) then
+    return currentApp()      
   end
 
   return 'globalEmacs'
@@ -224,28 +223,28 @@ end
 -- @param mods String modifier keys such as alt, ctrl, shift
 -- @param key String key such as a, b, c, etc
 function tapKey(mods, key)
-  modal:exit()
+  hotkeyModal:exit()
   
   hs.eventtap.event.newKeyEvent(mods, key, true):post()
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
 
-  modal:enter()
+  hotkeyModal:enter()
 end
 
 function holdKey(mods, key)
-  modal:exit()
+  hotkeyModal:exit()
   
   hs.eventtap.event.newKeyEvent(mods, key, true):post()
 
-  modal:enter()
+  hotkeyModal:enter()
 end
 
 function releaseKey(mods, key)
-  modal:exit()
+  hotkeyModal:exit()
   
   hs.eventtap.event.newKeyEvent(mods, key, false):post()
 
-  modal:enter()
+  hotkeyModal:enter()
 end
 
 --- Appends a shift modifier key (if needed) to the existing mods.
@@ -270,7 +269,7 @@ end
 -- @return Boolean true if Emacs
 function isEmacs()
   for index, value in ipairs(appsWithNativeEmacsKeybindings) do
-    if value:lower() == currentApp:lower() then
+    if value:lower() == currentApp():lower() then
       return true
     end
   end
@@ -278,19 +277,12 @@ function isEmacs()
   return false
 end
 
---- Currently running application on Hammerspoon start-up
-function appOnStartup()
+--- Currently running application
+function currentApp()
   app = hs.application.frontmostApplication()
 
   if app ~= nil then
     return app:title()
-  end
-end
-
--- Updates the global currentApp when the user switches applications
-function appWatcherFunction(appName, eventType, appObject)
-  if (eventType == hs.application.watcher.activated) then
-    currentApp = appName
   end
 end
 
@@ -310,11 +302,11 @@ end
 -- @param key String key such as a, b, c, etc
 function assignKey(mod, key)
   if mod == 'altShift' then
-    modal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
+    hotkeyModal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
   elseif mod:match('alt') then
-    modal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
+    hotkeyModal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
   elseif mod:match('ctrl') then
-    modal:bind('ctrl', key, processKeystrokes('ctrl', key), nil, nil)
+    hotkeyModal:bind('ctrl', key, processKeystrokes('ctrl', key), nil, nil)
   end  
 end
 
@@ -357,9 +349,4 @@ print('Starting Emacs Hammerspoon Script')
 
 assignKeys()
 
-currentApp = appOnStartup()
-
-local appWatcher = hs.application.watcher.new(appWatcherFunction)
-appWatcher:start()
-
-modal:enter()  
+hotkeyModal:enter()  

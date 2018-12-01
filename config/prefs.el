@@ -37,7 +37,7 @@
 (setq-default tab-width 2)
 (setq tab-width 2)
 
-;; Font's for win10 and osx (add osx)
+;; Font's for win10 and osx
 (cond ((eq system-type 'windows-nt) (set-default-font "Inconsolata-13"))
       ((eq system-type 'darwin) (set-default-font "Inconsolata-16")))
 
