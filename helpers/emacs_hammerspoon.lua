@@ -9,8 +9,8 @@
 
 -- Installation
 -- 1) Download and hammerspoon http://www.hammerspoon.org/
--- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua (or import emacs_hammerspoon.lua into your exisiting inti.lua)
 -- 3) Start Hammerspoon
+-- 2) Copy emacs_hammerspoon.lua to ~/.hammerspoon/init.lua (or import emacs_hammerspoon.lua into your exisiting inti.lua)
 
 -- Customization
 -- To customize the keybindings modfiy the global "keys" below.
@@ -91,7 +91,7 @@ local keys = {
       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
     },
     ['ctrlXPrefix'] = {
-      ['t'] = {nil, nil, false, 'macroAltTab'},
+      ['t'] = {{'alt'}, 'tab', false, nil},
       ['j'] = {'cmd', 'space', false, nil},
       [']'] = {{'ctrl', 'cmd'}, '2', false, nil},
       ['['] = {{'ctrl', 'cmd'}, '1', false, nil},            
@@ -110,6 +110,7 @@ local appsWithNativeEmacsKeybindings = {
 
 local ctrlXActive = false
 local ctrlSpaceActive = false
+local windowSwitcherActive = false
 local hotkeyModal = hs.hotkey.modal.new()
 
 --- Entry point for processing keystrokes and taking the appropriate action.
@@ -231,22 +232,6 @@ function tapKey(mods, key)
   hotkeyModal:enter()
 end
 
-function holdKey(mods, key)
-  hotkeyModal:exit()
-  
-  hs.eventtap.event.newKeyEvent(mods, key, true):post()
-
-  hotkeyModal:enter()
-end
-
-function releaseKey(mods, key)
-  hotkeyModal:exit()
-  
-  hs.eventtap.event.newKeyEvent(mods, key, false):post()
-
-  hotkeyModal:enter()
-end
-
 --- Appends a shift modifier key (if needed) to the existing mods.
 -- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
 -- @param ctrlSpaceSensitive Boolean current keybinding is amenable to holding shift
@@ -310,14 +295,6 @@ function assignKey(mod, key)
   end  
 end
 
--- Launches the Hammerspoon alt-tab alternative. Include minimized/hidden windows (sorta works).
-function macroAltTab()
-  switcher_space = hs.window.switcher.new(hs.window.filter.new():setCurrentSpace(true):setDefaultFilter{})
-  switcher_space.nextWindow()
-
-  window = hs.window.frontmostWindow()
-  window:focus()
-end
 
 -- Start a selection mark in a non Emacs app
 function macroCtrlSpace()
