@@ -1,7 +1,10 @@
 ;; turn off the menubars and scroll bars
+(if (display-graphic-p)
+  (progn    
+    (toggle-scroll-bar -1)
+    (tool-bar-mode -1)))
+
 (menu-bar-mode -1)
-(toggle-scroll-bar -1) 
-(tool-bar-mode -1)
 
 ;; start emacs GUI clients maximized
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
@@ -82,4 +85,3 @@
 (setq confirm-before-kill-emacs nil)
 (setq line-number-mode t)
 (setq require-final-newline t)
-
