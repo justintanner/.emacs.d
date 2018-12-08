@@ -86,6 +86,11 @@ local keys = {
       ['n'] = {'cmd', 't', false, nil},            
     }
   },
+  ['Terminal'] = {
+    ['ctrl'] = {
+      ['y'] = {nil, nil, false, 'macroTerminalPasteHack'},
+    }
+  },
   ['globalOverride'] = {
     ['ctrl'] = {
       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
@@ -128,8 +133,8 @@ function processKeystrokes(originalMods, originalKey)
 
     namespace = currentNamespace(mods, key)
 
-    if isEmacs() and namespace ~= 'globalOverride' then
-      print('Passingthrough to Emacs mods: ' .. mods .. ' keys: ' .. key)
+    if passthroughToEmacs(mods, key) then
+      print('Passingthrough to Emacs. mods: ' .. mods .. ' keys: ' .. key)
       tapKey(mods, key)    
       return
     end
@@ -137,7 +142,7 @@ function processKeystrokes(originalMods, originalKey)
     if keybindingExists(namespace, mods, key) then
       lookupAndTranslate(namespace, mods, key)      
     else
-      print('Passingthrough mods: ' .. mods .. ' keys: ' .. key)
+      print('Could not find a keybinding passingthrough. mods: ' .. mods .. ' keys: ' .. key)
       tapKey(mods, key)
     end
   end
@@ -204,7 +209,9 @@ function keybindingExists(namespace, mods, key)
     keys[namespace][mods][key] ~= nil)
 end
 
-
+function passthroughToEmacs(mods, key)
+  return isEmacs() and (namespace ~= 'globalOverride') and not keybindingExists(currentApp(), mods, key)
+end
 
 --- Checks the global keys table for a keybinding
 -- @param namespace String namespace of the keybinding (eg globalEmacs, Google Chrome, etc)
@@ -311,7 +318,18 @@ function macroStartCtrlX()
 
   if isEmacs() then
     print('Passingthrough C-x to Emacs')
-    tapKey({'ctrl'}, 'x')
+    tapKey('ctrl', 'x')
+  end
+end
+
+-- Allows a Ctrl-y to paste into the bash terminal from the mac clipboard and within emacs from its keyboard
+function macroTerminalPasteHack()
+  local focusedWindow = hs.window.focusedWindow()
+  
+  if focusedWindow:title():match('emacs') then
+    tapKey('ctrl', 'y')
+  else
+    tapKey('cmd', 'v')
   end
 end
 
@@ -327,3 +345,4 @@ print('Starting Emacs Hammerspoon Script')
 assignKeys()
 
 hotkeyModal:enter()  
+
