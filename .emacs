@@ -3,4 +3,6 @@
 (load (format "%s/start" CONFIGDIR))
 
 (require 'server)
-(server-start)
+
+(if (display-graphic-p)
+    (server-start))

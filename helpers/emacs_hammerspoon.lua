@@ -91,6 +91,11 @@ local keys = {
       ['y'] = {nil, nil, false, 'macroTerminalPasteHack'},
     }
   },
+  ['Evernote'] = {
+    ['ctrlXPrefix'] = {
+      ['g'] = {{'alt','cmd'}, 'f', false, nil},
+    }
+  },
   ['globalOverride'] = {
     ['ctrl'] = {
       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
@@ -326,7 +331,7 @@ end
 function macroTerminalPasteHack()
   local focusedWindow = hs.window.focusedWindow()
   
-  if focusedWindow:title():match('emacs') then
+  if focusedWindow:title():match('-emacs') then
     tapKey('ctrl', 'y')
   else
     tapKey('cmd', 'v')
