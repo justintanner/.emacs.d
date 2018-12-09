@@ -331,7 +331,7 @@ end
 function macroTerminalPasteHack()
   local focusedWindow = hs.window.focusedWindow()
   
-  if focusedWindow:title():match('-emacs') then
+  if focusedWindow:title():match('-- emacs') then
     tapKey('ctrl', 'y')
   else
     tapKey('cmd', 'v')

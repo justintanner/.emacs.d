@@ -53,7 +53,7 @@
 (global-unset-key "\C-x\C-n")
 (global-unset-key "\C-xn")
 (global-set-key "\C-x\C-o" 'other-window)
-;; C-xo other-window
+(global-set-key "\C-xo" 'other-window)
 (global-set-key "\C-x\C-p" 'query-replace-regexp)
 (global-set-key "\C-xp" 'query-replace-regexp)
 (global-unset-key "\C-x\C-q")
