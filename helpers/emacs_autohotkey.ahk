@@ -94,7 +94,7 @@ keys["globalOverride"]
     : {"x": ["", False, "MacroStartCtrlX"] }
   , "ctrlXPrefix"
     : {"j": ["^{Esc}", False, ""]
-     , "t": ["", False, "MacroStartWindowSwitcher"]
+     , "t": ["!{Space}", False, ""]
      , "]": ["^#{Right}", False, ""]
      , "[": ["^#{Left}", False, ""] }
   , "alt"
@@ -103,7 +103,6 @@ keys["globalOverride"]
 global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
 global ctrlXActive := False
 global ctrlSpaceActive := False
-global windowSwitcherActive := False
 
 ^a::
 ^b::
@@ -167,11 +166,6 @@ global windowSwitcherActive := False
 !+.::
 !^t::
 ProcessKeystrokes(A_ThisHotkey)
-Return
-
-~*Escape::
-IfWinExist ahk_class #32771
-  ClearWindowSwitcher()
 Return
 
 ; Entry point for processing keystrokes and taking the appropriate action.
@@ -419,30 +413,6 @@ MacroStartCtrlX()
 ClearCtrlX()
 {
   ctrlXActive := False
-}
-
-; Alt-tab replacement
-MacroStartWindowSwitcher()
-{
-  If windowSwitcherActive
-  {
-    Send {tab}
-  }
-  Else
-  {
-    Send {Alt down}{tab}
-  }
-
-  windowSwitcherActive := True
-
-  SetTimer, ClearWindowSwitcher, -1000
-  SetTimer, ClearCtrlX, -750
-}
-
-ClearWindowSwitcher()
-{
-  Send {Alt up}
-  windowSwitcherActive := False
 }
 
 ; Macro to kill a line and add it to the clipboard
