@@ -45,14 +45,13 @@ global keys
         ,"f": ["{Right}", True, ""]
         ,"g": ["{Escape}", False, ""]
         ,"h": ["", False, ""]
-        ,"k": ["", False, "MacroKillLine"]
         ,"j": ["", True, ""]
+        ,"k": ["", False, "MacroKillLine"]
         ,"n": ["{Down}", True, ""]
         ,"o": ["{Enter}", False, ""]
         ,"p": ["{Up}", True, ""]
         ,"r": ["^f", False, ""]
         ,"s": ["^f", False, ""]
-        ,"t": ["", True, ""]
         ,"v": ["{PgDn}", True, ""]
         ,"w": ["^x", False, ""]
         ,"y": ["^v", False, ""]
@@ -80,7 +79,6 @@ global keys
       : {".": ["^{End}", True, ""]
        , ",": ["^{Home}", True, ""] } } }
 
-; Add Evernote
 keys["chrome.exe"]
 := {"ctrlXPrefix"
    : {"b": ["^o", False, ""]
@@ -88,7 +86,7 @@ keys["chrome.exe"]
     , "f": ["^l", False, ""]
     , "k": ["^w", False, ""] }
   , "alt"
-    : {"n": ["^t", False, ""] } }
+   : {"n": ["^t", False, ""] } }
 
 keys["globalOverride"]
 := {"ctrl"
@@ -177,22 +175,13 @@ ProcessKeystrokes(keystrokes)
   key := ParseKey(keystrokes)
   namespace := CurrentNamespace(mods, key)
 
-  OutputDebug Mods: %mods% key: %key% namespace: %namespace%
-
-  ; TODO: Allow app specific keybinding to override emacs, like hammerspoon.
-  If (IsEmacs() && namespace != "globalOverride")
-  {
-    SendOriginal(keystrokes)
-    Return
-  }
-
-  If KeybindingExists(namespace, mods, key)
+  If TranslationNeeded(namespace, mods, key)
   {
     LookupAndTranslate(namespace, mods, key)
   }
   Else
   {
-    SendOriginal(keystrokes)
+    SendWithoutTranslation(keystrokes)
   }
 
   Return
@@ -217,7 +206,7 @@ LookupAndTranslate(namespace, mods, key)
   Else
   {
     toKey := AddShift(toKey, ctrlSpaceSensitive)
-    OutputDebug Sending: %toKey%
+    OutputDebug Translating: %mods% %key% to: %toKey%
     Send %toKey%
   }
 
@@ -241,16 +230,21 @@ KeybindingExists(namespace, mods, key)
   Return (keys[namespace] && keys[namespace][mods] && keys[namespace][mods][key])
 }
 
-; Parses out the modifiers from a keystrokes strings ommiting the key
+; Determines if a keystroke translation is needed
+; @param namespace String namespace of the keybinding (eg globalEmacs, chrome.exe, etc)
+; @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+; @param key String key such as a, b, c, etc
+TranslationNeeded(namespace, mods, key)
+{
+  Return (KeybindingExists("globalOverride", mods, key) || (!CurrentAppIsEmacs() && KeybindingExists(namespace, mods, key)))
+}
+
+; Find out what modify the user typed and translate it for use with the key map
 ; @param keystroke String contains autohotkey keystrokes such as ^c
 ; @return String translated modifiers such as ctrl or alt
 ParseMods(keystrokes)
 {
-  If InStr(keystrokes, "!^t")
-  {
-    Return "ctrlXPrefix"
-  }
-  Else If InStr(keystrokes, "^")
+  If InStr(keystrokes, "^")
   {
     If (ctrlXActive)
     {
@@ -278,11 +272,7 @@ ParseMods(keystrokes)
 ; @return String keys such as c
 ParseKey(keystrokes)
 {
-  If InStr(keystrokes, "& t")
-  {
-    Return "t"
-  }
-  Else If InStr(keystrokes, "Backspace")
+  If InStr(keystrokes, "Backspace")
   {
     Return "Backspace"
   }
@@ -309,29 +299,30 @@ AddShift(mods, ctrlSpaceSensitive)
 
   Return mods
 }
-
 ; Execute original keystrokes without translating
 ; @param keystrokes String original keystrokes
-SendOriginal(keystrokes)
+SendWithoutTranslation(keystrokes)
 {
-    ; Forgot why these exceptions exist!
-    If InStr(keystrokes, "Backspace")
-    {
-      Send ^{Backspace}
-    }
-    Else If InStr(keystrokes, "Space")
-    {
-      Send ^{Space}
-    }
-    Else
-    {
-      Send %keystrokes%
-    }
+  OutputDebug Sending *un-translated* keystrokes: %keystrokes%
+
+  ; Send ^Backpace and ^Space don't seem to work, needed to re-add the curly braces.
+  If (keystrokes == "^Backspace")
+  {
+    Send ^{Backspace}
+  }
+  Else If (keystrokes == "^Space")
+  {
+    Send ^{Space}
+  }
+  Else
+  {
+    Send %keystrokes%
+  }
 }
 
 ; Does the current app already have Emacs keybinings
 ; @return Boolean true if Emacs
-IsEmacs()
+CurrentAppIsEmacs()
 {
   For index, appName in appsWithNativeEmacsKeybindings
   {
@@ -406,7 +397,7 @@ MacroStartCtrlX()
   ctrlXActive := True
   SetTimer, ClearCtrlX, -750
 
-  If (IsEmacs())
+  If (CurrentAppIsEmacs())
   {
     Send ^x
   }
@@ -425,4 +416,3 @@ MacroKillLine()
   Send ^x
   Send {Del}
 }
-

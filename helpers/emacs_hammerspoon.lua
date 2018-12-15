@@ -36,7 +36,9 @@ local keys = {
       ['d'] = {'ctrl', 'd', false, nil},
       ['e'] = {'ctrl', 'e', true, nil},
       ['f'] = {nil, 'right', true, nil},
-      ['g'] = {nil, 'escape', false, nil},      
+      ['g'] = {nil, 'escape', false, nil},
+      ['h'] = {nil, nil, false, nil},
+      ['j'] = {nil, nil, false, nil},      
       ['k'] = {'ctrl', 'k', false, nil},      
       ['n'] = {nil, 'down', true, nil},
       ['o'] = {nil, 'return', false, nil},
@@ -45,7 +47,6 @@ local keys = {
       ['s'] = {'cmd', 'f', false, nil},
       ['v'] = {nil, 'pagedown', true, nil},
       ['w'] = {'cmd', 'x', false, nil},
-      ['x'] = {nil, nil, false, 'macroStartCtrlX'},
       ['y'] = {'cmd', 'v', false, nil},
       ['/'] = {'cmd', 'z', false, nil},
       ['space'] = {nil, nil, true, 'macroCtrlSpace'},
@@ -101,8 +102,8 @@ local keys = {
       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
     },
     ['ctrlXPrefix'] = {
-      ['t'] = {'alt', 'tab', false, nil},
       ['j'] = {'cmd', 'space', false, nil},
+      ['t'] = {'alt', 'tab', false, nil},
       [']'] = {{'ctrl', 'cmd'}, '2', false, nil},
       ['['] = {{'ctrl', 'cmd'}, '1', false, nil},            
     },
@@ -137,7 +138,7 @@ function processKeystrokes(originalMods, originalKey)
 
     namespace = currentNamespace(mods, key)
 
-    if passthroughToEmacs(mods, key) then
+    if passthroughToEmacs(namespace, mods, key) then
       print('Passingthrough to Emacs. mods: ' .. mods .. ' keys: ' .. key)
       tapKey(mods, key)    
       return
@@ -213,8 +214,8 @@ function keybindingExists(namespace, mods, key)
     keys[namespace][mods][key] ~= nil)
 end
 
-function passthroughToEmacs(mods, key)
-  return isEmacs() and (namespace ~= 'globalOverride') and not keybindingExists(currentApp(), mods, key)
+function passthroughToEmacs(namespace, mods, key)
+  return isEmacs() and (namespace ~= 'globalOverride') and not keybindingExists(namespace, mods, key)
 end
 
 --- Checks the global keys table for a keybinding
