@@ -80,6 +80,7 @@ global keys
       : {".": ["^{End}", True, ""]
        , ",": ["^{Home}", True, ""] } } }
 
+; Add Evernote
 keys["chrome.exe"]
 := {"ctrlXPrefix"
    : {"b": ["^o", False, ""]
@@ -184,9 +185,10 @@ ProcessKeystrokes(keystrokes)
 
   OutputDebug Mods: %mods% key: %key% namespace: %namespace%
 
+  ; TODO: Allow app specific keybinding to override emacs, like hammerspoon.
   If (IsEmacs() && namespace != "globalOverride")
   {
-    Passthrough(keystrokes)
+    SendOriginal(keystrokes)
     Return
   }
 
@@ -196,7 +198,7 @@ ProcessKeystrokes(keystrokes)
   }
   Else
   {
-    Passthrough(keystrokes)
+    SendOriginal(keystrokes)
   }
 
   Return
@@ -316,8 +318,9 @@ AddShift(mods, ctrlSpaceSensitive)
 
 ; Execute original keystrokes without translating
 ; @param keystrokes String original keystrokes
-Passthrough(keystrokes)
+SendOriginal(keystrokes)
 {
+    ; Forgot why these exceptions exist!
     If InStr(keystrokes, "Backspace")
     {
       Send ^{Backspace}

@@ -101,7 +101,7 @@ local keys = {
       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
     },
     ['ctrlXPrefix'] = {
-      ['t'] = {{'alt'}, 'tab', false, nil},
+      ['t'] = {'alt', 'tab', false, nil},
       ['j'] = {'cmd', 'space', false, nil},
       [']'] = {{'ctrl', 'cmd'}, '2', false, nil},
       ['['] = {{'ctrl', 'cmd'}, '1', false, nil},            
@@ -120,7 +120,6 @@ local appsWithNativeEmacsKeybindings = {
 
 local ctrlXActive = false
 local ctrlSpaceActive = false
-local windowSwitcherActive = false
 local hotkeyModal = hs.hotkey.modal.new()
 
 --- Entry point for processing keystrokes and taking the appropriate action.
