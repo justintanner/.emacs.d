@@ -138,16 +138,10 @@ function processKeystrokes(originalMods, originalKey)
 
     namespace = currentNamespace(mods, key)
 
-    if passthroughToEmacs(namespace, mods, key) then
-      print('Passingthrough to Emacs. mods: ' .. mods .. ' keys: ' .. key)
-      tapKey(mods, key)    
-      return
-    end
-
-    if keybindingExists(namespace, mods, key) then
-      lookupAndTranslate(namespace, mods, key)      
+    if translationNeeded(namespace, mods, key) then
+      lookupAndTranslate(namespace, mods, key)            
     else
-      print('Could not find a keybinding passingthrough. mods: ' .. mods .. ' keys: ' .. key)
+      print('Sending *un-translated* keystrokes: mods: ' .. mods .. ' keys: ' .. key)
       tapKey(mods, key)
     end
   end
@@ -169,10 +163,10 @@ function lookupAndTranslate(namespace, mods, key)
     _G[toMacro]()
   else
     toMods = addShift(toMods, ctrlSpaceSensitive)
-    
-    tapKey(toMods, toKey)
 
     logTranslation(mods, key, toMods, toKey)
+    
+    tapKey(toMods, toKey)
   end
 
   if not ctrlSpaceSensitive then
@@ -214,8 +208,14 @@ function keybindingExists(namespace, mods, key)
     keys[namespace][mods][key] ~= nil)
 end
 
-function passthroughToEmacs(namespace, mods, key)
-  return isEmacs() and (namespace ~= 'globalOverride') and not keybindingExists(namespace, mods, key)
+--- Determines if a keystroke translation is needed
+-- @param namespace String namespace of the keybinding (eg globalEmacs, Google Chrome, etc)
+-- @param mods String modifier keys such as alt, ctrl, ctrlXPrefix, etc
+-- @param key String key such as a, b, c, etc
+function translationNeeded(namespace, mods, key)
+  return (
+    keybindingExists('globalOverride', mods, key) or
+    (not currentAppIsEmacs() and keybindingExists(namespace, mods, key)))
 end
 
 --- Checks the global keys table for a keybinding
@@ -264,7 +264,7 @@ end
 
 --- Does the current app already have Emacs keybinings
 -- @return Boolean true if Emacs
-function isEmacs()
+function currentAppIsEmacs()
   for index, value in ipairs(appsWithNativeEmacsKeybindings) do
     if value:lower() == currentApp():lower() then
       return true
@@ -321,7 +321,7 @@ function macroStartCtrlX()
 
   hs.timer.doAfter(1, function() print 'End CtrlX'; ctrlXActive = false end)
 
-  if isEmacs() then
+  if currentAppIsEmacs() then
     print('Passingthrough C-x to Emacs')
     tapKey('ctrl', 'x')
   end
