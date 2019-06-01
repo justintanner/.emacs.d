@@ -86,6 +86,17 @@ local keys = {
       ['n'] = {'cmd', 't', false, nil},            
     }
   },
+  ['Firefox'] = {
+    ['ctrlXPrefix'] = {
+      ['b'] = {{'cmd', 'shift'}, 'o', false, nil},
+      ['d'] = {{'cmd', 'alt'}, 'k', false, nil}, 
+      ['f'] = {'cmd', 'l', false, nil},
+      ['k'] = {'cmd', 'w', false, nil},      
+    },
+    ['alt'] = {
+      ['n'] = {'cmd', 't', false, nil},            
+    }
+  },
   ['Terminal'] = {
     ['ctrl'] = {
       ['y'] = {nil, nil, false, 'macroTerminalPasteHack'},
@@ -94,6 +105,12 @@ local keys = {
   ['Evernote'] = {
     ['ctrlXPrefix'] = {
       ['g'] = {{'alt','cmd'}, 'f', false, nil},
+    }
+  },
+  ['Anki'] = {
+    ['ctrl'] = {
+      ['a'] = {nil, 'home', false, nil},
+      ['e'] = {nil, 'end', false, nil},
     }
   },
   ['globalOverride'] = {
@@ -343,6 +360,10 @@ end
 function macroBackwardsKillWord()
   tapKey({'shift', 'alt'}, 'left')
   tapKey('cmd', 'x')
+end
+
+function macroLaunchFinder()
+  hs.application.launchOrFocus('Finder')
 end
 
 print('---------------------------------')
