@@ -94,7 +94,8 @@ local keys = {
       ['k'] = {'cmd', 'w', false, nil},      
     },
     ['alt'] = {
-      ['n'] = {'cmd', 't', false, nil},            
+      ['n'] = {'cmd', 't', false, nil},
+      ['p'] = {'cmd', '\\', false, nil},
     }
   },
   ['Terminal'] = {
