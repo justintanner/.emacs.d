@@ -86,6 +86,17 @@ local keys = {
       ['n'] = {'cmd', 't', false, nil},            
     }
   },
+  ['Brave Browser'] = {
+    ['ctrlXPrefix'] = {
+      ['b'] = {'cmd', 'b', false, nil},
+      ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
+      ['f'] = {'cmd', 'l', false, nil},
+      ['k'] = {'cmd', 'w', false, nil},      
+    },
+    ['alt'] = {
+      ['n'] = {'cmd', 't', false, nil},            
+    }
+  },  
   ['Firefox'] = {
     ['ctrlXPrefix'] = {
       ['b'] = {{'cmd', 'shift'}, 'o', false, nil},
