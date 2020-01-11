@@ -111,7 +111,7 @@ local keys = {
   },
   ['Terminal'] = {
     ['ctrl'] = {
-      ['y'] = {nil, nil, false, 'macroTerminalPasteHack'},
+      ['y'] = {nil, nil, false, 'doublePasteWithClear'},
     }
   },
   ['Evernote'] = {
@@ -243,7 +243,8 @@ end
 function translationNeeded(namespace, mods, key)
   return (
     keybindingExists('globalOverride', mods, key) or
-    (not currentAppIsEmacs() and keybindingExists(namespace, mods, key)))
+      (keybindingExists(currentApp(), mods, key) and (namespace == currentApp())) or 
+      (not currentAppIsEmacs() and keybindingExists(namespace, mods, key)))
 end
 
 --- Checks the global keys table for a keybinding
@@ -357,15 +358,14 @@ function macroStartCtrlX()
   end
 end
 
--- Allows a Ctrl-y to paste into the bash terminal from the mac clipboard and within emacs from its keyboard
-function macroTerminalPasteHack()
-  local focusedWindow = hs.window.focusedWindow()
+function doublePasteWithClear()
+  -- Paste whatever is in the OSX clipboard
+  tapKey('cmd', 'v')
   
-  if focusedWindow:title():match('-- emacs') then
-    tapKey('ctrl', 'y')
-  else
-    tapKey('cmd', 'v')
-  end
+  hs.pasteboard.clearContents()
+
+  -- Let the bash or emacs paste their interal clipboard
+  tapKey('ctrl', 'y')
 end
 
 -- Kill a word behind the cursor and put it in the clipboard
