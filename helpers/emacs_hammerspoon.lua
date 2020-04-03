@@ -111,7 +111,7 @@ local keys = {
   },
   ['Terminal'] = {
     ['ctrl'] = {
-      ['y'] = {nil, nil, false, 'doublePasteWithClear'},
+      ['y'] = {nil, nil, false, 'terminalPasteHack'},
     }
   },
   ['Evernote'] = {
@@ -150,6 +150,7 @@ local appsWithNativeEmacsKeybindings = {
 local ctrlXActive = false
 local ctrlSpaceActive = false
 local hotkeyModal = hs.hotkey.modal.new()
+local lastPasteboardContents = nil
 
 --- Entry point for processing keystrokes and taking the appropriate action.
 -- @param mods String modifiers such as: ctrl or alt
@@ -358,14 +359,18 @@ function macroStartCtrlX()
   end
 end
 
-function doublePasteWithClear()
-  -- Paste whatever is in the OSX clipboard
-  tapKey('cmd', 'v')
-  
-  hs.pasteboard.clearContents()
+function terminalPasteHack()
+  pasteboardContents = hs.pasteboard.getContents()
 
-  -- Let the bash or emacs paste their interal clipboard
-  tapKey('ctrl', 'y')
+  if pasteboardContents and (pasteboardContents ~= lastPasteboardContents) then
+    -- Paste whatever is in the OSX system clipboard
+    tapKey('cmd', 'v')
+
+    lastPasteboardContents = pasteboardContents
+  else
+    -- Let the bash or emacs paste their interal clipboard
+    tapKey('ctrl', 'y')
+  end
 end
 
 -- Kill a word behind the cursor and put it in the clipboard
