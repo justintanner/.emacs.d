@@ -88,9 +88,20 @@ keys["chrome.exe"]
   , "alt"
    : {"n": ["^t", False, ""] } }
 
+keys["brave.exe"]
+:= {"ctrlXPrefix"
+   : {"b": ["^o", False, ""]
+    , "d": ["^+j", False, ""]
+    , "f": ["^l", False, ""]
+    , "k": ["^w", False, ""] }
+  , "alt"
+   : {"n": ["^t", False, ""] } }
+
 keys["globalOverride"]
 := {"ctrl"
-    : {"x": ["", False, "MacroStartCtrlX"] }
+    : {"x": ["", False, "MacroStartCtrlX"]
+     , "p": ["{Up}", False, ""]
+     , "n": ["{Down}", False, ""] }
   , "ctrlXPrefix"
     : {"j": ["^{Esc}", False, ""]
      , "t": ["!{Space}", False, ""]
