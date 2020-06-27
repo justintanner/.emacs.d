@@ -28,8 +28,8 @@
 ;; C-xC-a, C-xa unbound
 (global-set-key "\C-x\C-b" 'electric-buffer-list)
 (global-set-key "\C-xb" 'electric-buffer-list)
-(global-set-key "\C-x\C-c" 'save-buffers-kill-emacs)
-(global-set-key "\C-xc" 'save-buffers-kill-emacs)
+(global-unset-key "\C-x\C-c")
+(global-unset-key "\C-xc")
 (global-set-key "\C-x\C-d" 'show-message-log)
 (global-set-key "\C-xd" 'show-message-log)
 ;; C-xC-e eval-last-sexp
@@ -98,7 +98,7 @@
 (global-unset-key "\M-m")
 ;; M-n new-buffer
 (global-unset-key "\M-o")
-(global-unset-key "\M-q")
+(global-set-key "\M-q" 'save-buffers-kill-emacs)
 ;; M-p previous command in shell
 (global-unset-key "\M-r")
 (global-unset-key "\M-s")

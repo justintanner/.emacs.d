@@ -72,7 +72,8 @@ global keys
         ,"v": ["{PgUp}", True, ""]
         ,"w": ["^c", False, ""]
         ,"y": ["^v", False, ""]
-        ,"Backspace": ["^z", False, ""] }
+        ,"Backspace": ["^z", False, ""]
+        ,"q": ["!{F4}", False, ""] } 
    , "altShift"
       : {".": ["^{End}", True, ""]
        , ",": ["^{Home}", True, ""] } } }
@@ -106,8 +107,7 @@ keys["globalOverride"]
      , "]": ["^#{Right}", False, ""]
      , "[": ["^#{Left}", False, ""] }
   , "alt"
-    : {"m": ["{LWin down}{Up}{LWin up}", False, ""]
-     , "q": ["!{F4}", False, ""] } }
+    : {"m": ["{LWin down}{Up}{LWin up}", False, ""] } }
 
 global appsWithNativeEmacsKeybindings = ["emacs.exe", "rubymine64.exe", "conemu64.exe"]
 global ctrlXActive := False
