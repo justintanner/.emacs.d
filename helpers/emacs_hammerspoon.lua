@@ -136,7 +136,7 @@ local keys = {
       ['['] = {{'ctrl', 'cmd'}, '1', false, nil},            
     },
     ['alt'] = {
-      ['s'] = {{'shift', 'ctrl', 'cmd'}, '5', false, nil},
+      ['s'] = {{'shift', 'cmd'}, '5', false, nil},
     }
   }  
 }
