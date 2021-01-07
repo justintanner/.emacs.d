@@ -29,11 +29,6 @@
 
 (setq js-indent-level 2)
 
-;; Set yasnippets to global
-(require 'yasnippet)
-(yas-global-mode 1)
-(setq yas-snippet-dirs '("~/emacs.d/snippets"))
-
 ;; Allows emacs terminal to have the right path
 (unless (require 'exec-path-from-shell nil 'noerror)
   (exec-path-from-shell-initialize))
