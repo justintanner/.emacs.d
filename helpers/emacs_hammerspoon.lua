@@ -75,12 +75,27 @@ local keys = {
       [','] = {'cmd', 'up', true, nil},      
     },
   },
+  ['Safari'] = {
+    ['ctrlXPrefix'] = {
+      ['b'] = {'cmd', 'b', false, nil},
+      ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
+      ['f'] = {'cmd', 'l', false, nil},
+      ['k'] = {'cmd', 'w', false, nil},
+      [']'] = {'cmd', 'right', false, nil},
+      ['['] = {'cmd', 'left', false, nil},
+    },
+    ['alt'] = {
+      ['n'] = {'cmd', 't', false, nil},            
+    }
+  },
   ['Google Chrome'] = {
     ['ctrlXPrefix'] = {
       ['b'] = {'cmd', 'b', false, nil},
       ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
       ['f'] = {'cmd', 'l', false, nil},
-      ['k'] = {'cmd', 'w', false, nil},      
+      ['k'] = {'cmd', 'w', false, nil},
+      [']'] = {'cmd', 'right', false, nil},
+      ['['] = {'cmd', 'left', false, nil},
     },
     ['alt'] = {
       ['n'] = {'cmd', 't', false, nil},            
@@ -91,7 +106,9 @@ local keys = {
       ['b'] = {'cmd', 'b', false, nil},
       ['d'] = {{'cmd', 'alt'}, 'j', false, nil}, 
       ['f'] = {'cmd', 'l', false, nil},
-      ['k'] = {'cmd', 'w', false, nil},      
+      ['k'] = {'cmd', 'w', false, nil},
+      [']'] = {'cmd', 'right', false, nil},
+      ['['] = {'cmd', 'left', false, nil},
     },
     ['alt'] = {
       ['n'] = {'cmd', 't', false, nil},            
@@ -102,7 +119,9 @@ local keys = {
       ['b'] = {{'cmd', 'shift'}, 'o', false, nil},
       ['d'] = {{'cmd', 'alt'}, 'k', false, nil}, 
       ['f'] = {'cmd', 'l', false, nil},
-      ['k'] = {'cmd', 'w', false, nil},      
+      ['k'] = {'cmd', 'w', false, nil},
+      [']'] = {'cmd', 'right', false, nil},
+      ['['] = {'cmd', 'left', false, nil},
     },
     ['alt'] = {
       ['n'] = {'cmd', 't', false, nil},
@@ -116,7 +135,7 @@ local keys = {
   },
   ['Evernote'] = {
     ['ctrlXPrefix'] = {
-      ['g'] = {{'alt','cmd'}, 'f', false, nil},
+      ['g'] = {{'alt','cmd'}, 'f', false, nil}, 
     }
   },
   ['Anki'] = {
@@ -132,8 +151,6 @@ local keys = {
     ['ctrlXPrefix'] = {
       ['j'] = {'cmd', 'space', false, nil},
       ['t'] = {'alt', 'tab', false, nil},
-      [']'] = {{'ctrl', 'cmd'}, '2', false, nil},
-      ['['] = {{'ctrl', 'cmd'}, '1', false, nil},            
     },
     ['alt'] = {
       ['s'] = {{'shift', 'cmd'}, '5', false, nil},
@@ -150,7 +167,6 @@ local appsWithNativeEmacsKeybindings = {
 local ctrlXActive = false
 local ctrlSpaceActive = false
 local hotkeyModal = hs.hotkey.modal.new()
-local lastPasteboardContents = nil
 
 --- Entry point for processing keystrokes and taking the appropriate action.
 -- @param mods String modifiers such as: ctrl or alt
@@ -360,16 +376,12 @@ function macroStartCtrlX()
 end
 
 function terminalPasteHack()
-  pasteboardContents = hs.pasteboard.getContents()
-
-  if pasteboardContents and (pasteboardContents ~= lastPasteboardContents) then
-    -- Paste whatever is in the OSX system clipboard
-    tapKey('cmd', 'v')
-
-    lastPasteboardContents = pasteboardContents
-  else
-    -- Let the bash or emacs paste their interal clipboard
+  local focusedWindow = hs.window.focusedWindow()
+  
+  if focusedWindow:title():find('emacs') then
     tapKey('ctrl', 'y')
+  else
+    tapKey('cmd', 'v')
   end
 end
 

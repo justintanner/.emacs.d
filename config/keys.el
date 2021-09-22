@@ -74,7 +74,7 @@
 (global-unset-key "\C-xx")
 ;; C-xC-y, C-xy unset
 (global-unset-key "\C-x\C-z")
-(global-unset-key "\C-xz")
+;; C-x1,3
 
 ;; C-y yank (paste)
 (global-unset-key "\C-z")
