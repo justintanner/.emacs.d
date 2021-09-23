@@ -30,5 +30,9 @@
 (setq js-indent-level 2)
 
 ;; Allows emacs terminal to have the right path
-(unless (require 'exec-path-from-shell nil 'noerror)
-  (exec-path-from-shell-initialize))
+(exec-path-from-shell-initialize)
+
+;; Make sure I'm not using zsh
+(setq explicit-shell-file-name "/bin/bash")
+(setq-default shell-file-name "/bin/bash")
+
