@@ -31,10 +31,17 @@
 ;; cleanup make output
 (setenv "TERM" "emacs")
 
-;; Global tab settings
+;; Setting spacing to 2 spaces most places
 (set-default 'indent-tabs-mode nil)
 (setq-default tab-width 2)
-(setq tab-width 2)
+(setq-default c-basic-offset 2)
+(setq-default javascript-indent-level 2)
+(setq-default js-indent-level 2)
+(setq-default js2-basic-offset 2)
+(setq-default web-mode-markup-indent-offset 2)
+(setq-default web-mode-css-indent-offset 2)
+(setq-default web-mode-code-indent-offset 2)
+(setq-default css-indent-offset 2)
 
 ;; Font's for win10 and osx
 (cond ((eq system-type 'windows-nt) (set-frame-font "Inconsolata-13"))

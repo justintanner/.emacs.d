@@ -19,15 +19,6 @@
  ;; If there is more than one, they won't work right.
  )
 
-(defun my-web-mode-hook ()
-  "Hooks for Web mode."
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-)
-(add-hook 'web-mode-hook  'my-web-mode-hook)
-
-(setq js-indent-level 2)
 
 ;; Allows emacs terminal to have the right path
 (exec-path-from-shell-initialize)
