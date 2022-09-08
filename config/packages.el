@@ -21,7 +21,8 @@
 
 
 ;; Allows emacs terminal to have the right path
-(exec-path-from-shell-initialize)
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
 
 ;; Make sure I'm not using zsh
 (setq explicit-shell-file-name "/bin/bash")
