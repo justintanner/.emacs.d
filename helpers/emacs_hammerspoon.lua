@@ -97,6 +97,12 @@ local keys = {
       [']'] = {'cmd', 'right', false, nil},
       ['['] = {'cmd', 'left', false, nil},
     },
+    ['ctrlShift'] = {
+      ['n'] = {{'cmd', 'shift'}, 'down', true, nil},
+      ['p'] = {{'cmd', 'shift'}, 'up', true, nil},
+      ['f'] = {{'cmd', 'shift'}, 'right', true, nil},
+      ['b'] = {{'cmd', 'shift'}, 'left', true, nil},
+    },
     ['alt'] = {
       ['n'] = {'cmd', 't', false, nil},            
     }
@@ -109,6 +115,12 @@ local keys = {
       ['k'] = {'cmd', 'w', false, nil},
       [']'] = {'cmd', 'right', false, nil},
       ['['] = {'cmd', 'left', false, nil},
+    },
+    ['ctrlShift'] = {
+      ['n'] = {{'cmd', 'shift'}, 'down', true, nil},
+      ['p'] = {{'cmd', 'shift'}, 'up', true, nil},
+      ['f'] = {{'cmd', 'shift'}, 'right', true, nil},
+      ['b'] = {{'cmd', 'shift'}, 'left', true, nil},
     },
     ['alt'] = {
       ['n'] = {'cmd', 't', false, nil},            
@@ -348,6 +360,8 @@ end
 function assignKey(mod, key)
   if mod == 'altShift' then
     hotkeyModal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
+  elseif mod == 'ctrlShift' then
+    hotkeyModal:bind({'ctrl', 'shift'}, key, processKeystrokes('ctrlShift', key), nil, nil)    
   elseif mod:match('alt') then
     hotkeyModal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
   elseif mod:match('ctrl') then
