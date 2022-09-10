@@ -159,6 +159,8 @@ local keys = {
   ['globalOverride'] = {
     ['ctrl'] = {
       ['x'] = {nil, nil, false, 'macroStartCtrlX'},
+      ['0'] = {'alt', 'tab', false, nil},
+      ['9'] = {'cmd', 'space', false, nil},
     },
     ['ctrlXPrefix'] = {
       ['j'] = {'cmd', 'space', false, nil},
