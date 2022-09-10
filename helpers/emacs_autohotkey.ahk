@@ -98,9 +98,9 @@ keys["brave.exe"]
 
 keys["globalOverride"]
 := {"ctrl"
-    : {"x": ["", False, "MacroStartCtrlX"]
-     , "p": ["{Up}", False, ""]
-     , "n": ["{Down}", False, ""] }
+   : {"x": ["", False, "MacroStartCtrlX"]
+     , "0": ["!{Space}", False, ""]
+     , "9": ["^{Esc}", False, ""] }
   , "ctrlXPrefix"
     : {"j": ["^{Esc}", False, ""]
      , "t": ["!{Space}", False, ""]
