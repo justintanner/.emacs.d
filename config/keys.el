@@ -9,8 +9,8 @@
 ;; C-g cancel / escape
 ;; C-h prefix / chord
 (global-set-key "\C-h\C-k"  'describe-key)
-;; C-i **not** emacs is resolving C-i to C-TAB
-;; C-j something
+;; C-i indent-or-hippie-expand
+;; C-j electric-newline-and-maybe-indent
 ;; C-k kill line
 (global-unset-key "\C-l")
 ;; C-m RET
@@ -85,18 +85,18 @@
 
 
 (global-unset-key "\M-a")
-(global-unset-key "\M-b")
+(global-set-key "\M-b" 'backward-to-word)
 (global-unset-key "\M-c")
-(global-unset-key "\M-d")
+(global-set-key "\M-d" 'kill-word)
 (global-unset-key "\M-e")
-;; M-g goto-line ( first M-g always fails for some reason )
+;; M-g goto-line (osx is interefering with M-g somehow)
 (global-unset-key "\M-h")
 (global-unset-key "\M-i")
 (global-unset-key "\M-j")
 (global-unset-key "\M-k")
 (global-unset-key "\M-l")
 (global-unset-key "\M-m")
-;; M-n new-buffer
+(global-set-key "\M-n" 'empty-buffer)
 (global-unset-key "\M-o")
 (global-set-key "\M-q" 'save-buffers-kill-emacs)
 ;; M-p previous command in shell

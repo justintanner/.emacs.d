@@ -361,13 +361,13 @@ end
 -- @param key String key such as a, b, c, etc
 function assignKey(mod, key)
   if mod == 'altShift' then
-    hotkeyModal:bind({'alt', 'shift'}, key, processKeystrokes('altShift', key), nil, nil)
+    hotkeyModal:bind({'alt', 'shift'}, key, nil, processKeystrokes('altShift', key), nil, nil)
   elseif mod == 'ctrlShift' then
-    hotkeyModal:bind({'ctrl', 'shift'}, key, processKeystrokes('ctrlShift', key), nil, nil)    
+    hotkeyModal:bind({'ctrl', 'shift'}, key, nil, processKeystrokes('ctrlShift', key), nil, nil)    
   elseif mod:match('alt') then
-    hotkeyModal:bind('alt', key, processKeystrokes('alt', key), nil, nil)
+    hotkeyModal:bind('alt', key, nil, processKeystrokes('alt', key), nil, nil)
   elseif mod:match('ctrl') then
-    hotkeyModal:bind('ctrl', key, processKeystrokes('ctrl', key), nil, nil)
+    hotkeyModal:bind('ctrl', key, nil, processKeystrokes('ctrl', key), nil, nil)
   end  
 end
 

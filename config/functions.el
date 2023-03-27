@@ -12,3 +12,16 @@
     (hippie-expand arg))
    (t (indent-for-tab-command))))
 
+(defun empty-frame ()
+  "Open a new frame with a buffer named Untitled<N>.
+
+The buffer is not associated with a file."
+  (interactive)
+  (switch-to-buffer-other-frame (generate-new-buffer "Untitled")))
+
+(defun empty-buffer ()
+  "Open a new a buffer named Untitled<N>.
+
+The buffer is not associated with a file."
+  (interactive)
+  (switch-to-buffer (generate-new-buffer "Untitled")))
