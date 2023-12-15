@@ -1,16 +1,16 @@
 ;; C-a start line
 ;; C-b backward character
 ;; C-c prefix
-(global-set-key "\C-c\C-c"  'comment-region)
-(global-set-key "\C-cc"  'comment-region)
+(global-set-key "\C-c\C-c" 'comment-region)
+(global-set-key "\C-cc" 'comment-region)
 ;; C-d delete character
 ;; C-e end of line
 ;; C-f forward character
 ;; C-g cancel / escape
 ;; C-h prefix / chord
 (global-set-key "\C-h\C-k"  'describe-key)
-;; C-i indent-or-hippie-expand
-;; C-j electric-newline-and-maybe-indent
+;; C-i **not** emacs is resolving C-i to C-TAB
+;; C-j something
 ;; C-k kill line
 (global-unset-key "\C-l")
 ;; C-m RET
@@ -26,10 +26,12 @@
 (global-set-key "\C-w" 'kill-region)
 ;; C-x prefix
 ;; C-xC-a, C-xa unbound
+;; C-y yank
+
+;; C-xC-a unbound
 (global-set-key "\C-x\C-b" 'electric-buffer-list)
 (global-set-key "\C-xb" 'electric-buffer-list)
-(global-unset-key "\C-x\C-c")
-(global-unset-key "\C-xc")
+;; C-xC-c save-buffer-exit
 (global-set-key "\C-x\C-d" 'show-message-log)
 (global-set-key "\C-xd" 'show-message-log)
 ;; C-xC-e eval-last-sexp
@@ -50,14 +52,14 @@
 (global-set-key "\C-xl" 'dumb-jump-go)
 (global-set-key "\C-x\C-m" 'execute-extended-command)
 (global-set-key "\C-xm" 'execute-extended-command)
-(global-unset-key "\C-x\C-n")
-(global-unset-key "\C-xn")
+(global-set-key "\C-x\C-n" 'empty-buffer)
+(global-set-key "\C-xn" 'empty-buffer)
 (global-set-key "\C-x\C-o" 'other-window)
 (global-set-key "\C-xo" 'other-window)
 (global-set-key "\C-x\C-p" 'query-replace-regexp)
 (global-set-key "\C-xp" 'query-replace-regexp)
-(global-unset-key "\C-x\C-q")
-(global-unset-key "\C-xq")
+(global-set-key "\C-x\C-q" 'save-buffers-kill-emacs)
+(global-set-key "\C-xq" 'save-buffers-kill-emacs)
 (global-set-key "\C-x\C-r" 'revert-buffer)
 (global-set-key "\C-xr" 'revert-buffer)
 (global-set-key "\C-x\C-s" 'save-buffer)
@@ -89,16 +91,16 @@
 (global-unset-key "\M-c")
 (global-set-key "\M-d" 'kill-word)
 (global-unset-key "\M-e")
-;; M-g goto-line (osx is interefering with M-g somehow)
+;; M-g goto-line ( first M-g always fails for some reason )
 (global-unset-key "\M-h")
 (global-unset-key "\M-i")
 (global-unset-key "\M-j")
 (global-unset-key "\M-k")
 (global-unset-key "\M-l")
 (global-unset-key "\M-m")
-(global-set-key "\M-n" 'empty-buffer)
+;; M-n new-buffer
 (global-unset-key "\M-o")
-(global-set-key "\M-q" 'save-buffers-kill-emacs)
+(global-unset-key "\M-q")
 ;; M-p previous command in shell
 (global-unset-key "\M-r")
 (global-unset-key "\M-s")
@@ -107,7 +109,7 @@
 ;; M-v pageup
 ;; M-w copy
 ;; M-x M-x
-;; M-y yank pop 
+;; M-y yank pop
 (global-unset-key "\M-z")
 
 ;; set tab to autocomplete everything
