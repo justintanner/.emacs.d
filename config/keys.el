@@ -71,12 +71,14 @@
 (global-unset-key "\C-x\C-v")
 (global-unset-key "\C-xv")
 ;; C-xC-w write-file
-(global-set-key "\C-xw"  'write-file)
+(global-set-key "\C-xw" 'write-file)
 (global-unset-key "\C-x\C-x")
 (global-unset-key "\C-xx")
 ;; C-xC-y, C-xy unset
 (global-unset-key "\C-x\C-z")
-;; C-x1,3
+(global-set-key (kbd "C-x C-1") 'delete-other-windows)
+(global-set-key (kbd "C-x C-2") 'split-window-below)
+(global-set-key (kbd "C-x C-3") 'split-window-right)
 
 ;; C-y yank (paste)
 (global-unset-key "\C-z")
