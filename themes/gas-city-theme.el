@@ -33,13 +33,18 @@
   (custom-theme-set-faces
    'gas-city
 
-   ;; Basics
-   `(default          ((t (:background ,bg :foreground ,fg))))
+   ;; Basics. In TTY mode the hex bg quantizes to 256-color and lands on a
+   ;; muddy red, so let `default' inherit from the terminal — Alacritty
+   ;; already paints #1e150e via colors.primary.background. In GUI Emacs we
+   ;; set the hex directly.
+   `(default ((((type tty))     (:background unspecified :foreground unspecified))
+              (((type graphic)) (:background ,bg :foreground ,fg))))
    `(cursor           ((t (:background ,yellow))))
    `(region           ((t (:background ,bg-region))))
    `(highlight        ((t (:background ,bg-alt))))
    `(hl-line          ((t (:background ,bg-alt))))
-   `(fringe           ((t (:background ,bg :foreground ,fg-dim))))
+   `(fringe ((((type tty))     (:background unspecified :foreground unspecified))
+             (((type graphic)) (:background ,bg :foreground ,fg-dim))))
    `(vertical-border  ((t (:foreground ,bg-mode))))
 
    ;; Mode line
@@ -47,9 +52,13 @@
    `(mode-line-inactive     ((t (:background ,bg-alt  :foreground ,fg-dim :box nil))))
    `(mode-line-buffer-id    ((t (:foreground ,yellow :weight bold))))
 
-   ;; Line numbers
-   `(line-number              ((t (:background ,bg :foreground ,bg-bright-black))))
-   `(line-number-current-line ((t (:background ,bg :foreground ,yellow :weight bold))))
+   ;; Line numbers — let the gutter inherit terminal bg in TTY
+   `(line-number
+     ((((type tty))     (:background unspecified :foreground ,bg-bright-black))
+      (((type graphic)) (:background ,bg :foreground ,bg-bright-black))))
+   `(line-number-current-line
+     ((((type tty))     (:background unspecified :foreground ,yellow :weight bold))
+      (((type graphic)) (:background ,bg :foreground ,yellow :weight bold))))
 
    ;; Minibuffer / links
    `(minibuffer-prompt ((t (:foreground ,yellow :weight bold))))
