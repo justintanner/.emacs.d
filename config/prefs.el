@@ -88,3 +88,7 @@
 (setq confirm-before-kill-emacs nil)
 (setq line-number-mode t)
 (setq require-final-newline t)
+
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "themes" user-emacs-directory))
+(load-theme 'gas-city t)
