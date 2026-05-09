@@ -1,0 +1,2441 @@
+This is ellama.info, produced by makeinfo version 7.1 from ellama.texi.
+
+Copyright (C) 2023-2026 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover Texts
+     being “A GNU Manual,” and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     “GNU Free Documentation License.”
+
+     (a) The FSF’s Back-Cover Text is: “You have the freedom to copy and
+     modify this GNU manual.”
+
+Ellama is a tool for interacting with large language models from Emacs.
+It allows you to ask questions and receive responses from the LLMs.
+Ellama can perform various tasks such as translation, code review,
+summarization, enhancing grammar/spelling or wording and more through
+the Emacs interface.  Ellama natively supports streaming output, making
+it effortless to use with your preferred text editor.
+
+The name "ellama" is derived from "Emacs Large LAnguage Model
+Assistant".  Previous sentence was written by Ellama itself.
+INFO-DIR-SECTION Emacs misc features
+START-INFO-DIR-ENTRY
+* Ellama: (ellama).     Tool for interaction with large language models.
+END-INFO-DIR-ENTRY
+
+
+File: ellama.info,  Node: Top,  Next: Installation,  Up: (dir)
+
+Ellama manual
+*************
+
+Copyright (C) 2023-2026 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover Texts
+     being “A GNU Manual,” and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     “GNU Free Documentation License.”
+
+     (a) The FSF’s Back-Cover Text is: “You have the freedom to copy and
+     modify this GNU manual.”
+
+Ellama is a tool for interacting with large language models from Emacs.
+It allows you to ask questions and receive responses from the LLMs.
+Ellama can perform various tasks such as translation, code review,
+summarization, enhancing grammar/spelling or wording and more through
+the Emacs interface.  Ellama natively supports streaming output, making
+it effortless to use with your preferred text editor.
+
+The name "ellama" is derived from "Emacs Large LAnguage Model
+Assistant".  Previous sentence was written by Ellama itself.
+
+* Menu:
+
+* Installation::
+* Commands::
+* Keymap::
+* Configuration::
+* Context Management::
+* Minor modes::
+* Using Blueprints::
+* MCP Integration::
+* Agent Skills::
+* Acknowledgments::
+* Contributions::
+* GNU Free Documentation License::
+
+-- The Detailed Node Listing --
+
+Configuration
+
+* Session Provider Keys::
+* Session Compaction::
+* Image Input::
+* Task Tool Subagents::
+* DLP for Tool Input/Output::
+* SRT Filesystem Policy for Tools::
+
+Context Management
+
+* Transient Menus for Context Management::
+* Managing the Context::
+* Considerations::
+
+Minor modes
+
+* ellama-context-header-line-mode::
+* ellama-context-header-line-global-mode::
+* ellama-context-mode-line-mode::
+* ellama-context-mode-line-global-mode::
+* Ellama Session Header Line Mode::
+* Ellama Session Mode Line Mode::
+
+Ellama Session Header Line Mode
+
+* Enabling and Disabling::
+* Customization::
+
+Ellama Session Mode Line Mode
+
+* Enabling and Disabling: Enabling and Disabling (1).
+* Customization: Customization (1).
+
+Using Blueprints
+
+* Key Components of Ellama Blueprints::
+* Creating and Managing Blueprints::
+* Blueprints files::
+* Variable Management::
+* Keymap and Mode::
+* Transient Menus::
+* Running Blueprints programmatically::
+
+Agent Skills
+
+* Directory Structure::
+* Creating a Skill::
+* How it works::
+
+
+
+File: ellama.info,  Node: Installation,  Next: Commands,  Prev: Top,  Up: Top
+
+1 Installation
+**************
+
+Just ‘M-x’ ‘package-install’ Enter ‘ellama’ Enter.  By default it uses
+ollama (https://github.com/jmorganca/ollama) provider.  If you are OK
+with it, you need to install ollama
+(https://github.com/jmorganca/ollama) and pull any ollama model
+(https://ollama.com/models) like this:
+
+     ollama pull qwen2.5:3b
+
+You can use ‘ellama’ with other models or another LLM provider.  Without
+any configuration, the first available ollama model will be used.  You
+can customize ellama configuration like this:
+
+     (use-package ellama
+       :ensure t
+       :bind ("C-c e" . ellama)
+       ;; send last message in chat buffer with C-c C-c
+       :hook (org-ctrl-c-ctrl-c-hook . ellama-chat-send-last-message)
+       :init (setopt ellama-auto-scroll t)
+       :config
+       ;; show ellama context in header line in all buffers
+       (ellama-context-header-line-global-mode +1)
+       ;; show ellama session id in header line in all buffers
+       (ellama-session-header-line-global-mode +1))
+
+More sophisticated configuration example:
+
+     (use-package ellama
+       :ensure t
+       :bind ("C-c e" . ellama)
+       ;; send last message in chat buffer with C-c C-c
+       :hook (org-ctrl-c-ctrl-c-hook . ellama-chat-send-last-message)
+       :init
+       ;; setup key bindings
+       ;; (setopt ellama-keymap-prefix "C-c e")
+       ;; language you want ellama to translate to
+       (setopt ellama-language "German")
+       ;; could be llm-openai for example
+       (require 'llm-ollama)
+       (setopt ellama-provider
+               (make-llm-ollama
+                ;; this model should be pulled to use it
+                ;; value should be the same as you print in terminal during pull
+                :chat-model "llama3:8b-instruct-q8_0"
+                :embedding-model "nomic-embed-text"
+                :default-chat-non-standard-params '(("num_ctx" . 8192))))
+       (setopt ellama-summarization-provider
+               (make-llm-ollama
+                :chat-model "qwen2.5:3b"
+                :embedding-model "nomic-embed-text"
+                :default-chat-non-standard-params '(("num_ctx" . 32768))))
+       (setopt ellama-coding-provider
+               (make-llm-ollama
+                :chat-model "qwen2.5-coder:3b"
+                :embedding-model "nomic-embed-text"
+                :default-chat-non-standard-params '(("num_ctx" . 32768))))
+       ;; Predefined llm providers for interactive switching.
+       ;; You shouldn't add ollama providers here - it can be selected interactively
+       ;; without it. It is just example.
+       (setopt ellama-providers
+               '(("zephyr" . (make-llm-ollama
+                              :chat-model "zephyr:7b-beta-q6_K"
+                              :embedding-model "zephyr:7b-beta-q6_K"))
+                 ("mistral" . (make-llm-ollama
+                               :chat-model "mistral:7b-instruct-v0.2-q6_K"
+                               :embedding-model "mistral:7b-instruct-v0.2-q6_K"))
+                 ("mixtral" . (make-llm-ollama
+                               :chat-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"
+                               :embedding-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"))))
+       ;; Naming new sessions with llm
+       (setopt ellama-naming-provider
+               (make-llm-ollama
+                :chat-model "llama3:8b-instruct-q8_0"
+                :embedding-model "nomic-embed-text"
+                :default-chat-non-standard-params '(("stop" . ("\n")))))
+       (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
+       ;; Translation llm provider
+       (setopt ellama-translation-provider
+               (make-llm-ollama
+                :chat-model "qwen2.5:3b"
+                :embedding-model "nomic-embed-text"
+                :default-chat-non-standard-params
+                '(("num_ctx" . 32768))))
+       (setopt ellama-extraction-provider (make-llm-ollama
+                                           :chat-model "qwen2.5-coder:7b-instruct-q8_0"
+                                           :embedding-model "nomic-embed-text"
+                                           :default-chat-non-standard-params
+                                           '(("num_ctx" . 32768))))
+       ;; customize display buffer behaviour
+       ;; see ~(info "(elisp) Buffer Display Action Functions")~
+       (setopt ellama-chat-display-action-function #'display-buffer-full-frame)
+       (setopt ellama-instant-display-action-function #'display-buffer-at-bottom)
+       :config
+       ;; show ellama context in header line in all buffers
+       (ellama-context-header-line-global-mode +1)
+       ;; show ellama session id in header line in all buffers
+       (ellama-session-header-line-global-mode +1)
+       ;; handle scrolling events
+       (advice-add 'pixel-scroll-precision :before #'ellama-disable-scroll)
+       (advice-add 'end-of-buffer :after #'ellama-enable-scroll))
+
+
+File: ellama.info,  Node: Commands,  Next: Keymap,  Prev: Installation,  Up: Top
+
+2 Commands
+**********
+
+   • ‘ellama’: This is the entry point for Ellama.  It displays the main
+     transient menu, allowing you to access all other Ellama commands
+     from here.
+   • ‘ellama-chat’: Ask Ellama about something by entering a prompt in
+     an interactive buffer and continue conversation.  If called with
+     universal argument (‘C-u’) will start new session with llm model
+     interactive selection.
+   • ‘ellama-ask-image’: Ask Ellama about one image file by adding it as
+     ephemeral context for the request.  If called with universal
+     argument (‘C-u’) will start new session with llm model interactive
+     selection.
+   • ‘ellama-chat-with-image’: Ask Ellama about one image file.  If
+     called with universal argument (‘C-u’) will start new session with
+     llm model interactive selection.
+   • ‘ellama-chat-with-images’: Ask Ellama about multiple image files.
+     If called with universal argument (‘C-u’) will start new session
+     with llm model interactive selection.
+   • ‘ellama-write’: This command allows you to generate text using an
+     LLM.  When called interactively, it prompts for an instruction that
+     is then used to generate text based on the context.  If a region is
+     active, the selected text is added to ephemeral context before
+     generating the response.
+   • ‘ellama-chat-send-last-message’: Send last user message extracted
+     from current ellama chat buffer.
+   • ‘ellama-ask-about’: Ask Ellama about a selected region or the
+     current buffer.  Automatically adds selected region or current
+     buffer to ephemeral context for one request.
+   • ‘ellama-ask-selection’: Send selected region or current buffer to
+     ellama chat.
+   • ‘ellama-ask-line’: Send current line to ellama chat.
+   • ‘ellama-complete’: Complete text in current buffer with ellama.
+   • ‘ellama-translate’: Ask Ellama to translate a selected region or
+     word at the point.
+   • ‘ellama-translate-buffer’: Translate current buffer.
+   • ‘ellama-define-word’: Find the definition of the current word using
+     Ellama.
+   • ‘ellama-summarize’: Summarize a selected region or the current
+     buffer using Ellama.
+   • ‘ellama-summarize-killring’: Summarize text from the kill ring.
+   • ‘ellama-code-review’: Review code in a selected region or the
+     current buffer using Ellama.  Automatically adds selected region or
+     current buffer to ephemeral context for one request.
+   • ‘ellama-change’: Change text in a selected region or the current
+     buffer according to a provided change.
+   • ‘ellama-make-list’: Create a markdown list from the active region
+     or the current buffer using Ellama.
+   • ‘ellama-make-table’: Create a markdown table from the active region
+     or the current buffer using Ellama.
+   • ‘ellama-summarize-webpage’: Summarize a webpage fetched from a URL
+     using Ellama.
+   • ‘ellama-provider-select’: Select ellama provider.
+   • ‘ellama-select-model’: Change the current provider model
+     interactively.  The model transient supports Ollama and
+     OpenAI-compatible providers, including URL editing for compatible
+     APIs.  It can also set the maximum number of output tokens.  Use
+     "Reset model fields" to clear model, temperature, context-length,
+     and max-token overrides and let the provider use its defaults;
+     reset values are shown as ‘default’ in the transient.
+   • ‘ellama-code-complete’: Complete selected code or code in the
+     current buffer according to a provided change using Ellama.
+   • ‘ellama-code-add’: Generate and insert new code based on
+     description.  This function prompts the user to describe the code
+     they want to generate.  If a region is active, it includes the
+     selected text in ephemeral context for code generation.
+   • ‘ellama-code-edit’: Change selected code or code in the current
+     buffer according to a provided change using Ellama.
+   • ‘ellama-code-improve’: Change selected code or code in the current
+     buffer according to a provided change using Ellama.
+   • ‘ellama-generate-commit-message’: Generate commit message based on
+     diff.
+   • ‘ellama-proofread’: Proofread selected text.
+   • ‘ellama-improve-wording’: Enhance the wording in the currently
+     selected region or buffer using Ellama.
+   • ‘ellama-improve-grammar’: Enhance the grammar and spelling in the
+     currently selected region or buffer using Ellama.
+   • ‘ellama-improve-conciseness’: Make the text of the currently
+     selected region or buffer concise and simple using Ellama.
+   • ‘ellama-make-format’: Render the currently selected text or the
+     text in the current buffer as a specified format using Ellama.
+   • ‘ellama-load-session’: Load ellama session from file.
+   • ‘ellama-session-delete’: Delete ellama session.
+   • ‘ellama-session-switch’: Change current active session.
+   • ‘ellama-session-kill’: Select and kill one of active sessions.
+   • ‘ellama-session-rename’: Rename current ellama session.
+   • ‘ellama-session-compact-current’: Compact current Ellama session
+     context.
+   • ‘ellama-session-compact’: Select and compact an active Ellama
+     session context.
+   • ‘ellama-context-add-file’: Add file to context.
+   • ‘ellama-context-add-image’: Add image file to context.
+   • ‘ellama-context-add-directory’: Add all files in directory to the
+     context.
+   • ‘ellama-context-add-buffer’: Add buffer to context.
+   • ‘ellama-context-add-selection’: Add selected region to context.
+   • ‘ellama-context-add-info-node’: Add info node to context.
+   • ‘ellama-context-reset’: Clear global context.
+   • ‘ellama-context-manage’: Manage the global context.  Inside context
+     management buffer you can see ellama context elements.  Available
+     actions with key bindings:
+        • ‘n’: Move to the next line.
+        • ‘p’: Move to the previous line.
+        • ‘q’: Quit the window.
+        • ‘g’: Update context management buffer.
+        • ‘a’: Open the transient context menu for adding new elements.
+        • ‘d’: Remove the context element at the current point.
+        • ‘RET’: Preview the context element at the current point.
+   • ‘ellama-context-preview-element-at-point’: Preview ellama context
+     element at point.  Works inside ellama context management buffer.
+   • ‘ellama-context-remove-element-at-point’: Remove ellama context
+     element at point from global context.  Works inside ellama context
+     management buffer.
+   • ‘ellama-chat-translation-enable’: Enable chat translation.
+   • ‘ellama-chat-translation-disable’: Disable chat translation.
+   • ‘ellama-solve-reasoning-problem’: Solve reasoning problem with
+     Abstraction of Thought technique.  It uses a chain of multiple
+     messages to an LLM and helps it to provide much better answers on
+     reasoning problems.  Even small LLMs like phi3-mini provide much
+     better results on reasoning tasks using AoT.
+   • ‘ellama-solve-domain-specific-problem’: Solve domain specific
+     problem with simple chain.  It makes LLMs act like a professional
+     and adds a planning step.
+   • ‘ellama-community-prompts-select-blueprint’: Select a prompt from
+     the community prompt collection.  The user is prompted to choose a
+     role, and then a corresponding prompt is inserted into a blueprint
+     buffer.
+   • ‘ellama-blueprint-fill-variables’: Prompt user for values of
+     variables found in current blueprint buffer and update them.
+   • ‘ellama-tools-enable-by-name’: Enable a specific tool by its name.
+     Use this command to activate individual tools.  Requires the tool
+     name as input.
+   • ‘ellama-tools-enable-all’: Enable all available tools at once.  Use
+     this command to activate every tool in the system for comprehensive
+     functionality without manual selection.
+   • ‘ellama-tools-disable-by-name’: Disable a specific tool by its
+     name.  Use this command to deactivate individual tools when their
+     functionality is no longer needed.
+   • ‘ellama-tools-disable-all’: Disable all enabled tools
+     simultaneously.  Use this command to reset the system to a minimal
+     state, ensuring no tools are active.
+
+
+File: ellama.info,  Node: Keymap,  Next: Configuration,  Prev: Commands,  Up: Top
+
+3 Keymap
+********
+
+It's better to use a transient menu (‘M-x ellama’) instead of a keymap.
+It offers a better user experience.
+
+In any buffer where there is active ellama streaming, you can press
+‘C-g’ and it will cancel current stream.
+
+Here is a table of keybindings and their associated functions in Ellama,
+using the ‘ellama-keymap-prefix’ prefix (not set by default):
+
+Keymap   Function                          Description
+--------------------------------------------------------------------------
+"w"      ellama-write                      Write
+"c c"    ellama-code-complete              Code complete
+"c a"    ellama-code-add                   Code add
+"c e"    ellama-code-edit                  Code edit
+"c i"    ellama-code-improve               Code improve
+"c r"    ellama-code-review                Code review
+"c m"    ellama-generate-commit-message    Generate commit message
+"s s"    ellama-summarize                  Summarize
+"s w"    ellama-summarize-webpage          Summarize webpage
+"s c"    ellama-summarize-killring         Summarize killring
+"s l"    ellama-load-session               Session Load
+"s r"    ellama-session-rename             Session rename
+"s d"    ellama-session-delete             Session delete
+"s a"    ellama-session-switch             Session activate
+"P"      ellama-proofread                  Proofread
+"i w"    ellama-improve-wording            Improve wording
+"i g"    ellama-improve-grammar            Improve grammar and spelling
+"i c"    ellama-improve-conciseness        Improve conciseness
+"m l"    ellama-make-list                  Make list
+"m t"    ellama-make-table                 Make table
+"m f"    ellama-make-format                Make format
+"a a"    ellama-ask-about                  Ask about
+"a i"    ellama-chat                       Chat (ask interactively)
+"a I"    ellama-ask-image                  Ask image
+"a l"    ellama-ask-line                   Ask current line
+"a s"    ellama-ask-selection              Ask selection
+"t t"    ellama-translate                  Text translate
+"t b"    ellama-translate-buffer           Translate buffer
+"t e"    ellama-chat-translation-enable    Translation enable
+"t d"    ellama-chat-translation-disable   Translation disable
+"t c"    ellama-complete                   Text complete
+"d w"    ellama-define-word                Define word
+"x b"    ellama-context-add-buffer         Context add buffer
+"x f"    ellama-context-add-file           Context add file
+"x d"    ellama-context-add-directory      Context add directory
+"x s"    ellama-context-add-selection      Context add selection
+"x i"    ellama-context-add-info-node      Context add info node
+"x r"    ellama-context-reset              Context reset
+"p s"    ellama-provider-select            Provider select
+
+
+File: ellama.info,  Node: Configuration,  Next: Context Management,  Prev: Keymap,  Up: Top
+
+4 Configuration
+***************
+
+The following variables can be customized for the Ellama client:
+
+   • ‘ellama-enable-keymap’: Enable the Ellama keymap.
+   • ‘ellama-keymap-prefix’: The keymap prefix for Ellama.
+   • ‘ellama-user-nick’: The user nick in logs.
+   • ‘ellama-assistant-nick’: The assistant nick in logs.
+   • ‘ellama-language’: The language for Ollama translation.  Default
+language is english.
+   • ‘ellama-provider’: llm provider for ellama.
+There are many supported providers: ‘ollama’, ‘open ai’, ‘vertex’,
+‘GPT4All’.  For more information see llm documentation
+(https://elpa.gnu.org/packages/llm.html).
+   • ‘ellama-max-tokens’: Maximum number of tokens to generate.  If not
+     set, use the provider default.
+   • ‘ellama-providers’: association list of model llm providers with
+     name as key.
+   • ‘ellama-spinner-enabled’: Enable spinner during text generation.
+   • ‘ellama-spinner-type’: Spinner type for ellama.  Default type is
+     ‘progress-bar’.
+   • ‘ellama-auto-scroll’: If enabled ellama buffer will scroll
+     automatically during generation.  Disabled by default.
+   • ‘ellama-fill-paragraphs’: Option to customize ellama paragraphs
+     filling behaviour.
+   • ‘ellama-response-process-method’: Configure how LLM responses are
+     processed.  Options include streaming for real-time output, async
+     for asynchronous processing, or skipping every N messages to reduce
+     resource usage.
+   • ‘ellama-name-prompt-words-count’: Count of words in prompt to
+     generate name.
+   • Prompt templates for every command.
+   • ‘ellama-chat-done-callback’: Callback that will be called on ellama
+chat response generation done.  It should be a function with single
+argument generated text string.
+   • ‘ellama-nick-prefix-depth’: User and assistant nick prefix depth.
+     Default value is 2.
+   • ‘ellama-sessions-directory’: Directory for saved ellama sessions.
+   • ‘ellama-major-mode’: Major mode for ellama commands.  Org mode by
+     default.
+   • ‘ellama-session-auto-save’: Automatically save ellama sessions if
+     set.  Enabled by default.
+   • ‘ellama-session-persist-provider-keys’: Control provider key
+     persistence in saved session files.  Disabled by default; set to
+     ‘auth-source’ to restore provider keys from auth-source lookup
+     references.
+   • ‘ellama-session-auto-compact-enabled’: Automatically compact long
+     chat session context.  Enabled by default.
+   • ‘ellama-session-auto-compact-token-threshold’: Total token count
+     that triggers automatic session compaction.  If not set, Ellama
+     uses ‘ellama-session-auto-compact-threshold-percent’ of the
+     provider context window.
+   • ‘ellama-session-auto-compact-threshold-percent’: Percentage of
+     provider context limit that triggers automatic compaction.  Default
+     value is 80.
+   • ‘ellama-session-auto-compact-keep-last-turns’: Number of recent
+     user turns to keep verbatim during compaction.  Default value is 3.
+   • ‘ellama-session-auto-compact-target-token-threshold’: Preferred
+     target token count after compaction.  If not set, Ellama targets
+     half of the compaction threshold.
+   • ‘ellama-session-auto-compact-provider’: Provider used to summarize
+     old session context.  If not set, Ellama uses
+     ‘ellama-summarization-provider’, then the session provider.
+   • ‘ellama-session-auto-compact-show-message’: Show compaction notices
+     in chat buffers.  Enabled by default.
+   • ‘ellama-session-auto-compact-prompt-template’: Prompt template for
+     automatic session context compaction.
+   • ‘ellama-naming-scheme’: How to name new sessions.
+   • ‘ellama-naming-provider’: LLM provider for generating session names
+     by LLM.  If not set ‘ellama-provider’ will be used.
+   • ‘ellama-chat-translation-enabled’: Enable chat translations if set.
+   • ‘ellama-translation-provider’: LLM translation provider.
+     ‘ellama-provider’ will be used if not set.
+   • ‘ellama-coding-provider’: LLM coding tasks provider.
+     ‘ellama-provider’ will be used if not set.
+   • ‘ellama-image-file-extensions’: File extensions supported for image
+     input.  SVG is intentionally unsupported.
+   • ‘ellama-summarization-provider’: LLM summarization provider.
+     ‘ellama-provider’ will be used if not set.
+   • ‘ellama-show-quotes’: Show quotes content in chat buffer.  Disabled
+     by default.
+   • ‘ellama-chat-display-action-function’: Display action function for
+     ‘ellama-chat’.
+   • ‘ellama-instant-display-action-function’: Display action function
+     for ‘ellama-instant’.
+   • ‘ellama-translate-italic’: Translate italic during markdown to org
+     transformations.  Enabled by default.
+   • ‘ellama-extraction-provider’: LLM provider for data extraction.
+   • ‘ellama-text-display-limit’: Limit for text display in context
+     elements.
+   • ‘ellama-context-poshandler’: Position handler for displaying
+     context buffer.  ‘posframe-poshandler-frame-top-center’ will be
+     used if not set.
+   • ‘ellama-context-border-width’: Border width for the context buffer.
+   • ‘ellama-image-context-default-scope’: Default scope for image
+     context added interactively.  Use ‘ephemeral’ for one request only,
+     or ‘persistent’ to keep image context until it is removed or reset.
+   • ‘ellama-session-remove-reasoning’: Remove internal reasoning from
+     the session after ellama provide an answer.  This can improve
+     long-term communication with reasoning models.  Enabled by default.
+   • ‘ellama-session-hide-org-quotes’: Hide org quotes in the Ellama
+     session buffer.  From now on, think tags will be replaced with
+     quote blocks.  If this flag is enabled, reasoning steps will be
+     collapsed after generation and upon session loading.  Enabled by
+     default.
+   • ‘ellama-output-remove-reasoning’: Eliminate internal reasoning from
+     ellama output to enhance the versatility of reasoning models across
+     diverse applications.
+   • ‘ellama-context-posframe-enabled’: Enable showing posframe with
+     ellama context.
+   • ‘ellama-context-manage-display-action-function’: Display action
+     function for ‘ellama-context-manage’.  Default value
+     ‘display-buffer-same-window’.
+   • ‘ellama-context-preview-element-display-action-function’: Display
+     action function for ‘ellama-context-preview-element’.
+   • ‘ellama-context-line-always-visible’: Make context header or mode
+     line always visible, even with empty context.
+   • ‘ellama-community-prompts-url’: The URL of the community prompts
+     collection.
+   • ‘ellama-community-prompts-file’: Path to the CSV file containing
+     community prompts.  This file is expected to be located inside an
+     ‘ellama’ subdirectory within your ‘user-emacs-directory’.
+   • ‘ellama-show-reasoning’: Show reasoning in separate buffer if
+     enabled.  Enabled by default.
+   • ‘ellama-reasoning-display-action-function’: Display action function
+     for reasoning.
+   • ‘ellama-display-session-buffer-on-generation’: Display the session
+     buffer whenever generation starts.  This also applies to sub-agent
+     sessions started by the ‘task’ tool, so delegated work is visible
+     while it runs.
+   • ‘ellama-session-line-template’: Template for formatting the current
+     session line.
+   • ‘ellama-debug’: Enable debug.  When enabled, generated text is now
+     logged to a ‘*ellama-debug*’ buffer with a separator for easier
+     tracking of debug information.  The debug output includes the raw
+     text being processed and is appended to the end of the debug buffer
+     each time.
+   • ‘ellama-tools-allow-all’: Allow ‘ellama’ using all the tools
+     without user confirmation.  Dangerous.  Use at your own risk.
+   • ‘ellama-tools-allowed’: List of allowed ‘ellama’ tools.  Tools from
+     this list will work without user confirmation.
+   • ‘ellama-tools-argument-max-length’: Max length of function argument
+     in the confirmation prompt.  Default value 50.
+   • ‘ellama-tools-read-file-default-mode’: Default mode for the
+     ‘read_file’ tool.  Use ‘auto’ to read text files as text and
+     supported image files as media, ‘text’ to force text reading, or
+     ‘image’ to force image handling.
+   • ‘ellama-tools-use-srt’: Run shell-based tools (‘shell_command’,
+     ‘grep’ and ‘grep_in_file’) via the external ‘srt’ sandbox runtime.
+     Disabled by default.  If enabled, non-shell file tools also perform
+     local filesystem checks derived from the same ‘srt’ settings file
+     to keep behavior aligned.  The local checks currently enforce the
+     filesystem subset ‘denyRead’, ‘allowWrite’ and ‘denyWrite’ for
+     tools such as ‘read_file’, ‘write_file’, ‘edit_file’,
+     ‘directory_tree’, ‘move_file’, ‘count_lines’ and ‘lines_range’.  If
+     enabled and ‘srt’ is not installed, or the relevant ‘srt’ settings
+     file is missing or malformed, the tool call signals a user error
+     (fail closed).
+   • ‘ellama-tools-srt-program’: Sandbox runtime executable name/path
+     used when ‘ellama-tools-use-srt’ is enabled.  Default value is
+     ‘"srt"’.
+   • ‘ellama-tools-srt-args’: Extra arguments passed to ‘srt’ before the
+     wrapped command (for example ‘--settings /path/to/settings.json’).
+     The same arguments are also used to resolve the settings file path
+     for local non-shell filesystem checks (default
+     ‘~/.srt-settings.json’ if no ‘--settings~/’-s~ is provided).
+   • ‘ellama-tools-task-template-dirs’: Directories where the ‘task’
+     tool searches for prompt templates when no ‘template_base’ is
+     supplied.  Relative template names are resolved below these
+     directories.
+   • ‘ellama-tools-task-template-allow-absolute-paths’: Allow absolute
+     file names in the ‘task’ tool ‘template’ argument.  Disabled by
+     default.  Relative template names are still supported.
+   • ‘ellama-blueprint-global-dir’: Global directory for storing
+     blueprint files.
+   • ‘ellama-blueprint-local-dir’: Local directory name for
+     project-specific blueprints.
+   • ‘ellama-blueprint-file-extensions’: File extensions recognized as
+     blueprint files.
+   • ‘ellama-blueprint-variable-regexp’: Regular expression to match
+     blueprint variables like ‘{var_name}’.
+   • ‘ellama-skills-global-path’: Path to the global directory
+     containing Agent Skills.
+   • ‘ellama-skills-local-path’: Project-relative path for local Agent
+     Skills.  Default value is ‘"skills"’.
+   • ‘ellama-tools-subagent-default-max-steps’: Default maximum number
+     of auto-continue steps for a sub-agent.  Default value is 30.
+   • ‘ellama-tools-subagent-continue-prompt’: Prompt sent to a sub-agent
+     when it finishes a turn without calling ‘report_result’.
+   • ‘ellama-tools-subagent-roles’: Subagent roles with provider, system
+     prompt and allowed tools.  Configuration of subagents for the
+     ‘task’ tool.
+
+* Menu:
+
+* Session Provider Keys::
+* Session Compaction::
+* Image Input::
+* Task Tool Subagents::
+* DLP for Tool Input/Output::
+* SRT Filesystem Policy for Tools::
+
+
+File: ellama.info,  Node: Session Provider Keys,  Next: Session Compaction,  Up: Configuration
+
+4.1 Session Provider Keys
+=========================
+
+Ellama does not persist provider keys as plaintext in session files.
+Saved sessions keep provider settings such as model and URL, but
+provider key slots are removed before writing the session file.  When a
+session is loaded, Ellama restores missing keys from the configured
+provider when possible.
+
+If a saved provider key cannot be restored, the session still loads.
+Requests using that provider can fail later with the provider's normal
+authentication error until the provider is configured again.
+
+The upstream ‘llm’ provider-key redaction change is merged, but released
+versions such as ‘llm’ 0.30.3 may not include it yet.  Until a released
+‘llm’ version containing that change is installed, provider keys can
+still appear in debugger output produced by ‘llm’ itself.  Ellama avoids
+adding new plaintext keys to saved session files, but it cannot redact
+every ‘llm’ backtrace from older released ‘llm’ versions.
+
+Set ‘ellama-session-persist-provider-keys’ to ‘auth-source’ to save an
+auth-source lookup reference in the session file.  The secret itself
+stays in auth-source and is resolved when the session is loaded.  Ellama
+uses the provider URL host when available, otherwise the provider symbol
+or provider type, together with
+‘ellama-session-provider-key-auth-source-user’ and
+‘ellama-session-provider-key-auth-source-port’.
+
+Example auth-source entry:
+
+     machine api.example.com login ellama port api-key password example-secret
+
+Example configuration:
+
+     (setopt ellama-session-persist-provider-keys 'auth-source)
+     (setopt ellama-session-provider-key-auth-source-user "ellama")
+     (setopt ellama-session-provider-key-auth-source-port "api-key")
+
+
+File: ellama.info,  Node: Session Compaction,  Next: Image Input,  Prev: Session Provider Keys,  Up: Configuration
+
+4.2 Session Compaction
+======================
+
+Ellama can compact long chat sessions to keep them within the provider
+context window.  Compaction summarizes older conversation turns into one
+synthetic assistant message and keeps the most recent user turns
+verbatim.  New messages continue from the compacted prompt, so the
+session can keep running without resending the full history.
+
+Automatic compaction is enabled by default with
+‘ellama-session-auto-compact-enabled’.  It runs after a response when
+Ellama can determine or estimate token usage and the session crosses the
+configured threshold.  Use ‘ellama-session-auto-compact-token-threshold’
+for an absolute token threshold, or leave it unset to use
+‘ellama-session-auto-compact-threshold-percent’ of the provider context
+limit.
+
+You can compact sessions manually:
+
+   • ‘M-x ellama-session-compact-current’ compacts the current session.
+   • ‘M-x ellama-session-compact’ prompts for an active session and
+     compacts it.
+
+The system message is not summarized by the compaction LLM.  Ellama
+restores the original system message in the compacted session prompt
+context, including when an LLM provider moved the system message into a
+system interaction before the request.
+
+Example configuration:
+
+     (setopt ellama-session-auto-compact-enabled t)
+     (setopt ellama-session-auto-compact-threshold-percent 75)
+     (setopt ellama-session-auto-compact-keep-last-turns 4)
+     (setopt ellama-session-auto-compact-provider ellama-summarization-provider)
+
+
+File: ellama.info,  Node: Image Input,  Next: Task Tool Subagents,  Prev: Session Compaction,  Up: Configuration
+
+4.3 Image Input
+===============
+
+Ellama can send image files to providers that advertise the
+‘image-input’ capability through the ‘llm’ library.  Image data is sent
+as multipart media and is supported for PNG, JPEG, WebP and GIF files by
+default.
+
+Use ‘M-x ellama-ask-image’ to ask about one image.  This command follows
+the same context-based workflow as ‘ellama-ask-about’: it adds the image
+as ephemeral context, sends the request with ‘ellama-chat’, and shows
+the image link in the chat buffer.  ‘M-x ellama-chat-with-image’ and
+‘M-x ellama-chat-with-images’ use the same context workflow for
+compatibility.  The main transient menu also includes "Chat with image".
+
+Programmatic calls can also pass image files directly:
+
+     (ellama-chat "Describe this screenshot." nil
+                  :images '("/path/to/screenshot.png"))
+
+     (ellama-stream "Extract visible text."
+                    :images '("/path/to/image.png"))
+
+The singular ‘:image’ argument is also accepted as a convenience alias.
+
+Use ‘M-x ellama-context-add-image’ to add an image to context.  Image
+context is ephemeral by default, so it is attached to the next request
+and then removed.  Set ‘ellama-image-context-default-scope’ to
+‘persistent’ to keep image context until it is removed or the context is
+reset.  The context transient menu also provides "Add Image"; combine it
+with ‘--ephemeral’ to force one-request image context.
+
+The built-in ‘read_file’ tool supports image files through a
+configurable read mode:
+
+   • ‘auto’: read text files as text and queue supported image files as
+     image input
+   • ‘text’: force text reading, even for files with image-like
+     extensions
+   • ‘image’: force image handling and return a clear text error for
+     unsupported image types, missing sessions, or providers without
+     ‘image-input’
+
+Tool calls can request image handling explicitly:
+
+     {
+       "file_name": "/path/to/image.png",
+       "mode": "image"
+     }
+
+
+File: ellama.info,  Node: Task Tool Subagents,  Next: DLP for Tool Input/Output,  Prev: Image Input,  Up: Configuration
+
+4.4 Task Tool Subagents
+=======================
+
+The ‘task’ tool delegates work to an asynchronous sub-agent.  The parent
+model gets control back immediately, and the sub-agent reports the final
+result by calling the injected ‘report_result’ tool.  If the sub-agent
+finishes a turn without reporting a result, Ellama sends
+‘ellama-tools-subagent-continue-prompt’ until the task is complete or
+‘ellama-tools-subagent-default-max-steps’ is reached.
+
+Each sub-agent runs in its own Ellama session.  When
+‘ellama-display-session-buffer-on-generation’ is non-nil, Ellama
+displays both the main session and sub-agent session buffers as
+generation starts.  Sub-agent buffers include the delegated prompt under
+the ‘Main agent:’ label, followed by the sub-agent response.
+
+The tool accepts either a free-form ‘description’ or a prompt template:
+
+     {
+       "template": "templates/researcher.md",
+       "template_base": "/path/to/skill",
+       "arguments": {
+         "main_topic": "Example topic",
+         "subtopic_name": "Example subtopic"
+       },
+       "role": "explorer"
+     }
+
+Prompt templates are plain text files with placeholders like
+‘{main_topic}’.  The ‘arguments’ object must provide values whose keys
+match the placeholder names.  If validation fails, the tool returns an
+error with hints listing missing and unused keys and an example object
+to retry.
+
+Template resolution is intentionally scoped:
+
+   • relative ‘template’ paths are resolved under ‘template_base’ when
+     supplied
+   • otherwise relative paths are searched under
+     ‘ellama-tools-task-template-dirs’
+   • path traversal outside the selected base directory is rejected
+   • absolute template paths are rejected unless
+     ‘ellama-tools-task-template-allow-absolute-paths’ is non-nil
+
+This keeps large prompts out of the main agent context while still
+letting skills bundle reusable task prompts next to their ‘SKILL.md’
+files.
+
+
+File: ellama.info,  Node: DLP for Tool Input/Output,  Next: SRT Filesystem Policy for Tools,  Prev: Task Tool Subagents,  Up: Configuration
+
+4.5 DLP for Tool Input/Output
+=============================
+
+Ellama includes an optional DLP (Data Loss Prevention) layer for tool
+calls.  It can scan:
+
+   • tool input (arguments sent from the model to tools)
+   • tool output (strings returned from tools back to the model)
+
+The DLP layer supports regex-based rules and exact secret detection
+derived from environment variables (including common encoded variants
+such as base64/base64url and hex).  It also includes an optional
+LLM-based semantic check as a block-only backstop for payloads that look
+unsafe but do not match a deterministic rule.
+
+Recommended initial rollout:
+
+   • enable DLP
+   • keep mode in ‘monitor’
+   • review incidents before switching selected paths to ‘enforce’
+   • if enabling the LLM detector, start with a small tool allowlist
+
+Example minimal setup:
+
+     (setopt ellama-tools-dlp-enabled t)
+     (setopt ellama-tools-dlp-mode 'monitor)
+     (setopt ellama-tools-dlp-log-targets '(memory))
+
+Key settings:
+
+   • ‘ellama-tools-dlp-enabled’: Enable DLP scanning for tool
+     input/output.
+   • ‘ellama-tools-dlp-mode’: Rollout mode.  Use ‘monitor’ for
+     detect+log only, or ‘enforce’ to apply actions.
+   • ‘ellama-tools-dlp-regex-rules’: Regex detector rules (IDs,
+     patterns, direction/tool/arg scoping, enable/disable, case
+     folding).
+   • ‘ellama-tools-dlp-scan-env-exact-secrets’: Enable exact-secret
+     detection from environment variables (enabled by default).
+   • ‘ellama-tools-dlp-llm-check-enabled’: Enable the optional isolated
+     LLM safety classifier (disabled by default).
+   • ‘ellama-tools-dlp-llm-provider’: Provider used for the isolated LLM
+     safety check.  When nil, it falls back to the extraction provider,
+     then the default provider.
+   • ‘ellama-tools-dlp-llm-directions’: Directions where the LLM
+     detector may run (‘input’, ‘output’, or both).
+   • ‘ellama-tools-dlp-llm-max-scan-size’: Maximum bytes eligible for
+     the LLM detector.  Payloads above this limit are skipped for the
+     LLM pass.
+   • ‘ellama-tools-dlp-llm-tool-allowlist’: Optional list of tool names
+     allowed to use the LLM detector.  Nil means all tools are eligible.
+   • ‘ellama-tools-dlp-llm-run-policy’: Run the LLM detector only when
+     deterministic findings are empty (‘clean-only’) or on every
+     non-blocked scan (‘always-unless-blocked’).
+   • ‘ellama-tools-dlp-max-scan-size’: Maximum bytes scanned per
+     input/output payload (default 5 MB; larger payloads are truncated
+     for scanning).
+   • ‘ellama-tools-dlp-input-default-action’: Default action for input
+     findings in ‘enforce’ mode (‘allow’, ‘warn’, ‘block’).
+   • ‘ellama-tools-dlp-output-default-action’: Default action for output
+     findings in ‘enforce’ mode (‘allow’, ‘warn’, ‘block’, ‘redact’).
+   • ‘ellama-tools-dlp-output-warn-behavior’: Handling for output ‘warn’
+     verdicts (‘allow’, ‘confirm’, or ‘block’).
+   • ‘ellama-tools-dlp-policy-overrides’: Per-tool/per-arg overrides and
+     exceptions.  For structured input args, nested string values are
+     scanned with path-like arg names (for example
+     ‘payload.items[0].token’).  Override ‘:arg’ matches exact names and
+     nested path prefixes (for example ‘"payload"’ matches
+     ‘payload.items[0].token’).
+   • ‘ellama-tools-dlp-log-targets’: Incident log targets (‘memory’,
+     ‘message’, ‘file’).
+   • ‘ellama-tools-dlp-audit-log-file’: JSONL path used when ‘file’ sink
+     is enabled.
+   • ‘ellama-tools-dlp-incident-log-max’: Maximum in-memory incidents
+     retained.
+   • ‘ellama-tools-dlp-input-fail-open’ /
+     ‘ellama-tools-dlp-output-fail-open’: Behavior when DLP itself
+     errors internally.
+   • ‘ellama-tools-irreversible-enabled’: Enable irreversible-action
+     handling.
+   • ‘ellama-tools-irreversible-default-action’: Default irreversible
+     action (‘warn’ or ‘block’, with monitor downgrade to
+     ‘warn-strong’).
+   • ‘ellama-tools-irreversible-unknown-tool-action’: Default action for
+     unknown MCP tools (‘warn’ or ‘allow’).
+   • ‘ellama-tools-irreversible-require-typed-confirm’: Require typed
+     phrase for irreversible warnings.
+   • ‘ellama-tools-irreversible-project-overrides-enabled’: Enable
+     project-local irreversible override policy.
+   • ‘ellama-tools-irreversible-project-overrides-file’: Project policy
+     file name.
+   • ‘ellama-tools-irreversible-project-trust-store-file’: User trust
+     store for repository approval records (repo root + remote + policy
+     hash).
+   • ‘ellama-tools-irreversible-scoped-bypass-default-ttl’: Default TTL
+     (seconds) for session bypass entries.
+   • ‘ellama-tools-output-line-budget-enabled’: Enable per-tool output
+     line-budget truncation before returning text to the model (enabled
+     by default).
+   • ‘ellama-tools-output-line-budget-max-lines’: Max lines per tool
+     output (default ‘200’).
+   • ‘ellama-tools-output-line-budget-max-line-length’: Max characters
+     per line before a single line is truncated (default ‘4000’).
+   • ‘ellama-tools-output-line-budget-save-overflow-file’: Save full
+     overflowing output to a temp file when the output source file is
+     unknown (default ‘t’).
+
+Enforcement behavior (v1):
+
+   • input ‘block’ prevents tool execution
+   • input ‘warn’ asks for explicit confirmation before execution
+   • output ‘block’ returns a safe denial string
+   • output ‘redact’ replaces detected fragments with placeholders
+   • output ‘warn’ follows ‘ellama-tools-dlp-output-warn-behavior’
+     (‘confirm’ by default)
+
+LLM safety check behavior (v1):
+
+   • the LLM detector runs only when
+     ‘ellama-tools-dlp-llm-check-enabled’ is non-nil
+   • the checker uses an isolated structured-output request with no
+     tools
+   • in ‘monitor’, unsafe LLM verdicts are logged but do not change the
+     result
+   • in ‘enforce’, an unsafe LLM verdict may force ‘block’
+   • LLM findings never trigger ‘warn’ or ‘redact’ and do not affect
+     redaction
+
+Irreversible action safety (v1):
+
+   • irreversible warnings use ‘warn-strong’ with typed confirmation
+     phrase ‘I UNDERSTAND THIS CANNOT BE UNDONE’
+   • in ‘enforce’, high-confidence irreversible findings hard ‘block’
+   • in ‘monitor’, high-confidence irreversible findings still require
+     typed confirmation and do not hard block
+   • unknown MCP tool identities default to ‘warn’ (configurable via
+     ‘ellama-tools-irreversible-unknown-tool-action’)
+   • policy precedence for irreversible decisions: ‘high-confidence
+     enforce block’ > ‘session bypass’ > ‘project override’ > global
+     irreversible default
+   • project overrides are ignored until the repository policy is
+     explicitly trusted; trust is bound to repo root, remote URL, and
+     policy hash
+   • audit sink write failure for irreversible decisions is fail-closed;
+     in interactive sessions a separate explicit confirmation can
+     override once
+
+Session bypass helper:
+
+     ;; Allow irreversible actions for one tool identity in this session.
+     (ellama-tools-dlp-add-session-bypass "mcp-db/query" 3600 "migration window")
+
+Autonomous agent configuration:
+
+Autonomous agents need a low-friction policy.  Prompting on every
+ordinary tool call trains users to approve blindly, which is worse than
+a smaller set of high-signal prompts.  The recommended shape is:
+
+   • clean read/write operations inside the approved workspace run
+     automatically
+   • secret leaks and prompt-injection-like output are redacted or
+     blocked
+   • ambiguous dangerous actions require typed user confirmation or fail
+     closed
+   • high-confidence destructive actions are blocked, not prompted
+   • unknown MCP tools warn until they are classified
+
+‘ellama-tools-allow-all’ only bypasses the normal confirmation wrapper.
+It does not bypass DLP, irreversible-action checks, output scanning, or
+‘srt’ filesystem checks because DLP wraps the confirmation layer.  This
+makes ‘allow-all’ suitable only when DLP enforcement is enabled and tool
+filesystem access is constrained.
+
+Recommended baseline for autonomous coding:
+
+     (with-eval-after-load 'ellama-tools
+       ;; Let clean calls run without repetitive prompts.
+       (setopt ellama-tools-allow-all t)
+
+       ;; Required safety layer.
+       (setopt ellama-tools-dlp-enabled t)
+       (setopt ellama-tools-dlp-mode 'enforce)
+
+       ;; Prefer fail-closed behavior for autonomous operation.
+       (setopt ellama-tools-dlp-input-fail-open nil)
+       (setopt ellama-tools-dlp-output-fail-open nil)
+
+       ;; Keep secret and output protections active.
+       (setopt ellama-tools-dlp-scan-env-exact-secrets t)
+       (setopt ellama-tools-dlp-input-default-action 'warn)
+       (setopt ellama-tools-dlp-output-default-action 'redact)
+
+       ;; Irreversible actions require stronger intent.
+       (setopt ellama-tools-irreversible-enabled t)
+       (setopt ellama-tools-irreversible-default-action 'warn)
+       (setopt ellama-tools-irreversible-require-typed-confirm t)
+
+       ;; Keep telemetry durable enough to tune.
+       (setopt ellama-tools-dlp-log-targets '(memory file))
+
+       ;; Strongly recommended when `ellama-tools-allow-all' is enabled.
+       (setopt ellama-tools-use-srt t)
+       (setopt ellama-tools-srt-args
+               '("--settings" "~/.config/ellama/srt-autonomous.json")))
+
+Use an ‘srt’ policy that allows writes only inside the current project
+and a scratch area.  Add explicit read/write denials for secrets,
+credentials, audit logs, and system paths.  See the project sandbox
+example in the SRT Filesystem Policy for Tools section.
+
+There are two reasonable policies for dangerous cases.  User-handled
+dangerous cases ask only for DLP warnings and irreversible actions:
+
+     (setopt ellama-tools-dlp-input-default-action 'warn)
+     (setopt ellama-tools-dlp-output-warn-behavior 'confirm)
+     (setopt ellama-tools-irreversible-default-action 'warn)
+     (setopt ellama-tools-irreversible-require-typed-confirm t)
+
+Medium-risk irreversible actions require the typed confirmation phrase
+‘I UNDERSTAND THIS CANNOT BE UNDONE’.  High-confidence destructive
+actions are still blocked in ‘enforce’ mode before session or project
+overrides apply.
+
+Secure fallback is better for unattended agents:
+
+     (setopt ellama-tools-dlp-input-default-action 'block)
+     (setopt ellama-tools-dlp-output-warn-behavior 'block)
+     (setopt ellama-tools-irreversible-default-action 'block)
+     (setopt ellama-tools-irreversible-require-typed-confirm t)
+
+With secure fallback, the agent receives a denial string and must find a
+safer path.  This avoids turning user confirmation into a routine
+approval habit.
+
+Reduce prompt fatigue by tightening tool roles instead of weakening
+safety.  Avoid ‘:tools :all’ for autonomous subagents.  Prefer separate
+roles such as:
+
+   • read-only explorer without ‘shell_command’
+   • coder with file tools and sandboxed ‘shell_command’
+   • bash role only when a task explicitly needs shell access
+   • no ‘ask_user’ tool unless user interruption is intentional
+
+For MCP tools, keep ‘ellama-tools-irreversible-unknown-tool-action’ as
+‘warn’ initially.  After observing common safe tools, classify trusted
+tool identities with ‘ellama-tools-irreversible-tool-risk-overrides’ or
+trusted project overrides.  Use ‘ellama-tools-dlp-add-session-bypass’
+only for narrow tool identities and short TTLs; do not disable DLP
+globally to reduce prompts.
+
+If ‘srt’ is not available, do not use global ‘ellama-tools-allow-all’
+for autonomous coding.  Use a small ‘ellama-tools-allowed’ list of safe
+read-only tools instead, and keep mutating tools behind confirmation or
+DLP fallback.
+
+Tool output truncation behavior:
+
+   • line budget is applied per tool output payload
+   • if a payload exceeds the line budget, the model receives a
+     truncation notice plus the truncated snippet
+   • if lines exceed ‘ellama-tools-output-line-budget-max-line-length’,
+     those lines are shortened and marked with ‘...[line truncated]’
+   • when source is known (for example ‘read_file’, ‘lines_range’,
+     ‘grep_in_file’), the notice includes source path and suggests using
+     ‘lines_range’ and ‘grep_in_file~/~grep’
+   • when source is unknown (for example generic tool output), full
+     output is saved to a temp file (if enabled) and the filename is
+     included in the notice
+
+Example regex rules:
+
+     (setopt ellama-tools-dlp-regex-rules
+             '((:id "openai-key"
+                :pattern "sk-[[:alnum:]-]+"
+               :directions (input output))
+               (:id "pem-header"
+                :pattern "-----BEGIN [A-Z ]+-----"
+                :directions (output)
+                :enabled t)))
+
+Example scoped override (ignore noisy shell command input):
+
+     (setopt ellama-tools-dlp-policy-overrides
+             '((:tool "shell_command"
+                :direction input
+                :arg "cmd"
+                :except t)))
+
+Example override for structured input payloads (top-level arg prefix
+match):
+
+     (setopt ellama-tools-dlp-policy-overrides
+             '((:tool "write_file"
+                :direction input
+                :arg "content"
+                :action warn)))
+
+Tuning helpers:
+
+   • ‘M-x ellama-tools-dlp-reset-runtime-state’
+   • ‘M-x ellama-tools-dlp-show-incident-stats’
+   • ‘(ellama-tools-dlp-recent-incidents)’
+   • ‘(ellama-tools-dlp-incident-stats)’
+   • ‘(ellama-tools-dlp-incident-stats-report)’
+
+Incident stats include rollups by risk class, rule ID, tool identity,
+and decision type (including ‘bypass’).
+
+For a longer rollout/tuning walkthrough and more override examples, see
+‘docs/dlp_rollout_guide.md’.
+
+Troubleshooting:
+
+   • repeated irreversible warnings: classify trusted MCP tools with
+     ‘ellama-tools-irreversible-tool-risk-overrides’ or use a
+     short-lived session bypass for one tool identity
+   • bypass expiry: session bypasses expire by TTL and are removed
+     automatically; re-add with ‘ellama-tools-dlp-add-session-bypass’
+     when needed
+   • false positives: inspect incidents via
+     ‘ellama-tools-dlp-recent-incidents’ and tune regex rules /
+     overrides before moving more paths to enforce
+
+
+File: ellama.info,  Node: SRT Filesystem Policy for Tools,  Prev: DLP for Tool Input/Output,  Up: Configuration
+
+4.6 SRT Filesystem Policy for Tools
+===================================
+
+When ‘ellama-tools-use-srt’ is non-nil, the ‘srt’ settings file is the
+source of truth for tool filesystem policy:
+
+   • shell-based tools (‘shell_command’, ‘grep’, ‘grep_in_file’) are
+     enforced by the external ‘srt’ runtime
+   • non-shell file tools (‘read_file’, ‘write_file’, ‘append_file’,
+     ‘prepend_file’, ‘edit_file’, ‘directory_tree’, ‘move_file’,
+     ‘count_lines’, ‘lines_range’) apply local checks derived from the
+     same ‘srt’ settings file
+
+Supported local filesystem subset (current):
+
+   • ‘filesystem.denyRead’
+   • ‘filesystem.allowWrite’
+   • ‘filesystem.denyWrite’ (takes precedence over ‘allowWrite’)
+
+For irreversible audit hardening, keep ‘ellama-tools-dlp-audit-log-file’
+outside ‘allowWrite’ and add explicit ‘denyRead~/~denyWrite’ entries for
+the audit directory.
+
+Local checks intentionally ignore unrelated ‘srt’ keys (for example
+‘network.*’).  If the ‘filesystem’ section is missing, local checks use
+the same defaults as ‘srt’ for filesystem access: reads are allowed by
+default and writes are denied unless allowed by ‘allowWrite’.
+
+Path matching notes for local checks:
+
+   • relative paths in ‘srt’ rules are resolved against Emacs
+     ‘default-directory’
+   • ~~ expands to the current user home directory
+   • literal paths, directory-prefix rules, and glob patterns are
+     supported
+   • malformed/unsupported patterns signal a ‘user-error’ (fail closed)
+
+The local checks fail closed when ‘ellama-tools-use-srt’ is enabled and:
+
+   • ‘srt’ is not installed
+   • the resolved settings file is missing
+   • the settings file is malformed JSON
+   • relevant ‘filesystem’ keys have an invalid shape
+
+Example ‘srt’ config for a project sandbox:
+
+     {
+       "network": {
+         "allowedDomains": [
+           "github.com",
+           "*.github.com",
+           "api.github.com",
+           "*.npmjs.org"
+         ],
+         "deniedDomains": [],
+         "allowUnixSockets": [],
+         "allowLocalBinding": false
+       },
+       "filesystem": {
+         "denyRead": [
+           "~/.srt-settings.json",
+           "~/.ssh",
+           "~/.aws",
+           "~/.gnupg/",
+           "~/.config/gcloud/",
+           "~/.azure/",
+           "~/.kube/",
+           "~/.docker/",
+           "~/.netrc",
+           "~/.npmrc",
+           "~/.pypirc",
+           "~/.git-credentials",
+           "~/.emacs.d/ellama-dlp-audit.jsonl",
+           ".env",
+           ".env.*",
+           ".env*.local",
+           "*.env",
+           "*-credentials.json",
+           "*serviceAccount*.json",
+           "*service-account*.json",
+           "kubeconfig",
+           "*-secret.yaml",
+           "secrets.yaml",
+           "*.pem",
+           "*.key",
+           "*.p12",
+           "*.pfx",
+           "*.tfstate",
+           "*.tfstate.backup",
+           ".terraform/",
+           ".vercel/",
+           ".netlify/",
+           ".supabase/",
+           "dump.sql",
+           "backup.sql",
+           "*.dump"
+         ],
+         "allowWrite": [
+           ".",
+           "src/",
+           "test/",
+           "docs/",
+           "/tmp/ellama-agent"
+         ],
+         "denyWrite": [
+           "~/.srt-settings.json",
+           "~/.ssh",
+           "~/.aws",
+           "~/.gnupg/",
+           "~/.config/gcloud/",
+           "~/.azure/",
+           "~/.kube/",
+           "~/.docker/",
+           "~/.netrc",
+           "~/.npmrc",
+           "~/.pypirc",
+           "~/.git-credentials",
+           "~/.emacs.d/ellama-dlp-audit.jsonl",
+           ".env",
+           ".env.*",
+           ".env*.local",
+           "*.env",
+           "*-credentials.json",
+           "*serviceAccount*.json",
+           "*service-account*.json",
+           "kubeconfig",
+           "*-secret.yaml",
+           "secrets.yaml",
+           "*.pem",
+           "*.key",
+           "*.p12",
+           "*.pfx",
+           "*.tfstate",
+           "*.tfstate.backup",
+           ".terraform/",
+           ".vercel/",
+           ".netlify/",
+           ".supabase/",
+           "dump.sql",
+           "backup.sql",
+           "*.dump",
+           "/etc/",
+           "/usr/",
+           "/bin/",
+           "/sbin/",
+           "/boot/",
+           "/root/",
+           "~/.bash_history",
+           "~/.zsh_history",
+           "~/.node_repl_history",
+           "~/.bashrc",
+           "~/.zshrc",
+           "~/.profile",
+           "~/.bash_profile"
+         ]
+       },
+       "ignoreViolations": {
+         "npm": [
+           "/private/tmp"
+         ]
+       },
+       "enableWeakerNestedSandbox": false,
+       "enableWeakerNetworkIsolation": false
+     }
+
+Keep ‘allowUnixSockets’ empty unless the agent explicitly needs a local
+socket.  For example, adding ‘/var/run/docker.sock’ gives the sandbox
+broad Docker control and should be treated as a privileged capability.
+
+Example Emacs configuration:
+
+     (setopt ellama-tools-use-srt t)
+     (setopt ellama-tools-srt-args
+             '("--settings" "/path/to/.srt-settings.json"))
+
+Parity tests (real ‘srt’ runtime vs local ‘ellama’ checks):
+
+   • ‘make test-srt-integration’: Run host parity tests (requires ‘srt’
+     installed)
+   • ‘make test-srt-integration-linux’: Run parity tests in Docker on
+     Linux semantics.  Requires Docker and runs a privileged container
+     (‘--privileged’).
+
+
+File: ellama.info,  Node: Context Management,  Next: Minor modes,  Prev: Configuration,  Up: Top
+
+5 Context Management
+********************
+
+Ellama allows you to provide context to the Large Language Model (LLM)
+to improve the relevance and quality of responses.  Context serves as
+background information, data, or instructions that guide the LLM's
+understanding of your prompt.  Without context, the LLM relies solely on
+its pre-existing knowledge, which may not always be appropriate.
+
+A “global context” is maintained, which is a collection of text blocks
+accessible to the LLM when responding to prompts.  This global context
+is prepended to your prompt before transmission to the LLM.
+Additionally, Ellama supports an "ephemeral context," which is temporary
+and only available for a single request.
+
+Some commands add context automatically as ephemeral context:
+‘ellama-ask-about’, ‘ellama-code-review’, ‘ellama-write’, and
+‘ellama-code-add’.
+
+* Menu:
+
+* Transient Menus for Context Management::
+* Managing the Context::
+* Considerations::
+
+
+File: ellama.info,  Node: Transient Menus for Context Management,  Next: Managing the Context,  Up: Context Management
+
+5.1 Transient Menus for Context Management
+==========================================
+
+Ellama provides a transient menu accessible through the main menu,
+offering a streamlined way to manage context elements.  This menu is
+accessed via the “System” branch of the main transient menu, and then
+selecting "Context Commands."
+
+The Context Commands transient menu is structured as follows:
+
+Context Commands:
+
+   • Options: Provides options for managing ephemeral context.
+        • “-e” "Use Ephemeral Context" ‘--ephemeral’
+   • Add: Provides options for adding content to the global or ephemeral
+     context.
+        • “b” "Add Buffer" ‘ellama-transient-add-buffer’
+        • “d” "Add Directory" ‘ellama-transient-add-directory’
+        • “f” "Add File" ‘ellama-transient-add-file’
+        • “I” "Add Image" ‘ellama-transient-add-image’
+        • “s” "Add Selection" ‘ellama-transient-add-selection’
+        • “i” "Add Info Node" ‘ellama-transient-add-info-node’
+   • Manage: Provides options for managing the global context.
+        • “m” "Manage context" ‘ellama-context-manage’ - Opens the
+          context management buffer.
+        • “D” "Delete element" ‘ellama-context-element-remove-by-name’ -
+          Deletes an element by name.
+        • “r” "Context reset" ‘ellama-context-reset’ - Clears the entire
+          global context.
+   • Quit: (“q” "Quit" ‘transient-quit-one’) - Closes the context
+     commands transient menu.
+
+
+File: ellama.info,  Node: Managing the Context,  Next: Considerations,  Prev: Transient Menus for Context Management,  Up: Context Management
+
+5.2 Managing the Context
+========================
+
+‘ellama-context-manage’ opens a dedicated buffer, the context management
+buffer, where you can view, modify, and organize the global context.
+Within this buffer:
+
+   • ‘n’: Move to the next context element.
+   • ‘p’: Move to the previous context element.
+   • ‘q’: Quit the context management buffer.
+   • ‘g’: Refresh the contents of the context management buffer.
+   • ‘a’: Add a new context element (similar to
+     ‘ellama-context-add-selection’).
+   • ‘RET’: Preview the content of the context element at the current
+     point.
+
+
+File: ellama.info,  Node: Considerations,  Prev: Managing the Context,  Up: Context Management
+
+5.3 Considerations
+==================
+
+Large Language Models possess limited context window sizes, restricting
+the total amount of text they can process.  Be mindful of the size of
+your context to avoid truncation or performance degradation.  Irrelevant
+context can dilute the information and hinder the LLM’s focus.  Ensure
+context remains up-to-date for accurate information.  Experimentation
+with different approaches to context management can optimize performance
+for specific use cases.
+
+
+File: ellama.info,  Node: Minor modes,  Next: Using Blueprints,  Prev: Context Management,  Up: Top
+
+6 Minor modes
+*************
+
+The Ellama package for Emacs offers a suite of minor modes designed to
+enhance the user experience by providing context-specific information
+directly within the editor's interface.  These minor modes focus on
+updating both the header line and mode line with relevant details,
+making it easier to manage and navigate multiple sessions and buffers.
+
+Key features include:
+
+   • Context Header Line Modes: ‘ellama-context-header-line-mode’ and
+     its global counterpart, ‘ellama-context-header-line-global-mode’,
+     update the header line to display what elements are added to the
+     global Ellama context.  This is particularly useful for keeping
+     track of what information is currently in context.
+   • Context Mode Line Modes: Similarly, ‘ellama-context-mode-line-mode’
+     and ‘ellama-context-mode-line-global-mode’ provide information
+     about the current global context directly within the mode line,
+     ensuring that users always have relevant information at a glance.
+   • Session Header Line Mode: ‘ellama-session-header-line-mode’ and its
+     global version display the current Ellama session ID in the header
+     line, helping users manage multiple sessions efficiently.
+   • Session Mode Line Mode: ‘ellama-session-mode-line-mode’ and its
+     global counterpart offer an additional way to track session IDs by
+     displaying them in the mode line.
+
+These minor modes are easily toggled on or off using specific commands,
+providing flexibility for users who may want to enable these features
+globally across all buffers or selectively within individual buffers.
+
+* Menu:
+
+* ellama-context-header-line-mode::
+* ellama-context-header-line-global-mode::
+* ellama-context-mode-line-mode::
+* ellama-context-mode-line-global-mode::
+* Ellama Session Header Line Mode::
+* Ellama Session Mode Line Mode::
+
+
+File: ellama.info,  Node: ellama-context-header-line-mode,  Next: ellama-context-header-line-global-mode,  Up: Minor modes
+
+6.1 ellama-context-header-line-mode
+===================================
+
+Description: Toggle the Ellama Context header line mode.  This minor
+mode updates the header line to display context-specific information.
+
+Usage: To enable or disable ‘ellama-context-header-line-mode’, use the
+command:
+
+M-x ellama-context-header-line-mode
+
+When enabled, this mode adds a hook to ‘window-state-change-hook’ to
+update the header line whenever the window state changes.  It also calls
+‘ellama-context-update-header-line’ to initialize the header line with
+context-specific information.
+
+When disabled, it removes the evaluation of ‘(:eval
+(ellama-context-line))’ from ‘header-line-format’.
+
+
+File: ellama.info,  Node: ellama-context-header-line-global-mode,  Next: ellama-context-mode-line-mode,  Prev: ellama-context-header-line-mode,  Up: Minor modes
+
+6.2 ellama-context-header-line-global-mode
+==========================================
+
+Description: Globalized version of ‘ellama-context-header-line-mode’.
+This mode ensures that ‘ellama-context-header-line-mode’ is enabled in
+all buffers.
+
+Usage: To enable or disable ‘ellama-context-header-line-global-mode’,
+use the command:
+
+M-x ellama-context-header-line-global-mode
+
+This globalized minor mode provides a convenient way to ensure that
+context-specific header line information is always available, regardless
+of the buffer being edited.
+
+
+File: ellama.info,  Node: ellama-context-mode-line-mode,  Next: ellama-context-mode-line-global-mode,  Prev: ellama-context-header-line-global-mode,  Up: Minor modes
+
+6.3 ellama-context-mode-line-mode
+=================================
+
+Description: Toggle the Ellama Context mode line mode.  This minor mode
+updates the mode line to display context-specific information.
+
+Usage: To enable or disable ‘ellama-context-mode-line-mode’, use the
+command:
+
+M-x ellama-context-mode-line-mode
+
+When enabled, this mode adds a hook to ‘window-state-change-hook’ to
+update the mode line whenever the window state changes.  It also calls
+‘ellama-context-update-mode-line’ to initialize the mode line with
+context-specific information.
+
+When disabled, it removes the evaluation of ‘(:eval
+(ellama-context-line))’ from ‘mode-line-format’.
+
+
+File: ellama.info,  Node: ellama-context-mode-line-global-mode,  Next: Ellama Session Header Line Mode,  Prev: ellama-context-mode-line-mode,  Up: Minor modes
+
+6.4 ellama-context-mode-line-global-mode
+========================================
+
+Description: Globalized version of ‘ellama-context-mode-line-mode’.
+This mode ensures that ‘ellama-context-mode-line-mode’ is enabled in all
+buffers.
+
+Usage: To enable or disable ‘ellama-context-mode-line-global-mode’, use
+the command:
+
+M-x ellama-context-mode-line-global-mode
+
+This globalized minor mode provides a convenient way to ensure that
+context-specific mode line information is always available, regardless
+of the buffer being edited.
+
+
+File: ellama.info,  Node: Ellama Session Header Line Mode,  Next: Ellama Session Mode Line Mode,  Prev: ellama-context-mode-line-global-mode,  Up: Minor modes
+
+6.5 Ellama Session Header Line Mode
+===================================
+
+The ‘ellama-session-header-line-mode’ is a minor mode that allows you to
+display the current Ellama session ID in the header line of your Emacs
+buffers.  This feature helps keep track of which session you are working
+with, especially useful when managing multiple sessions.
+
+* Menu:
+
+* Enabling and Disabling::
+* Customization::
+
+
+File: ellama.info,  Node: Enabling and Disabling,  Next: Customization,  Up: Ellama Session Header Line Mode
+
+6.5.1 Enabling and Disabling
+----------------------------
+
+To enable this mode, use the following command:
+     M-x ellama-session-header-line-mode
+
+This will toggle the display of the session ID in the header line.  You
+can also enable or disable it globally across all buffers using:
+     M-x ellama-session-header-line-global-mode
+
+
+File: ellama.info,  Node: Customization,  Prev: Enabling and Disabling,  Up: Ellama Session Header Line Mode
+
+6.5.2 Customization
+-------------------
+
+The session ID is displayed with a customizable face called
+‘ellama-face’.  You can customize this face to change its appearance.
+
+
+File: ellama.info,  Node: Ellama Session Mode Line Mode,  Prev: Ellama Session Header Line Mode,  Up: Minor modes
+
+6.6 Ellama Session Mode Line Mode
+=================================
+
+The ‘ellama-session-mode-line-mode’ is a minor mode that allows you to
+display the current Ellama session ID in the mode line of your Emacs
+buffers.  This feature provides an additional way to keep track of which
+session you are working with, especially useful when managing multiple
+sessions.
+
+* Menu:
+
+* Enabling and Disabling: Enabling and Disabling (1).
+* Customization: Customization (1).
+
+
+File: ellama.info,  Node: Enabling and Disabling (1),  Next: Customization (1),  Up: Ellama Session Mode Line Mode
+
+6.6.1 Enabling and Disabling
+----------------------------
+
+To enable this mode, use the following command:
+     M-x ellama-session-mode-line-mode
+
+This will toggle the display of the session ID in the mode line.  You
+can also enable or disable it globally across all buffers using:
+     M-x ellama-session-mode-line-global-mode
+
+
+File: ellama.info,  Node: Customization (1),  Prev: Enabling and Disabling (1),  Up: Ellama Session Mode Line Mode
+
+6.6.2 Customization
+-------------------
+
+The session ID is displayed with a customizable face called
+‘ellama-face’.  You can customize this face to change its appearance.
+
+
+File: ellama.info,  Node: Using Blueprints,  Next: MCP Integration,  Prev: Minor modes,  Up: Top
+
+7 Using Blueprints
+******************
+
+Blueprints in Ellama refer to predefined templates or structures that
+facilitate the creation and management of chat sessions.  These
+blueprints are designed to streamline the process of generating
+consistent and high-quality outputs by providing a structured framework
+for interactions.
+
+* Menu:
+
+* Key Components of Ellama Blueprints::
+* Creating and Managing Blueprints::
+* Blueprints files::
+* Variable Management::
+* Keymap and Mode::
+* Transient Menus::
+* Running Blueprints programmatically::
+
+
+File: ellama.info,  Node: Key Components of Ellama Blueprints,  Next: Creating and Managing Blueprints,  Up: Using Blueprints
+
+7.1 Key Components of Ellama Blueprints
+=======================================
+
+  1. Act: This is the primary identifier for a blueprint, representing
+     the
+action or purpose of the blueprint.
+  1. Prompt: The content that will be used to initiate the chat session.
+     This
+can include instructions, context, or any other relevant information
+needed to guide the conversation.
+  1. For Developers: A flag indicating whether the blueprint is intended
+     for
+developers.
+
+
+File: ellama.info,  Node: Creating and Managing Blueprints,  Next: Blueprints files,  Prev: Key Components of Ellama Blueprints,  Up: Using Blueprints
+
+7.2 Creating and Managing Blueprints
+====================================
+
+Ellama provides several functions to create, select, and manage
+blueprints:
+
+   • ‘ellama-blueprint-create’: This function allows users to create a
+     new blueprint from the current buffer.  It prompts for a name and
+     whether the blueprint is for developers, then saves the content of
+     the current buffer as the prompt.
+
+   • ‘ellama-blueprint-new’: This function creates a new buffer for a
+     blueprint, optionally inserting the content of the current region
+     if active.
+
+   • ‘ellama-blueprint-select’: This function allows users to select a
+     prompt from the collection of blueprints.  It filters prompts based
+     on whether they are for developers and their source (user-defined,
+     community, or all).
+
+
+File: ellama.info,  Node: Blueprints files,  Next: Variable Management,  Prev: Creating and Managing Blueprints,  Up: Using Blueprints
+
+7.3 Blueprints files
+====================
+
+You can also store blueprints as plain text files.  You can store it
+globally inside ‘ellama-blueprint-global-dir’ or locally in the project
+local directory ‘ellama-blueprint-local-dir’ with
+‘ellama-blueprint-file-extensions’.
+
+
+File: ellama.info,  Node: Variable Management,  Next: Keymap and Mode,  Prev: Blueprints files,  Up: Using Blueprints
+
+7.4 Variable Management
+=======================
+
+Blueprints can include variables that need to be filled before running
+the chat session.  Ellama provides command to fill these variables:
+
+   • ‘ellama-blueprint-fill-variables’: Prompts the user to enter values
+     for variables found in the current buffer and fills them.
+
+
+File: ellama.info,  Node: Keymap and Mode,  Next: Transient Menus,  Prev: Variable Management,  Up: Using Blueprints
+
+7.5 Keymap and Mode
+===================
+
+Ellama provides a local keymap ‘ellama-blueprint-mode-map’ for managing
+blueprints within buffers.  The mode includes key bindings for sending
+the buffer to a new chat session, killing the current buffer, creating a
+new blueprint, and filling variables.
+
+The ‘ellama-blueprint-mode’ is a derived mode from ‘text-mode’,
+providing syntax highlighting for variables in curly braces and setting
+up the local keymap.
+
+When in ‘ellama-blueprint-mode’, the following keybindings are
+available:
+
+   • ‘C-c C-c’: Send current buffer to a new chat session and kill the
+     current buffer.
+   • ‘C-c C-k’: Kill the current buffer.
+   • ‘C-c c’: Create a blueprint from the current buffer.
+   • ‘C-c v’: Fill variables in the current blueprint.
+
+
+File: ellama.info,  Node: Transient Menus,  Next: Running Blueprints programmatically,  Prev: Keymap and Mode,  Up: Using Blueprints
+
+7.6 Transient Menus
+===================
+
+Ellama includes transient menus for easy access to blueprint commands.
+The ‘ellama-transient-blueprint-menu’ provides options for chatting with
+a selected blueprint, creating a new blueprint, and quitting the menu.
+
+The ‘ellama-transient-main-menu’ integrates the blueprint menu into the
+main menu, providing a comprehensive interface for all Ellama commands.
+
+
+File: ellama.info,  Node: Running Blueprints programmatically,  Prev: Transient Menus,  Up: Using Blueprints
+
+7.7 Running Blueprints programmatically
+=======================================
+
+The ‘ellama-blueprint-run’ function initiates a chat session using a
+specified blueprint.  It pre-fills variables based on the provided
+arguments.
+
+     (defun my-chat-with-morpheus ()
+       "Start chat with Morpheus."
+       (interactive)
+       (ellama-blueprint-run "Character" '(:character "Morpheus" :series "Matrix")))
+
+     (global-set-key (kbd "C-c e M") #'my-chat-with-morpheus)
+
+
+File: ellama.info,  Node: MCP Integration,  Next: Agent Skills,  Prev: Using Blueprints,  Up: Top
+
+8 MCP Integration
+*****************
+
+You can also use MCP (Model Context Protocol) tools with ‘ellama’.  You
+need Emacs 30 or higher version.  Install ‘mcp.el’ -
+<https://github.com/lizqwerscott/mcp.el>.  For example to add web search
+capability to ‘ellama’ you can add duckduckgo mcp server
+(<https://github.com/nickclyde/duckduckgo-mcp-server>):
+
+     (use-package mcp
+       :ensure t
+       :demand t
+       :custom
+       (mcp-hub-servers
+        `(("ddg" . (:command "uvx"
+                             :args
+                             ("duckduckgo-mcp-server")))))
+       :config
+       (require 'mcp-hub)
+       (mcp-hub-start-all-server
+        (lambda ()
+          (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+            (mapcar #'(lambda (tool)
+                        (apply #'ellama-tools-define-tool
+                               (list tool)))
+                    tools)))))
+
+When ‘:categoryp t’ is used, ellama derives stable MCP tool identity as
+‘<category>/<tool-name>’ (for example ‘mcp-ddg/search’).  Irreversible
+policy, audit, and overrides are keyed by this identity.
+
+
+File: ellama.info,  Node: Agent Skills,  Next: Acknowledgments,  Prev: MCP Integration,  Up: Top
+
+9 Agent Skills
+**************
+
+Ellama supports *Agent Skills*, a lightweight format for extending AI
+capabilities.  Skills are loaded into context only when needed
+(Progressive Disclosure).
+
+* Menu:
+
+* Directory Structure::
+* Creating a Skill::
+* How it works::
+
+
+File: ellama.info,  Node: Directory Structure,  Next: Creating a Skill,  Up: Agent Skills
+
+9.1 Directory Structure
+=======================
+
+Ellama looks for skills in two locations:
+  1. *Global*: ‘~/.emacs.d/ellama/skills/’ (Customizable via
+‘ellama-skills-global-path’)
+  1. *Project-Local*: ‘skills/’ inside your project root (Customizable
+     via
+‘ellama-skills-local-path’)
+
+A skill is a directory containing a ‘SKILL.md’ file.  This file includes
+metadata (‘name’ and ‘description’, at minimum) and instructions that
+tell an agent how to perform a specific task.  Skills can also bundle
+scripts, templates, and reference materials.
+
+     my-project/
+     └──skills/
+        └── pdf-processing/
+            ├── SKILL.md          # Required: instructions + metadata
+            ├── scripts/          # Optional: executable code
+            ├── references/       # Optional: documentation
+            └── assets/           # Optional: templates, resources
+
+
+File: ellama.info,  Node: Creating a Skill,  Next: How it works,  Prev: Directory Structure,  Up: Agent Skills
+
+9.2 Creating a Skill
+====================
+
+SKILL.md must contain YAML frontmatter:
+
+     ---
+     name: pdf-processing
+     description: Extract text from PDFs and summarize them.
+     ---
+
+     # PDF Processing Instructions
+     To extract text from a PDF...
+
+
+File: ellama.info,  Node: How it works,  Prev: Creating a Skill,  Up: Agent Skills
+
+9.3 How it works
+================
+
+*Auto-Discovery*: Ellama scans skill directories automatically whenever
+a chat starts.  *Context*: Skill metadata (name, description, location)
+is injected into the system prompt.  *Activation*: The LLM uses the
+read_file tool to load the SKILL.md content when needed.
+
+
+File: ellama.info,  Node: Acknowledgments,  Next: Contributions,  Prev: Agent Skills,  Up: Top
+
+10 Acknowledgments
+******************
+
+Thanks Jeffrey Morgan (https://github.com/jmorganca) for excellent
+project ollama (https://github.com/jmorganca/ollama).  This project
+cannot exist without it.
+
+Thanks zweifisch (https://github.com/zweifisch) - I got some ideas from
+ollama.el (https://github.com/zweifisch/ollama) what ollama client in
+Emacs can do.
+
+Thanks Dr.  David A.  Kunz (https://github.com/David-Kunz) - I got more
+ideas from gen.nvim (https://github.com/David-Kunz/gen.nvim).
+
+Thanks Andrew Hyatt (https://github.com/ahyatt) for ‘llm’ library.
+Without it only ‘ollama’ would be supported.
+
+
+File: ellama.info,  Node: Contributions,  Next: GNU Free Documentation License,  Prev: Acknowledgments,  Up: Top
+
+11 Contributions
+****************
+
+To contribute, submit a pull request or report a bug.  This library is
+part of GNU ELPA; major contributions must be from someone with FSF
+papers.  Alternatively, you can write a module and share it on a
+different archive like MELPA.
+
+
+File: ellama.info,  Node: GNU Free Documentation License,  Prev: Contributions,  Up: Top
+
+Appendix A GNU Free Documentation License
+*****************************************
+
+                     Version 1.3, 3 November 2008
+
+     Copyright © 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+     <https://fsf.org/>
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document “free” in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.  We
+     recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it can
+     be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You accept
+     the license if you copy, modify or distribute the work in a way
+     requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in the
+     notice that says that the Document is released under this License.
+     If a section does not fit the above definition of Secondary then it
+     is not allowed to be designated as Invariant.  The Document may
+     contain zero Invariant Sections.  If the Document does not identify
+     any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images composed
+     of pixels) generic paint programs or (for drawings) some widely
+     available drawing editor, and that is suitable for input to text
+     formatters or for automatic translation to a variety of formats
+     suitable for input to text formatters.  A copy made in an otherwise
+     Transparent file format whose markup, or absence of markup, has
+     been arranged to thwart or discourage subsequent modification by
+     readers is not Transparent.  An image format is not Transparent if
+     used for any substantial amount of text.  A copy that is not
+     "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and standard-conforming
+     simple HTML, PostScript or PDF designed for human modification.
+     Examples of transparent image formats include PNG, XCF and JPG.
+     Opaque formats include proprietary formats that can be read and
+     edited only by proprietary word processors, SGML or XML for which
+     the DTD and/or processing tools are not generally available, and
+     the machine-generated HTML, PostScript or PDF produced by some word
+     processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow the
+     conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the title
+     equally prominent and visible.  You may add other material on the
+     covers in addition.  Copying with changes limited to the covers, as
+     long as they preserve the title of the Document and satisfy these
+     conditions, can be treated as verbatim copying in other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a machine-readable
+     Transparent copy along with each Opaque copy, or state in or with
+     each Opaque copy a computer-network location from which the general
+     network-using public has access to download using public-standard
+     network protocols a complete Transparent copy of the Document, free
+     of added material.  If you use the latter option, you must take
+     reasonably prudent steps, when you begin distribution of Opaque
+     copies in quantity, to ensure that this Transparent copy will
+     remain thus accessible at the stated location until at least one
+     year after the last time you distribute an Opaque copy (directly or
+     through your agents or retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of copies,
+     to give them a chance to provide you with an updated version of the
+     Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with the
+     Modified Version filling the role of the Document, thus licensing
+     distribution and modification of the Modified Version to whoever
+     possesses a copy of it.  In addition, you must do these things in
+     the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of previous
+          versions (which should, if there were any, be listed in the
+          History section of the Document).  You may use the same title
+          as a previous version if the original publisher of that
+          version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on the
+          Title Page.  If there is no section Entitled "History" in the
+          Document, create one stating the title, year, authors, and
+          publisher of the Document as given on its Title Page, then add
+          an item describing the Modified Version as stated in the
+          previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in the
+          "History" section.  You may omit a network location for a work
+          that was published at least four years before the Document
+          itself, or if the original publisher of the version it refers
+          to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the section
+          all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document, unaltered
+          in their text and in their titles.  Section numbers or the
+          equivalent are not considered part of the section titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option designate
+     some or all of these sections as invariant.  To do this, add their
+     titles to the list of Invariant Sections in the Modified Version's
+     license notice.  These titles must be distinct from any other
+     section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end of
+     the list of Cover Texts in the Modified Version.  Only one passage
+     of Front-Cover Text and one of Back-Cover Text may be added by (or
+     through arrangements made by) any one entity.  If the Document
+     already includes a cover text for the same cover, previously added
+     by you or by arrangement made by the same entity you are acting on
+     behalf of, you may not add another; but you may replace the old
+     one, on explicit permission from the previous publisher that added
+     the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination all
+     of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the documents
+     in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow this
+     License in all other respects regarding verbatim copying of that
+     document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of a
+     storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly and
+     finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from you
+     under this License.  If your rights have been terminated and not
+     permanently reinstated, receipt of a copy of some or all of the
+     same material does not give you any rights to use it.
+
+  10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     <https://www.gnu.org/licenses/>.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If the
+     Document does not specify a version number of this License, you may
+     choose any version ever published (not as a draft) by the Free
+     Software Foundation.  If the Document specifies that a proxy can
+     decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+  11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+ADDENDUM: How to use this License for your documents
+====================================================
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of free
+software license, such as the GNU General Public License, to permit
+their use in free software.
+
+
+
+Tag Table:
+Node: Top1379
+Node: Installation3919
+Node: Commands8933
+Node: Keymap17562
+Node: Configuration20449
+Node: Session Provider Keys32233
+Node: Session Compaction34094
+Node: Image Input35748
+Node: Task Tool Subagents37893
+Node: DLP for Tool Input/Output39996
+Node: SRT Filesystem Policy for Tools54898
+Node: Context Management60567
+Node: Transient Menus for Context Management61635
+Node: Managing the Context63314
+Node: Considerations64089
+Node: Minor modes64682
+Node: ellama-context-header-line-mode66670
+Node: ellama-context-header-line-global-mode67495
+Node: ellama-context-mode-line-mode68215
+Node: ellama-context-mode-line-global-mode69063
+Node: Ellama Session Header Line Mode69767
+Node: Enabling and Disabling70336
+Node: Customization70783
+Node: Ellama Session Mode Line Mode71071
+Node: Enabling and Disabling (1)71656
+Node: Customization (1)72103
+Node: Using Blueprints72397
+Node: Key Components of Ellama Blueprints73037
+Node: Creating and Managing Blueprints73644
+Node: Blueprints files74622
+Node: Variable Management75043
+Node: Keymap and Mode75496
+Node: Transient Menus76432
+Node: Running Blueprints programmatically76978
+Node: MCP Integration77565
+Node: Agent Skills78800
+Node: Directory Structure79163
+Node: Creating a Skill80190
+Node: How it works80565
+Node: Acknowledgments80956
+Node: Contributions81667
+Node: GNU Free Documentation License82053
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:
