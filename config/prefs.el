@@ -45,7 +45,7 @@
 
 ;; Font's for win10 and osx
 (cond ((eq system-type 'windows-nt) (set-frame-font "Inconsolata-13"))
-      ((eq system-type 'darwin) (set-frame-font "Inconsolata-16")))
+      ((eq system-type 'darwin) (set-frame-font "Inconsolata-17")))
 
 ;; list of things to try when hippie-expanding
 (setq hippie-expand-try-functions-list '(yas-hippie-try-expand
